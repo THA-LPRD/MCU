@@ -1,0 +1,5 @@
+{
+    "OperatingMode": "Standalone",
+    "WiFiSSID": "ESP32-Access-Point",
+    "WiFiPassword": "THA-LPRD-2024"
+}
