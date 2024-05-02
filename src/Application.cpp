@@ -16,6 +16,9 @@ void Application::Init()
         Log::Fatal("Failed to setup WiFi");
         return;
     }
+
+    Log::Debug("Initializing HTTP server");
+    m_Server.Init();
 }
 
 bool Application::SetupWiFi() {

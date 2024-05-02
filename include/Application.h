@@ -1,6 +1,8 @@
 #ifndef APPLICATION_H_
 #define APPLICATION_H_
 
+#include "HTTPServer.h"
+
 class Application
 {
 public:
@@ -10,7 +12,6 @@ public:
         NETWORK,
         SERVER,
     };
-
     Application() = default;
     ~Application() = default;
     void Init();
@@ -20,6 +21,7 @@ private:
     void SetMode(std::string mode);
 private:
     Mode m_Mode;
+    HTTPServer m_Server;
 };
 
 #endif /*APPLICATION_H_*/
