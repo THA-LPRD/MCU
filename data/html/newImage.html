@@ -1,72 +1,149 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HTML Konverter</title>
-<style>
-  #inputText {
-    margin-bottom: 10px;
-  }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML Konverter</title>
+    <style>
+        #inputText {
+            margin-bottom: 10px;
+        }
 
-  #previewContainer {
-    width: 800px;
-    height: 480px;
-    border: 1px solid #ccc;
-    overflow: auto;
-    margin-top: 20px;
-    position: relative;
-  }
+        #previewContainer {
+            width: 800px;
+            height: 480px;
+            border: 1px solid #ccc;
+            overflow: auto;
+            margin-top: 20px;
+            position: relative;
+        }
 
-  #preview {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-  }
+        #preview {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
 
-  #previewImg {
-    width: 75%;
-    height: 75%;
-    border: 1px solid #ff0000
-  }
-</style>
+        #previewImg {
+            width: 75%;
+            height: 75%;
+            border: 1px solid #ff0000
+        }
+    </style>
 </head>
+
 <body>
 
     <div id="previewContainer">
         <div id="preview"></div>
     </div>
-    <img id="previewImg" src=""/>
+    <img id="previewImg" src="" />
     <textarea id="inputText" rows="10" cols="50"></textarea><br>
     <button onclick="convertToHTML()">Konvertieren in HTML</button>
     <button onclick="convertToPNG()">Konvertieren in PNG</button>
+    <button onclick="convertToBitmap()">Konvertieren in Bitmap</button>
 
 
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 
-<script>
+    <script>
 
-function convertToHTML() {
-  var inputText = document.getElementById("inputText").value;
-  var preview = document.getElementById("preview");
+        function convertToHTML() {
+            var inputText = document.getElementById("inputText").value;
+            var preview = document.getElementById("preview");
 
-  // Set the preview content
-  preview.innerHTML = inputText;
-}
+            // Set the preview content
+            preview.innerHTML = inputText;
+        }
 
-function convertToPNG() {
+        function convertToPNG() {
 
-    html2canvas(document.querySelector("#preview")).then(canvas => {
-    // document.body.appendChild(canvas);
-    var img = canvas.toDataURL("image/png");
-    document.getElementById('previewImg').src = img;
-    var context = canvas.getContext("2d");
-    // console.log(context.getImageData(0, 0, 800, 400));
-    console.log(createImageBitmap(document.getElementById('previewImg'), 0, 0, 800, 480).data);
-});
+            html2canvas(document.querySelector("#preview")).then(canvas => {
+                // document.body.appendChild(canvas);
+                var img = canvas.toDataURL("image/png");
+                document.getElementById('previewImg').src = img;
+                var context = canvas.getContext("2d");
+                // console.log(context.getImageData(0, 0, 800, 400));
+                console.log(createImageBitmap(document.getElementById('previewImg'), 0, 0, 800, 480).data);
+            });
+        }
 
-}
-</script>
+        function convertToBitmap() {
+            html2canvas(document.querySelector("#preview")).then(canvas => {
+                // document.body.appendChild(canvas);
+                // var img = canvas.toDataURL("image/png");
+                // document.getElementById('previewImg').src = img;
+                var context = canvas.getContext("2d");
+                var imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+
+                var byteArray = convertImageDataToByteArray(imageData);
+                console.log(byteArray);
+
+                // console.log(context.getImageData(0, 0, 800, 400));
+                // console.log(createImageBitmap(document.getElementById('previewImg'), 0, 0, 800, 480).data);
+            });
+        }
+
+        // Helper function to find the closest color for a given pixel
+        function findClosestColor(pixel) {
+            // Extract RGB components from the pixel
+            let r = pixel[0];
+            let g = pixel[1];
+            let b = pixel[2];
+            let a = pixel[3];
+
+            // Calculate the luminance
+            let luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+
+            // Determine the closest color based on luminance and alpha
+            if (a < 128) {
+                return "00"; // Transparent (Black)
+            } else {
+                if (luminance < 128) {
+                    // Dark colors: Black or Red
+                    if (r > g && r > b) {
+                        return "11"; // Red
+                    } else {
+                        return "00"; // Black
+                    }
+                } else {
+                    // Light colors: White or Yellow
+                    if (r > g && r > b) {
+                        return "10"; // Yellow
+                    } else {
+                        return "01"; // White
+                    }
+                }
+            }
+        }
+
+        // Main function to convert imageData to the desired array format
+        function convertImageDataToByteArray(imageData) {
+            let data = imageData.data;
+            let byteArray = [];
+
+            for (let i = 0; i < data.length; i += 16) {
+                let byte = "";
+
+                // Process 4 consecutive pixels at a time
+                for (let j = 0; j < 16; j += 4) {
+                    let pixel = [data[i + j], data[i + j + 1], data[i + j + 2], data[i + j + 3]];
+
+                    // Find the closest color for the pixel and append it to the byte
+                    byte += findClosestColor(pixel);
+                }
+
+                // Push the byte to the byteArray
+                //byteArray.push(byte);
+                byteArray.push(parseInt(byte, 2).toString(16).padStart(2, '0'));
+            }
+
+            return byteArray;
+        }
+
+    </script>
 
 </body>
+
 </html>
