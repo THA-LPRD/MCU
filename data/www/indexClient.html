@@ -1,0 +1,51 @@
+<!doctype html>
+
+<html>
+	<head>
+	
+        <meta charset="utf-8">
+
+        <meta name="LPRD" content="Bitmap Übertragung">
+
+        <link rel="stylesheet" type="text/css" href="style.css">
+
+</head>
+
+
+    <body>
+
+      <header>
+
+        <img src="Logo.png" alt="Logo"> 
+        <h1>Low Power Raumanzeige</h1>
+        
+       
+        
+        
+    </header>
+
+    <div id="trenner"> </div>
+
+    <div class="container">
+        <main>
+            
+
+            <p>Lade eine Textdatei hoch und drücke auf "Daten absenden", um sie auf dem Display anzuzeigen.</p>
+
+            <form action="upload.php" method="POST" enctype="multipart/form-data">
+              <input type="file" id="myFile" name="bitmap" accept=".txt">
+              <br></br>
+              <input type="submit">
+            </form>
+
+        </main>
+    </div>
+
+    <footer>
+        <p>© Projektarbeit Low Power Raumanzeige SoSe24</p>
+    </footer>
+
+      
+
+    </body>
+</html>
