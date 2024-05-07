@@ -16,7 +16,7 @@ void HTTPServer::Init() {
     m_Server.serveStatic("/", LittleFS, "/www/");
     m_Server.serveStatic("/", LittleFS, "/www/").setDefaultFile("index.html");
 
-    m_Server.on("/api/SetAPCred", HTTP_POST, [](AsyncWebServerRequest* request) {
+    m_Server.on("/api/v1/SetAPCred", HTTP_POST, [](AsyncWebServerRequest* request) {
         Log::Debug("Received SetAPCred request from client %s", request->client()->remoteIP().toString().c_str());
 
         AsyncWebParameter* pSSID = request->getParam("ssid", true);
@@ -34,6 +34,52 @@ void HTTPServer::Init() {
             return;
         }
         });
+
+
+    if (!LittleFS.exists("/upload")) {
+        Log::Debug("Creating upload directory");
+        if (!LittleFS.mkdir("/upload")) {
+            Log::Error("Failed to create upload directory");
+        }
+    }
+
+    m_Server.on("/api/v1/upload", HTTP_POST,
+        [](AsyncWebServerRequest* request) {
+            request->send(200);
+        },
+        [](AsyncWebServerRequest* request, String filename, size_t index, uint8_t* data, size_t len, bool final) {
+            if (index == 0) { // index zero means first chunk of file
+                Log::Debug("Received file upload request from client %s", request->client()->remoteIP().toString().c_str());
+                Log::Debug("Upload Started: %s", filename.c_str());
+            }
+            Log::Debug("File upload: %s, index: %u, len: %u, final: %s", filename.c_str(), index, len, final ? "true" : "false");
+
+
+            std::ofstream file("/littlefs/upload/" + std::string(filename.c_str()),
+                index == 0 ? std::ios::binary : std::ios::binary | std::ios::app);
+
+            if (file) {
+                if (len > 0) {
+                    file.write(reinterpret_cast<const char*>(data), len);
+                }
+            }
+            else {
+                Log::Error("Failed to open file for writing");
+                request->send(500, "text/plain", "Failed to open file for writing");
+            }
+
+            if (final) {
+                Log::Debug("Upload Ended: %s", filename.c_str());
+                request->send(200, "text/plain", "File uploaded successfully");
+            }
+            else {
+                request->send(200, "text/plain", "File chunk uploaded successfully");
+            }
+
+            
+            file.close();
+        });
+
 
     m_Server.onNotFound([](AsyncWebServerRequest* request) {
         Log::Debug("Not found: %s", request->url());
