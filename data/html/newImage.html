@@ -42,11 +42,14 @@
     <button onclick="convertToHTML()">HTML Vorschau</button>
     <button onclick="convertToPNG()">Konvertieren in PNG</button>
     <button onclick="convertToBitmap()">Konvertieren in Bitmap</button>
+    <button onclick="uploadBitmap()">Upload Bitmap</button>
 
 
     <script src="./html2canvas.min.js"></script>
 
     <script>
+
+        var byteArray = [];
 
         function convertToHTML() {
             var inputText = document.getElementById("inputText").value;
@@ -57,7 +60,6 @@
         }
 
         function convertToPNG() {
-
             html2canvas(document.querySelector("#preview"), { scale: 1 }).then(canvas => {
                 // document.body.appendChild(canvas);
                 var img = canvas.toDataURL("image/png");
@@ -78,7 +80,7 @@
 
                 console.log(canvas.width, canvas.height);
 
-                var byteArray = convertImageDataToByteArray(imageData);
+                byteArray = convertImageDataToByteArray(imageData);
                 console.log(byteArray);
 
                 // console.log(context.getImageData(0, 0, 800, 400));
@@ -167,6 +169,35 @@
             }
 
             return hexByteArray;
+        }
+
+        function uploadBitmap() {
+            var url = '/api/v1/uploadbmp';
+
+            // Konfiguration der Fetch-Anfrage
+            var requestOptions = {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ data: byteArray })
+            };
+
+            // Senden der POST-Anfrage mit der Fetch-API
+            fetch(url, requestOptions)
+                .then(function (response) {
+                    // Überprüfen, ob die Anfrage erfolgreich war (Statuscode 200)
+                    if (!response.ok) {
+                        throw new Error('Fehler beim Senden der Daten. Statuscode: ' + response.status);
+                    }
+                    return response.json(); // Rückgabe des JSON-Datenstroms der Antwort
+                })
+                .then(function (data) {
+                    console.log('Daten erfolgreich gesendet:', data);
+                })
+                .catch(function (error) {
+                    console.error('Fehler beim Senden der Daten:', error);
+                });
         }
 
     </script>
