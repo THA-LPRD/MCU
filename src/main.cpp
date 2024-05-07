@@ -14,6 +14,7 @@ void FuncLog(char* msg) {
     std::string log_msg = "[" + std::string(time_str) + "] - " + std::string(msg);
     Serial.println(log_msg.c_str());
 }
+Application* app = nullptr;
 
 void setup() {
     Serial.begin(115200);
@@ -28,10 +29,28 @@ void setup() {
         Log::Fatal("Failed to start file system");
         return;
     }
-    Log::Info("Starting application");
-    static Application app;
-    app.Init();
+
+    Config::LoadConfig();
+
+    app = Application::Create(Config::GetOperatingMode());
+    if (app == nullptr) {
+        Log::Fatal("Failed to create application");
+        return;
+    }
+
+    if (app->Init()) {
+        return;
+    }
+
+    Log::Fatal("Failed to initialize application. Switching to failsafe mode");
+    delete app;
+    app = Application::Create("Failsafe");
+    if (app == nullptr) {
+        Log::Fatal("Failed to create failsafe application");
+    }
+    return;
 }
 
 void loop() {
+    app->Run();
 }

@@ -6,21 +6,12 @@
 class Application
 {
 public:
-    enum class Mode
-    {
-        STANDALONE,
-        NETWORK,
-        SERVER,
-    };
     Application() = default;
-    ~Application() = default;
-    void Init();
-private:
-    inline void SetMode(Mode mode) { m_Mode = mode; }
-    bool SetupWiFi();
-    void SetMode(std::string mode);
-private:
-    Mode m_Mode;
+    virtual ~Application() = default;
+    virtual bool Init() = 0;
+    virtual void Run() = 0;
+    static Application* Create(std::string_view mode);
+protected:
     HTTPServer m_Server;
 };
 

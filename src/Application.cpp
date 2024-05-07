@@ -2,60 +2,27 @@
 #include <WiFi.h>
 #include <string>
 #include "Application.h"
+#include "AppStandalone.h"
+#include "AppNetwork.h"
 #include "Log.h"
 #include "Clock.h"
 #include "Config.h"
 
-void Application::Init()
-{
-    Config::LoadConfig();
+Application* Application::Create(std::string_view mode) {
+    Log::Info("Starting application");
 
-    SetMode(Config::GetOperatingMode());
-
-    if (!SetupWiFi()) {
-        Log::Fatal("Failed to setup WiFi");
-        return;
-    }
-
-    Log::Debug("Initializing HTTP server");
-    m_Server.Init();
-}
-
-bool Application::SetupWiFi() {
-    Log::Debug("Setting up WiFi");
-
-    switch (m_Mode) {
-    case Mode::STANDALONE:
-        WiFi.softAP(Config::GetWiFiSSID().c_str(), Config::GetWiFiPassword().c_str());
-        Log::Info("WiFi AP started: %s", Config::GetWiFiSSID().c_str());
-        return true;
-    case Mode::NETWORK:
-        WiFi.begin(Config::GetWiFiSSID().c_str(), Config::GetWiFiPassword().c_str());
-        Log::Info("Connecting to WiFi: %s", Config::GetWiFiSSID().c_str());
-        Log::Debug("With password: %s", Config::GetWiFiPassword().c_str());
-        while (WiFi.waitForConnectResult() != WL_CONNECTED) {
-            Log::Error("Failed to connect to WiFi: %s", Config::GetWiFiSSID().c_str());
-            return false;
-        }
-        Log::Info("Connected to WiFi: %s", Config::GetWiFiSSID().c_str());
-        return true;
-    default:
-        Log::Error("Invalid mode");
-        return false;
-    }
-}
-
-void Application::SetMode(std::string mode) {
     if (mode == "Standalone") {
-        SetMode(Mode::STANDALONE);
+        return new AppStandalone();
     }
     else if (mode == "Network") {
-        SetMode(Mode::NETWORK);
+        return new AppNetwork();
     }
     else if (mode == "Server") {
-        SetMode(Mode::SERVER);
+        // TODO Implement AppServer
+        // return new AppServer();
     }
     else {
-        Log::Error("Invalid mode");
+        // TODO Implement AppFailsafe
+        // return new AppFailsafe();
     }
 }
