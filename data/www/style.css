@@ -6,7 +6,7 @@ body {
 }
 
 header {
-    max-width: 840px;
+    max-width: 940px;
     margin: auto;
     margin-top: 10px;
     padding: 10px 0;
@@ -35,14 +35,14 @@ header img {
 
 #trenner {
     height: 2px;
-    max-width: 840px;
+    max-width: 940px;
     background-color: #FF0350;
     margin: auto;
   
 }
 
 .container {
-    max-width: 800px;
+    max-width: 900px;
     margin: auto;
     padding: 20px;
     background-color: #fff; /* Hintergrundfarbe für den Hauptinhalt */
@@ -50,14 +50,86 @@ header img {
 }
 
 main {
-    padding: 50px 0;
-   
+    padding: 50px 0; 
     text-align: center;
 
 }
 
+a {
+    color: black; 
+}
+
+#intro {
+    width: 500px;
+    margin: auto;
+    color:#FF0350;
+    font-family: arial, sans-serif;
+    font-weight: light;
+    font-style: italic;
+    border: 1px solid #FF0350;
+    padding: 3px;
+}
+
+#png-upload {
+    text-align: left;
+    margin-left: 65px; 
+}
+
+#designByHtml {
+
+    border-top: 2px dashed black;
+    width:800px;
+    padding-top: 30px;
+    margin: auto;
+
+}
+
+#list-header{
+    padding-left: 5px;
+
+}
+
+ol {
+    text-align: left;
+    margin-left: 25px;
+}
+
+ol li {
+    padding: 5px;
+}
+
+#inputText {
+    width: 800px;
+}
+
+button {
+    margin-top: 5px;
+    margin-bottom: 10px;
+}
+
+#previewContainer {
+    width: 800px;
+    height: 480px;
+    border: 1px solid #ccc;
+    /*overflow: auto;*/
+    margin: auto;
+
+    /*position: relative;*/
+}
+
+#preview {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+#previewImg {
+    width: 800px;
+    height: 480px;
+}
+
 footer {
-    max-width: 840px;
+    max-width: 940px;
     margin: 0 auto;
     padding: 10px 0;
     background-color: #FF0350;
