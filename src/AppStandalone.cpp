@@ -3,6 +3,7 @@
 #include "AppStandalone.h"
 #include "Log.h"
 #include "Config.h"
+#include "EPDL.h"
 
 bool AppStandalone::Init() {
     Log::Debug("Initializing standalone application");
@@ -12,9 +13,21 @@ bool AppStandalone::Init() {
         return false;
     }
 
-    m_Server.Init();
-
+    m_Server.Init(&m_RenderIMG);
     return true;
+}
+
+void AppStandalone::Run() {
+    m_DNSServer.processNextRequest();
+    if (m_RenderIMG != -1) {
+        Log::Debug("Rendering image");
+        EPDL::BeginFrame();
+        // EPDL::DrawImage(m_RenderIMG, 0, 0);
+        EPDL::EndFrame();
+        // EPDL::SwapBuffers();
+        EPDL::DeleteImage(m_RenderIMG);
+        m_RenderIMG = -1;
+    }
 }
 
 bool AppStandalone::SetupWiFi() {

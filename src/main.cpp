@@ -5,6 +5,7 @@
 #include "Log.h"
 #include "Clock.h"
 #include "Config.h"
+#include "EPDL.h"
 
 void FuncLog(char* msg) {
     time_t time = Clock::GetTime();
@@ -31,6 +32,8 @@ void setup() {
     }
 
     Config::LoadConfig();
+    EPDL::Init();
+    EPDL::LoadDriver(Config::GetDisplayDriver());
 
     app = Application::Create(Config::GetOperatingMode());
     if (app == nullptr) {

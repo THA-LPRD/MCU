@@ -1,5 +1,6 @@
 {
     "OperatingMode": "Standalone",
     "WiFiSSID": "ESP32-Access-Point",
-    "WiFiPassword": "THA-LPRD-2024"
+    "WiFiPassword": "THA-LPRD-2024",
+    "DisplayDriver": "WS_7IN3G"
 }

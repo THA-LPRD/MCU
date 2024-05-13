@@ -1,6 +1,7 @@
 #ifndef APPLICATION_H_
 #define APPLICATION_H_
 
+#include "EPDL.h"
 #include "HTTPServer.h"
 
 class Application
@@ -13,6 +14,7 @@ public:
     static Application* Create(std::string_view mode);
 protected:
     HTTPServer m_Server;
+    EPDL::ImageHandle m_RenderIMG = -1;
 };
 
 #endif /*APPLICATION_H_*/

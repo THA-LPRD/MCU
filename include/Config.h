@@ -15,6 +15,7 @@ namespace Config
     DEFINE_CONFIG_KEY(OperatingMode, std::string);
     DEFINE_CONFIG_KEY(WiFiSSID, std::string);
     DEFINE_CONFIG_KEY(WiFiPassword, std::string);
+    DEFINE_CONFIG_KEY(DisplayDriver, std::string);
 } // namespace Config
 #undef DEFINE_CONFIG_KEY
 

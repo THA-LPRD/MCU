@@ -16,6 +16,7 @@ namespace Config
         SetOperatingMode("Standalone");
         SetWiFiSSID("ESP32-Access-Point");
         SetWiFiPassword("THA-LPRD-2024");
+        SetDisplayDriver("WS_7IN3G");
     }
 
     void LoadConfig() {
@@ -43,6 +44,8 @@ namespace Config
         SetWiFiSSID(data);
         data = doc["WiFiPassword"];
         SetWiFiPassword(data);
+        data = doc["DisplayDriver"];
+        SetDisplayDriver(data);
 
         file.close();
         return;
@@ -60,6 +63,7 @@ namespace Config
         doc["OperatingMode"] = GetOperatingMode();
         doc["WiFiSSID"] = GetWiFiSSID();
         doc["WiFiPassword"] = GetWiFiPassword();
+        doc["DisplayDriver"] = GetDisplayDriver();
 
         serializeJson(doc, file);
         file.close();
@@ -73,6 +77,7 @@ namespace Config
     DEFINE_CONFIG_KEY(OperatingMode, std::string);
     DEFINE_CONFIG_KEY(WiFiSSID, std::string);
     DEFINE_CONFIG_KEY(WiFiPassword, std::string);
+    DEFINE_CONFIG_KEY(DisplayDriver, std::string);
 
 #undef DEFINE_CONFIG_KEY
 } // namespace Config

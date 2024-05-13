@@ -1,16 +1,19 @@
 #ifndef HTTPSERVER_H_
 #define HTTPSERVER_H_
 
-#include <ESPAsyncWebServer.h>
-#include <AsyncTCP.h>
+#include <map>
+#include <PsychicHttp.h>
+#include <string>
+#include <vector>
 
 class HTTPServer {
 public:
     HTTPServer() = default;
     ~HTTPServer() = default;
-    void Init();
+    void Init(int* RenderIMG);
 private:
-    AsyncWebServer m_Server;
+    PsychicHttpServer m_Server;
+    std::map<std::string, std::vector<uint8_t>> uploadBuffers;
 };
 
 #endif /*HTTPSERVER_H_*/

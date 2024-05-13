@@ -13,7 +13,7 @@ bool AppNetwork::Init() {
         return false;
     }
 
-    m_Server.Init();
+    m_Server.Init(&m_RenderIMG);
 
     return true;
 }
