@@ -6,7 +6,8 @@
 
 class HTTPServer {
 public:
-    HTTPServer();
+    HTTPServer() = default;
+    ~HTTPServer() = default;
     void Init();
 private:
     AsyncWebServer m_Server;

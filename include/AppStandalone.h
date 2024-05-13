@@ -10,7 +10,7 @@ public:
     AppStandalone() = default;
     ~AppStandalone() = default;
     bool Init() override;
-    void Run() override { m_DNSServer.processNextRequest(); }
+    void Run() override;
 private:
     bool SetupWiFi();
 private:
