@@ -21,6 +21,7 @@ bool AppConfig::SetupWiFi() {
     Log::Debug("Setting up WiFi");
 
     WiFi.softAP(Config::GetWiFiSSID().c_str(), Config::GetWiFiPassword().c_str());
+    
     Log::Info("WiFi AP started: %s", WiFi.softAPIP().toString().c_str());
     Log::Info("IP address: %s", WiFi.softAPIP().toString().c_str());
 

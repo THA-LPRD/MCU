@@ -16,6 +16,23 @@ void HTTPServer::Init() {
     m_Server.serveStatic("/", LittleFS, "/www/");
     m_Server.serveStatic("/", LittleFS, "/www/").setDefaultFile("index.html");
 
+    m_Server.on("/api/v1/ConfigOpMode", HTTP_POST, [](AsyncWebServerRequest* request) {
+        Log::Debug("Received ConfigOpMode request from client %s", request->client()->remoteIP().toString().c_str());
+
+        AsyncWebParameter* pOpMode = request->getParam("opmode", true);
+
+        if (pOpMode) {
+            Config::SetOperatingMode(pOpMode->value().c_str());
+            Config::SaveConfig();
+            request->send(200, "text/plain", " Operating Mode set. Please restart the device.");
+        }
+        else {
+            Log::Debug("Invalid request, missing parameters");
+            request->send(400, "text/plain", "Missing Operating Mode");
+            return;
+        }
+        });
+
     m_Server.on("/api/v1/SetAPCred", HTTP_POST, [](AsyncWebServerRequest* request) {
         Log::Debug("Received SetAPCred request from client %s", request->client()->remoteIP().toString().c_str());
 
