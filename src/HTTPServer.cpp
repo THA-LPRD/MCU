@@ -23,8 +23,8 @@ void HTTPServer::Init() {
         AsyncWebParameter* pPassword = request->getParam("password", true);
 
         if (pSSID && pPassword) {
-            Config::GetInstance().SetWiFiSSID(pSSID->value().c_str());
-            Config::GetInstance().SetWiFiPassword(pPassword->value().c_str());
+            Config::SetWiFiSSID(pSSID->value().c_str());
+            Config::SetWiFiPassword(pPassword->value().c_str());
             Config::SaveConfig();
             request->send(200, "text/plain", "WiFi credentials set. Please restart the device.");
         }

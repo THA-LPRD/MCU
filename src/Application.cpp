@@ -9,8 +9,8 @@
 #include "Config.h"
 
 Application* Application::Create(std::string_view mode) {
-    Log::Info("Starting application");
-
+    Log::Info("Starting application in %s mode", mode.data());
+    
     if (mode == "Standalone") {
         return new AppStandalone();
     }
