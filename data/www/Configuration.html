@@ -29,6 +29,7 @@
                     })
                     .then(data => {
                         document.getElementById('response').textContent = data;
+                        
                     })
                     .catch(error => {
                         document.getElementById('response').textContent = 'Error: ' + error.message;

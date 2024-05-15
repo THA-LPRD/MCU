@@ -1,10 +1,12 @@
 #include <Arduino.h>
 #include <WiFi.h>
-#include "AppConfig.h"
+#include "AppDefault.h"
 #include "Log.h"
 #include "Config.h"
+#define DEFAULT_WIFI_AP_SSID  "THA-LPRD-001"
+#define DEFAULT_WIFI_PASSWORD  "password"
 
-bool AppConfig::Init() {
+bool AppDefault::Init() {
     Log::Debug("Initializing config application");
 
     if (!SetupWiFi()) {
@@ -17,12 +19,12 @@ bool AppConfig::Init() {
     return true;
 }
 
-bool AppConfig::SetupWiFi() {
-    Log::Debug("Setting up WiFi");
+bool AppDefault::SetupWiFi() {
+    Log::Debug("Setting up Default WiFi Access Point");
 
-    WiFi.softAP(Config::GetWiFiSSID().c_str(), Config::GetWiFiPassword().c_str());
+    WiFi.softAP(DEFAULT_WIFI_AP_SSID, DEFAULT_WIFI_PASSWORD);
     
-    Log::Info("WiFi AP started: %s", WiFi.softAPIP().toString().c_str());
+    Log::Info("WiFi AP started: %s", DEFAULT_WIFI_AP_SSID);
     Log::Info("IP address: %s", WiFi.softAPIP().toString().c_str());
 
     return true;
