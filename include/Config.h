@@ -7,6 +7,9 @@
     void Set##name(const type& value); \
     const type& Get##name();
 
+#define DEFAULT_WIFI_AP_SSID  "THA-LPRD-001"
+#define DEFAULT_WIFI_PASSWORD  "password"
+
 namespace Config
 {
     void LoadDefaultConfig();

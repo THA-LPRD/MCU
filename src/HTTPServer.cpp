@@ -11,7 +11,7 @@ HTTPServer::HTTPServer() : m_Server(80) {
 
 
 void HTTPServer::Init() {
-    Log::Debug("Initializing HTTP server");
+    Log::Debug("Initializing HTTP server"); 
 
     m_Server.serveStatic("/", LittleFS, "/www/");
     m_Server.serveStatic("/", LittleFS, "/www/").setDefaultFile("index.html");
@@ -24,7 +24,9 @@ void HTTPServer::Init() {
         if (pOpMode) {
             Config::SetOperatingMode(pOpMode->value().c_str());
             Config::SaveConfig();
-            request->send(200, "text/plain", " Operating Mode set. Please restart the device.");
+            request->send(200, "text/plain", " Operating Mode set. Restarting device in 3 seconds.");
+            delay(3000);
+            ESP.restart();
         }
         else {
             Log::Debug("Invalid request, missing parameters");

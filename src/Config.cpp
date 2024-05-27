@@ -13,9 +13,9 @@ namespace Config
 
     void LoadDefaultConfig() {
         Log::Debug("Loading default config");
-        SetOperatingMode("Standalone");
-        SetWiFiSSID("ESP32-Access-Point");
-        SetWiFiPassword("THA-LPRD-2024");
+        SetOperatingMode("Default");
+        SetWiFiSSID(DEFAULT_WIFI_AP_SSID);
+        SetWiFiPassword(DEFAULT_WIFI_PASSWORD);
     }
 
     void LoadConfig() {

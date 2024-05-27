@@ -3,11 +3,10 @@
 #include "AppDefault.h"
 #include "Log.h"
 #include "Config.h"
-#define DEFAULT_WIFI_AP_SSID  "THA-LPRD-001"
-#define DEFAULT_WIFI_PASSWORD  "password"
+
 
 bool AppDefault::Init() {
-    Log::Debug("Initializing config application");
+    Log::Debug("Initializing default application");
 
     if (!SetupWiFi()) {
         Log::Fatal("Failed to setup WiFi");
