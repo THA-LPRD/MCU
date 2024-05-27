@@ -6,7 +6,7 @@
 
 class HTTPServer {
 public:
-    HTTPServer() = default;
+    HTTPServer();
     ~HTTPServer() = default;
     void Init();
 private:

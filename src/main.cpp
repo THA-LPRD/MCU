@@ -6,6 +6,8 @@
 #include "Clock.h"
 #include "Config.h"
 
+#define RESET_BUTTON_PIN 2
+
 void FuncLog(char* msg) {
     time_t time = Clock::GetTime();
     struct tm* timeinfo = localtime(&time);
@@ -18,6 +20,8 @@ Application* app = nullptr;
 
 void setup() {
     Serial.begin(115200);
+    
+    pinMode(RESET_BUTTON_PIN, INPUT_PULLUP); 
 
     Clock::SetTime(2024, 1, 1, 0, 0, 0, -1);
 
@@ -32,6 +36,14 @@ void setup() {
 
     Config::LoadConfig();
 
+    if (digitalRead(RESET_BUTTON_PIN) == HIGH) {
+        Log::Info("Reset button pressed. Loading default configuration.");
+        Config::LoadDefaultConfig;
+        return;
+    }
+    else 
+        Log::Debug("Reset button not pressed. Continuing Setup.");
+
     app = Application::Create(Config::GetOperatingMode());
     if (app == nullptr) {
         Log::Fatal("Failed to create application");
@@ -42,11 +54,11 @@ void setup() {
         return;
     }
 
-    Log::Fatal("Failed to initialize application. Switching to failsafe mode");
+    Log::Fatal("Failed to initialize application. Starting default app");
     delete app;
-    app = Application::Create("Failsafe");
+    Application* app = Application::Create("Default");
     if (app == nullptr) {
-        Log::Fatal("Failed to create failsafe application");
+        Log::Fatal("Failed to create default application.");
     }
     return;
 }

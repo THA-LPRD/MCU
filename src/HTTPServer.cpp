@@ -6,7 +6,7 @@
 #include "Log.h"
 #include "Config.h"
 
-HTTPServer::HTTPServer() : m_Server(80) {
+    HTTPServer::HTTPServer() : m_Server(80) {
 }
 
 

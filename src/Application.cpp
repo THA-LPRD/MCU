@@ -4,7 +4,6 @@
 #include "Application.h"
 #include "AppStandalone.h"
 #include "AppNetwork.h"
-#include "AppFailsafe.h"
 #include "AppDefault.h"
 #include "Log.h"
 #include "Clock.h"

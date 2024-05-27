@@ -1,10 +1,7 @@
 #ifndef APPDEFAULT_H_
 #define APPDEFAULT_H_
 
-
-
 #include "Application.h"
-
 
 class AppDefault : public Application
 {

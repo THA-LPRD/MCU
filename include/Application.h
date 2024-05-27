@@ -6,7 +6,7 @@
 class Application
 {
 public:
-    Application() = default;
+    Application() {};
     virtual ~Application() = default;
     virtual bool Init() = 0;
     virtual void Run() = 0;
