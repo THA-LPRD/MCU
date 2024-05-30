@@ -100,11 +100,13 @@ a {
 #pngText {
     float: left;
     margin-left: 70px;
+    padding-right: 50px;
+    text-align: left;
 
 }
 
 
-#uploadForm {
+#fileInput {
     float: left;
     margin-left: 70px;
     padding-right: 60px;
@@ -113,12 +115,38 @@ a {
 
 
 #imageContainer {
-    width: 800px;
-    margin:auto;
-    display: block;
+    width: 900px; 
+    display: flex;
+    flex-wrap: wrap;
+    margin: auto;
+    gap: 20px; /* Abstände zwischen den Bildcontainern */
+    justify-content: center; /* Zentriert die Container horizontal */
     padding-bottom: 100px;
 }
 
+
+/* CSS für das Anzeigen der Bilder in Reihen mit jeweils drei Bildern */
+.row {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.col {
+    flex: 1;
+    width: 33.33%; /* Jede Spalte nimmt ein Drittel der verfügbaren Breite ein */
+    box-sizing: border-box;
+    padding: 10px;
+}
+
+.inputUhrzeit {
+   width: 60px;
+   margin-right: 10px;
+
+}
+
+.entfernenButton {
+    margin-left: 30px;
+}
 
 
 #designByHtml {
