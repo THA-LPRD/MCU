@@ -16,7 +16,7 @@ namespace Config
         SetOperatingMode("Standalone");
         SetWiFiSSID("ESP32-Access-Point");
         SetWiFiPassword("THA-LPRD-2024");
-        SetDisplayDriver("WS_7IN3G");
+        SetDisplayDriver("WS_7IN3F");
     }
 
     void LoadConfig() {
@@ -37,7 +37,6 @@ namespace Config
             file.close();
             return;
         }
-
         const char* data = doc["OperatingMode"];
         SetOperatingMode(data);
         data = doc["WiFiSSID"];
