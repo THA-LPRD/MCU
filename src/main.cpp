@@ -36,43 +36,24 @@ void setup() {
     EPDL::Init();
     EPDL::LoadDriver(Config::GetDisplayDriver());
 
-    // app = Application::Create(Config::GetOperatingMode());
-    // if (app == nullptr) {
-    //     Log::Fatal("Failed to create application");
-    //     return;
-    // }
-
-    // if (app->Init()) {
-    //     return;
-    // }
-
-    // Log::Fatal("Failed to initialize application. Switching to failsafe mode");
-    // delete app;
-    // app = Application::Create("Failsafe");
-    // if (app == nullptr) {
-    //     Log::Fatal("Failed to create failsafe application");
-    // }
-    // return;
-    std::string imgPaths[4] = {
-            "/littlefs/upload/Mock_Julia.bmp",
-            "/littlefs/upload/Mock1_Mario.bmp",
-            "/littlefs/upload/Mock2_Mario.bmp",
-            "/littlefs/upload/Mock3_Mario.bmp"};
-    std::unique_ptr<EPDL::ImageData> imgDatas[4];
-    EPDL::ImageHandle imgHandles[4];
-    for (int i = 0; i < 4; i++) {
-        imgDatas[i] = std::make_unique<EPDL::ImageData>(imgPaths[i], 800, 480, 3);
-        imgHandles[i] = EPDL::CreateImage(std::move(imgDatas[i]));
+    app = Application::Create(Config::GetOperatingMode());
+    if (app == nullptr) {
+        Log::Fatal("Failed to create application");
+        return;
     }
-    for (int i = 0; i < 4; i++) {
-        EPDL::BeginFrame();
-        EPDL::DrawImage(imgHandles[i], 0, 0);
-        EPDL::SwapBuffers();
-        EPDL::EndFrame();
+
+    if (app->Init()) {
+        return;
     }
-    MCU::Sleep(5000);
+
+    Log::Fatal("Failed to initialize application. Switching to failsafe mode");
+    delete app;
+    app = Application::Create("Failsafe");
+    if (app == nullptr) {
+        Log::Fatal("Failed to create failsafe application");
+    }
 }
 
 void loop() {
-    // app->Run();
+    app->Run();
 }

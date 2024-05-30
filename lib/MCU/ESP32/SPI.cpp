@@ -15,7 +15,6 @@ namespace MCU
         return new ESP32SPI(mosi, miso, sck, cs);
     }
 
-
     ESP32SPI::ESP32SPI(int8_t mosi, int8_t miso, int8_t sck, int8_t cs) :
             ESP32SPI(mosi, miso, sck, cs,
                      spi_bus_config_t{
@@ -28,7 +27,7 @@ namespace MCU
                      },
                      spi_device_interface_config_t{
                              .mode = 0,                          // SPI mode 0
-                             .clock_speed_hz = 4 * 1000 * 1000, // Clock out at 4 MHz
+                             .clock_speed_hz = 4 * 1000 * 1000,  // Clock out at 4 MHz
                              .spics_io_num = cs,                 // CS pin
                              .queue_size = 7                     // We want to be able to queue 7 transactions at a time
                      }
@@ -90,7 +89,7 @@ namespace MCU
         spi_transaction_t t;
         memset(&t, 0, sizeof(t));
         t.length = 8;
-        t.rxlength = 8; // Set this if you expect to receive data
+        t.rxlength = 8;
         t.rx_buffer = &rx_data;
         esp_err_t ret = spi_device_polling_transmit(m_SPI, &t);
         if (ret != ESP_OK) {

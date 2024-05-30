@@ -18,7 +18,7 @@ namespace MCU
         uint8_t Read() override;
     private:
 //        void Initialize();
-        spi_device_handle_t m_SPI;
+        spi_device_handle_t m_SPI = nullptr;
 
     };
 } // namespace MCU

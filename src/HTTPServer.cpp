@@ -127,39 +127,43 @@ void HTTPServer::Init(int* RenderIMG) {
     //     return request->reply(200, "application/json", "{\"result\":\"success\"}");
     // });
 
-    // PsychicUploadHandler* multipartHandler = new PsychicUploadHandler();
-    // multipartHandler->onUpload(
-    //     [this](PsychicRequest* request, const String& filename, uint64_t index, uint8_t* data, size_t len, bool last) {
-    //         std::string identifier = request->client()->remoteIP().toString().c_str();
-    //         for (uint8_t i = 0; i < len; i++)
-    //             this->uploadBuffers[identifier].push_back(data[i]);
+    auto* multipartHandler = new PsychicUploadHandler();
+    multipartHandler->onUpload(
+            [this](PsychicRequest* request, const String &filename, uint64_t index, uint8_t* data, size_t len,
+                   bool last) {
+                std::string identifier = request->client()->remoteIP().toString().c_str();
+                std::ofstream file("/littlefs/upload/newimg", std::ios::binary);
 
-    //         Log::Debug("Saving %d bytes to the buffer", len);
-    //         if (last)
-    //             Log::Debug("Upload finished. Total bytes: %d", this->uploadBuffers[identifier].size());
+                file.write(reinterpret_cast<const char*>(data), len);
 
-    //         return ESP_OK;
-    //     });
+                Log::Debug("Saving %d bytes to the buffer", len);
+                if (last) {
+                    Log::Debug("%s", identifier.c_str());
+                }
+                Log::Debug("Upload finished. Total bytes: %d", this->uploadBuffers[identifier].size());
 
-    // //gets called after upload has been handled
-    // multipartHandler->onRequest([this, RenderIMG](PsychicRequest* request) {
-    //     PsychicWebParameter* width = request->getParam("width");
-    //     PsychicWebParameter* height = request->getParam("height");
+                return ESP_OK;
+            });
 
-    //     std::unique_ptr<EPDL::ImageData> img = std::make_unique<EPDL::ImageData>();
-    //     img->Width = width->value().toInt();
-    //     img->Height = height->value().toInt();
-    //     img->Data = this->uploadBuffers[request->client()->remoteIP().toString().c_str()];
+    //gets called after upload has been handled
+    multipartHandler->onRequest([this, RenderIMG](PsychicRequest* request) {
+        PsychicWebParameter* width = request->getParam("width");
+        PsychicWebParameter* height = request->getParam("height");
 
-    //     *RenderIMG = EPDL::CreateImage(std::move(img));
+        std::unique_ptr<EPDL::ImageData> img = std::make_unique<EPDL::ImageData>("/littlefs/upload/newimg",
+                                                                                 width->value().toInt(),
+                                                                                 height->value().toInt(),
+                                                                                 3);
 
-    //     this->uploadBuffers[request->client()->remoteIP().toString().c_str()].clear();
+        *RenderIMG = EPDL::CreateImage(std::move(img));
 
-    //     return request->reply(200, "text/plain", "Bitmap uploaded successfully");
-    // });
+        this->uploadBuffers[request->client()->remoteIP().toString().c_str()].clear();
 
-    // //upload to /multipart url
-    // m_Server.on("/api/v1/uploadbmp", HTTP_POST, multipartHandler);
+        return request->reply(200, "text/plain", "Bitmap uploaded successfully");
+    });
+
+    //upload to /multipart url
+    m_Server.on("/api/v1/uploadbmp", HTTP_POST, multipartHandler);
 
     m_Server.onNotFound([](PsychicRequest* request) {
         Log::Debug("Not found: %s", request->url());

@@ -8,10 +8,7 @@
 bool AppStandalone::Init() {
     Log::Debug("Initializing standalone application");
 
-    if (!SetupWiFi()) {
-        Log::Fatal("Failed to setup WiFi");
-        return false;
-    }
+    SetupWiFi();
 
     m_Server.Init(&m_RenderIMG);
     return true;
@@ -22,9 +19,9 @@ void AppStandalone::Run() {
     if (m_RenderIMG != -1) {
         Log::Debug("Rendering image");
         EPDL::BeginFrame();
-        // EPDL::DrawImage(m_RenderIMG, 0, 0);
+        EPDL::DrawImage(m_RenderIMG, 0, 0);
         EPDL::EndFrame();
-        // EPDL::SwapBuffers();
+        EPDL::SwapBuffers();
         EPDL::DeleteImage(m_RenderIMG);
         m_RenderIMG = -1;
     }
