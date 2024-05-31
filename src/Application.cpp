@@ -12,8 +12,7 @@
 
 Application* Application::Create(std::string_view mode) {
     Log::Info("Starting application");
-    std::string modestr = std::string(mode);
-    Log::Info("App mode: %s", modestr);
+    Log::Info("App mode: %s", std::string(mode));
 
     if (mode == "Config") {
         return new AppConfig();
