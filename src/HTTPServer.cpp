@@ -2,107 +2,55 @@
 #include <WiFi.h>
 #include <fstream>
 #include <LittleFS.h>
-#include <HTTPServer.h>
-#include "Log.h"
 #include "Config.h"
-
-HTTPServer::HTTPServer() : m_Server(80) {
-}
-
+#include "HTTPServer.h"
+#include <Log.h>
+#include <MCU.h>
 
 void HTTPServer::Init() {
     Log::Debug("Initializing HTTP server");
 
-    m_Server.serveStatic("/", LittleFS, "/www/");
-    m_Server.serveStatic("/", LittleFS, "/www/").setDefaultFile("index.html");
+    m_Server.listen(80);
+    m_Server.config.max_uri_handlers = 20;
 
-    m_Server.on("/api/v1/ConfigOpMode", HTTP_POST, [](AsyncWebServerRequest* request) {
+    m_Server.serveStatic("/", LittleFS, "/www/");
+
+    m_Server.on("/api/v1/ConfigOpMode", HTTP_POST, [](PsychicRequest* request) {
         Log::Debug("Received ConfigOpMode request from client %s", request->client()->remoteIP().toString().c_str());
 
-        AsyncWebParameter* pOpMode = request->getParam("opmode", true);
-
-        if (pOpMode) {
+        if (request->hasParam("opmode")) {
+            PsychicWebParameter* pOpMode = request->getParam("opmode");
             Config::SetOperatingMode(pOpMode->value().c_str());
             Config::SaveConfig();
-            request->send(200, "text/plain", " Operating Mode set. Please restart the device.");
+            request->reply(200, "text/plain", "Operating Mode set. Restarting device in 3 seconds.");
+            MCU::Sleep(3000);
+            MCU::Restart();
         }
-        else {
-            Log::Debug("Invalid request, missing parameters");
-            request->send(400, "text/plain", "Missing Operating Mode");
-            return;
-        }
-        });
+        Log::Debug("Invalid request, missing parameters");
+        return request->reply(400, "text/plain", "Missing Operating Mode");
+    });
 
-    m_Server.on("/api/v1/SetAPCred", HTTP_POST, [](AsyncWebServerRequest* request) {
+    m_Server.on("/api/v1/SetAPCred", HTTP_POST, [](PsychicRequest* request) {
         Log::Debug("Received SetAPCred request from client %s", request->client()->remoteIP().toString().c_str());
 
-        AsyncWebParameter* pSSID = request->getParam("ssid", true);
-        AsyncWebParameter* pPassword = request->getParam("password", true);
-
-        if (pSSID && pPassword) {
+        if (request->hasParam("ssid") && request->hasParam("password")) {
+            PsychicWebParameter* pSSID = request->getParam("ssid");
+            PsychicWebParameter* pPassword = request->getParam("password");
             Config::SetWiFiSSID(pSSID->value().c_str());
             Config::SetWiFiPassword(pPassword->value().c_str());
             Config::SaveConfig();
-            request->send(200, "text/plain", "WiFi credentials set. Please restart the device.");
+            Log::Debug("SSID: %s, Password: %s", Config::GetWiFiSSID().c_str(),
+                       Config::GetWiFiPassword().c_str());
+            return request->reply(200, "text/plain", "WiFi credentials set. Please restart the device.");
         }
-        else {
-            Log::Debug("Invalid request, missing parameters");
-            request->send(400, "text/plain", "Missing SSID or password");
-            return;
-        }
-        });
+        Log::Debug("Invalid request, missing parameters");
+        return request->reply(400, "text/plain", "Missing SSID or password");
+    });
 
+    m_Server.onNotFound([](PsychicRequest* request) {
+        Log::Debug("Not found: %s", request->url().c_str());
+        return request->reply(404, "text/plain", "Page not found");
+    });
 
-    if (!LittleFS.exists("/upload")) {
-        Log::Debug("Creating upload directory");
-        if (!LittleFS.mkdir("/upload")) {
-            Log::Error("Failed to create upload directory");
-        }
-    }
-
-    m_Server.on("/api/v1/upload", HTTP_POST,
-        [](AsyncWebServerRequest* request) {
-            request->send(200);
-        },
-        [](AsyncWebServerRequest* request, String filename, size_t index, uint8_t* data, size_t len, bool final) {
-            if (index == 0) { // index zero means first chunk of file
-                Log::Debug("Received file upload request from client %s", request->client()->remoteIP().toString().c_str());
-                Log::Debug("Upload Started: %s", filename.c_str());
-            }
-            Log::Debug("File upload: %s, index: %u, len: %u, final: %s", filename.c_str(), index, len, final ? "true" : "false");
-
-
-            std::ofstream file("/littlefs/upload/" + std::string(filename.c_str()),
-                index == 0 ? std::ios::binary : std::ios::binary | std::ios::app);
-
-            if (file) {
-                if (len > 0) {
-                    file.write(reinterpret_cast<const char*>(data), len);
-                }
-            }
-            else {
-                Log::Error("Failed to open file for writing");
-                request->send(500, "text/plain", "Failed to open file for writing");
-            }
-
-            if (final) {
-                Log::Debug("Upload Ended: %s", filename.c_str());
-                request->send(200, "text/plain", "File uploaded successfully");
-            }
-            else {
-                request->send(200, "text/plain", "File chunk uploaded successfully");
-            }
-
-            
-            file.close();
-        });
-
-
-    m_Server.onNotFound([](AsyncWebServerRequest* request) {
-        Log::Debug("Not found: %s", request->url());
-        request->send(404);
-        });
-
-    m_Server.begin();
     Log::Info("HTTP server started");
 }

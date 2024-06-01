@@ -1,23 +1,15 @@
-#include <Arduino.h>
-#include <WiFi.h>
 #include <string>
 #include "Application.h"
 #include "AppStandalone.h"
 #include "AppNetwork.h"
-#include "AppFailsafe.h"
-#include "AppConfig.h"
+#include "AppDefault.h"
 #include "Log.h"
-#include "Clock.h"
-#include "Config.h"
 
 Application* Application::Create(std::string_view mode) {
     Log::Info("Starting application");
-    Log::Info("App mode: %s", std::string(mode));
+    Log::Info("App mode: %s", mode.data());
 
-    if (mode == "Config") {
-        return new AppConfig();
-    }
-    else if (mode == "Standalone") {
+    if (mode == "Standalone") {
         return new AppStandalone();
     }
     else if (mode == "Network") {
@@ -27,9 +19,6 @@ Application* Application::Create(std::string_view mode) {
         // TODO Implement AppServer
         // return new AppServer();
     }
-    else {
-        // TODO Implement AppFailsafe
-        Log::Fatal("Invalid app mode. Starting Failsafe app ");
-        return new AppFailsafe();
-    }
+    return new AppDefault();
+
 }

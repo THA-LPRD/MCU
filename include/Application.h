@@ -4,8 +4,7 @@
 #include "EPDL.h"
 #include "HTTPServer.h"
 
-class Application
-{
+class Application {
 public:
     Application() = default;
     virtual ~Application() = default;
@@ -14,7 +13,6 @@ public:
     static Application* Create(std::string_view mode);
 protected:
     HTTPServer m_Server;
-    EPDL::ImageHandle m_RenderIMG = -1;
 };
 
 #endif /*APPLICATION_H_*/

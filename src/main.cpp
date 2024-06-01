@@ -5,8 +5,8 @@
 #include "Log.h"
 #include "Clock.h"
 #include "Config.h"
-#include "EPDL.h"
-#include "MCU.h"
+#include <GPIO.h>
+#include <MCU.h>
 
 void FuncLog(char* msg) {
     time_t time = Clock::GetTime();
@@ -20,6 +20,8 @@ Application* app = nullptr;
 
 void setup() {
     Serial.begin(115200);
+
+    MCU::GPIO::SetMode(Config::Pin::RST, MCU::GPIO::Mode::InputPullup);
 
     Clock::SetTime(2024, 1, 1, 0, 0, 0, -1);
 
@@ -36,21 +38,33 @@ void setup() {
     EPDL::Init();
     EPDL::LoadDriver(Config::GetDisplayDriver());
 
+
+    if (MCU::GPIO::Read(Config::Pin::RST) == 1) {
+        Log::Info("Reset button pressed. Loading default configuration.");
+        Config::SetOperatingMode("Default");
+        Config::SaveConfig();
+    }
+    else {
+        Log::Debug("Reset button not pressed. Continuing Setup.");
+    }
+
     app = Application::Create(Config::GetOperatingMode());
     if (app == nullptr) {
         Log::Fatal("Failed to create application");
-        return;
+        MCU::Restart();
     }
 
     if (app->Init()) {
         return;
     }
 
-    Log::Fatal("Failed to initialize application. Switching to failsafe mode");
+    Log::Fatal("Failed to initialize application. Starting default app");
     delete app;
-    app = Application::Create("Failsafe");
+    Config::LoadDefaultConfig();
+    app = Application::Create("Default");
     if (app == nullptr) {
-        Log::Fatal("Failed to create failsafe application");
+        Log::Fatal("Failed to create default application.");
+        MCU::Restart();
     }
 }
 

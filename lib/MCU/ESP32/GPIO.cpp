@@ -13,20 +13,38 @@ namespace MCU { namespace GPIO
             switch (mode) {
                 case Mode::Input:
                     return GPIO_MODE_INPUT;
-                case Mode::Output: // Same as arduino OUTPUT
-                    return GPIO_MODE_INPUT_OUTPUT;
+                case Mode::InputPullup:
+                    return GPIO_MODE_INPUT; // Mode remains input, pull-up configuration is separate
+                case Mode::InputPulldown:
+                    return GPIO_MODE_INPUT; // Mode remains input, pull-down configuration is separate
+                case Mode::Output:
+                    return GPIO_MODE_OUTPUT;
                 default:
                     return GPIO_MODE_DISABLE;
             }
         }
     }
 
+// SetMode function
     void SetMode(uint8_t pin, uint8_t mode) {
         gpio_config_t io_conf = {};
         io_conf.pin_bit_mask = (1ULL << pin);
         io_conf.mode = ModeToEspMode(mode);
-        io_conf.pull_down_en = GPIO_PULLDOWN_DISABLE;
-        io_conf.pull_up_en = GPIO_PULLUP_DISABLE;
+
+        // Set pull-up or pull-down based on the mode
+        if (mode == Mode::InputPullup) {
+            io_conf.pull_up_en = GPIO_PULLUP_ENABLE;
+            io_conf.pull_down_en = GPIO_PULLDOWN_DISABLE;
+        }
+        else if (mode == Mode::InputPulldown) {
+            io_conf.pull_up_en = GPIO_PULLUP_DISABLE;
+            io_conf.pull_down_en = GPIO_PULLDOWN_ENABLE;
+        }
+        else {
+            io_conf.pull_up_en = GPIO_PULLUP_DISABLE;
+            io_conf.pull_down_en = GPIO_PULLDOWN_DISABLE;
+        }
+
         io_conf.intr_type = GPIO_INTR_DISABLE;
         esp_err_t err = gpio_config(&io_conf);
         if (err != ESP_OK) {

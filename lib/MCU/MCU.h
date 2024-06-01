@@ -6,6 +6,7 @@
 namespace MCU
 {
     void Sleep(uint32_t ms);
+    void Restart();
 } // namespace MCU
 
 #endif //MCU_MCU_H

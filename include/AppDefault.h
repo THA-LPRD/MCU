@@ -1,10 +1,8 @@
 #ifndef APPDEFAULT_H_
 #define APPDEFAULT_H_
 
-
-
 #include "Application.h"
-
+#include <DNSServer.h>
 
 class AppDefault : public Application
 {
@@ -16,7 +14,7 @@ public:
 private:
     bool SetupWiFi();
 private:
-    
+    DNSServer m_DNSServer;
 };
 
 #endif /*APPDEFAULT_H_*/

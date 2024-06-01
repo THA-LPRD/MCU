@@ -10,7 +10,7 @@ class HTTPServer {
 public:
     HTTPServer() = default;
     ~HTTPServer() = default;
-    void Init(int* RenderIMG);
+    void Init();
 private:
     PsychicHttpServer m_Server;
     std::map<std::string, std::vector<uint8_t>> uploadBuffers;

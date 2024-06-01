@@ -3,16 +3,13 @@
 #include "AppDefault.h"
 #include "Log.h"
 #include "Config.h"
-#define DEFAULT_WIFI_AP_SSID  "THA-LPRD-001"
-#define DEFAULT_WIFI_PASSWORD  "password"
+
 
 bool AppDefault::Init() {
-    Log::Debug("Initializing config application");
+    Log::Debug("Initializing default application");
+    Config::LoadDefaultConfig();
 
-    if (!SetupWiFi()) {
-        Log::Fatal("Failed to setup WiFi");
-        return false;
-    }
+    SetupWiFi();
 
     m_Server.Init();
 
@@ -22,10 +19,11 @@ bool AppDefault::Init() {
 bool AppDefault::SetupWiFi() {
     Log::Debug("Setting up Default WiFi Access Point");
 
-    WiFi.softAP(DEFAULT_WIFI_AP_SSID, DEFAULT_WIFI_PASSWORD);
-    
-    Log::Info("WiFi AP started: %s", DEFAULT_WIFI_AP_SSID);
+    WiFi.softAP(Config::GetWiFiSSID().c_str(), Config::GetWiFiPassword().c_str());
+    Log::Info("WiFi AP started: %s", Config::GetWiFiSSID().c_str());
     Log::Info("IP address: %s", WiFi.softAPIP().toString().c_str());
 
+    Log::Debug("Setting up DNS server");
+    m_DNSServer.start(53, "*", WiFi.softAPIP());
     return true;
 }

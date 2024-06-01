@@ -7,7 +7,9 @@ namespace MCU { namespace GPIO
 {
     enum Mode : uint8_t {
         Input = 0,
-        Output = 1
+        InputPullup = 1,
+        InputPulldown = 2,
+        Output = 3
     };
     void SetMode(uint8_t pin, uint8_t mode);
     void Write(uint8_t pin, uint8_t value);

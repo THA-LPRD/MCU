@@ -14,8 +14,8 @@ namespace Config
     void LoadDefaultConfig() {
         Log::Debug("Loading default config");
         SetOperatingMode("Standalone");
-        SetWiFiSSID("ESP32-Access-Point");
-        SetWiFiPassword("THA-LPRD-2024");
+        SetWiFiSSID("THA-LPRD-001");
+        SetWiFiPassword("password");
         SetDisplayDriver("WS_7IN3F");
     }
 

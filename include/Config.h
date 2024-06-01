@@ -9,6 +9,9 @@
 
 namespace Config
 {
+    enum Pin {
+        RST = 2,
+    };
     void LoadDefaultConfig();
     void LoadConfig();
     void SaveConfig();
