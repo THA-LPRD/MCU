@@ -39,8 +39,7 @@ void HTTPServer::Init() {
             Config::SetWiFiSSID(pSSID->value().c_str());
             Config::SetWiFiPassword(pPassword->value().c_str());
             Config::SaveConfig();
-            Log::Debug("SSID: %s, Password: %s", Config::GetWiFiSSID().c_str(),
-                       Config::GetWiFiPassword().c_str());
+            Log::Debug("SSID: %s, Password: %s", Config::GetWiFiSSID().c_str(), Config::GetWiFiPassword().c_str());
             return request->reply(200, "text/plain", "WiFi credentials set. Please restart the device.");
         }
         Log::Debug("Invalid request, missing parameters");
