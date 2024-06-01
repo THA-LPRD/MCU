@@ -41,6 +41,7 @@ void setup() {
 
     if (MCU::GPIO::Read(Config::Pin::RST) == 1) {
         Log::Info("Reset button pressed. Loading default configuration.");
+        Config::LoadDefaultConfig();
         Config::SetOperatingMode("Default");
         Config::SaveConfig();
     }
