@@ -16,6 +16,7 @@ namespace Config
         SetOperatingMode("Default");
         SetWiFiSSID(DEFAULT_WIFI_AP_SSID);
         SetWiFiPassword(DEFAULT_WIFI_PASSWORD);
+        Config::SaveConfig();
     }
 
     void LoadConfig() {

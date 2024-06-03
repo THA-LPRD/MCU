@@ -6,7 +6,7 @@
 #include "Clock.h"
 #include "Config.h"
 
-#define RESET_BUTTON_PIN 2
+#define RESET_BUTTON_PIN 44
 
 void FuncLog(char* msg) {
     time_t time = Clock::GetTime();
@@ -36,7 +36,7 @@ void setup() {
 
     Config::LoadConfig();
 
-    if (digitalRead(RESET_BUTTON_PIN) == HIGH) {
+    if (digitalRead(RESET_BUTTON_PIN) == LOW) {
         Log::Info("Reset button pressed. Loading default configuration.");
         Config::LoadDefaultConfig;
         return;
