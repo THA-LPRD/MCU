@@ -107,6 +107,8 @@
 
             <img id="previewImg" src="" />
 
+            <canvas id="canvas2" width="800" height="480"></canvas>
+
         </main>
     </div>
 
@@ -187,20 +189,41 @@
 
 
         function convertAndUpload() {
+            //, canvas: document.querySelector("#preview-canvas")
             html2canvas(document.querySelector("#preview"), { scale: 1 }).then(canvas => {
                 // document.body.appendChild(canvas);
                 // var img = canvas.toDataURL("image/png");
                 // document.getElementById('previewImg').src = img;
+                // canvas.style.image-rendering = "pixelated"; 
+                // canvas.style.image-rendering = "crisp-edges";
+
                 var img = canvas.toDataURL("image/png");
                 document.getElementById('previewImg').src = img;
+                // canvas.scale(0.5);
                 var context = canvas.getContext("2d");
+                context.imageSmoothingEnabled = false;
                 // console.log(context.getImageData(0, 0, 800, 400));
-                console.log(createImageBitmap(document.getElementById('previewImg'), 0, 0, 800, 480).data);
-                var context = canvas.getContext("2d");
+                // console.log(createImageBitmap(document.getElementById('previewImg'), 0, 0, 800, 480).data);
                 var imageData = context.getImageData(0, 0, canvas.width, canvas.height);
 
-                console.log(canvas.width, canvas.height);
 
+                let canvas2 = document.querySelector("#canvas2");
+let context2 = canvas2.getContext("2d");
+
+                let resizeWidth = 800;
+let resizeHeight = 480;
+let resizeQuality = 'pixelated';
+let bitmap = createImageBitmap(imageData, {resizeWidth, resizeHeight, resizeQuality}).then(function(result){
+        context2.drawImage(result,800, 480);  /// <-- this is where error is thrown
+    })
+
+
+
+// context.drawImage(bitmap, 800, 480);
+
+
+                // console.log(canvas.width, canvas.height);
+                // document.body.appendChild(canvas)
                 byteArray = convertImageDataToByteArray(imageData);
                 console.log(byteArray);
 

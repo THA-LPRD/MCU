@@ -146,6 +146,15 @@ button {
     height: 480px;
 }
 
+canvas {
+    width: 800px;
+    height: 480px;
+    /* width: 3200px;
+    height: 1920px; */
+    image-rendering: pixelated; 
+    /* image-rendering: crisp-edges; */
+}
+
 footer {
     max-width: 940px;
     margin: 0 auto;
