@@ -1,13 +1,13 @@
+
 #include <Arduino.h>
 #include "FS.h"
 #include <LittleFS.h>
+#include "./DEV_Config.h"
 #include <time.h>
 #include <PNGdec.h>
-
-/* You only need to format LittleFS the first time you run a
-   test or else use the LITTLEFS plugin to create a partition
-   https://github.com/lorol/arduino-esp32littlefs-plugin */
-
+#include "EPD.h"
+#include "GUI_Paint.h"
+// #include <stdlib.h>
 
 PNG png;
 
@@ -15,9 +15,12 @@ PNG png;
 
 File myfile;
 
-uint16_t rawimage[10][10];
+// uint16_t rawimage[800][480];
+// uint16_t *rawimage;
+unsigned char gImage_7in3g[96000];
+// unsigned char* gImage_7in3g[];
 
-void * myOpen(const char *filename, int32_t *size) {
+void *myOpen(const char *filename, int32_t *size) {
   Serial.printf("Attempting to open %s\n", filename);
   //myfile = SD.open(filename);
   myfile = LittleFS.open(filename);
@@ -36,32 +39,118 @@ int32_t mySeek(PNGFILE *handle, int32_t position) {
   return myfile.seek(position);
 }
 
+uint8_t mapTo2Bits(uint16_t pixel) {
+  if (pixel == 0x0000) {
+    return 0b00;
+  } else if (pixel == 0xF800 || pixel == 0xD9AB)  { // 1111100000000000
+  // #DA345C
+    return 0b11;
+  } else if (pixel == 0xFFFF) { // 1111111111111111
+    return 0b01;
+  } else if (pixel == 0xFFE0) { // 1111111111100000
+    return 0b10;
+  } else {
+    return 0b01; // Standardfall
+  }
+}
+
 // Function to draw pixels to the display
 void PNGDraw(PNGDRAW *pDraw) {
-uint16_t usPixels[10];
-
+  uint16_t usPixels[800];
   png.getLineAsRGB565(pDraw, usPixels, PNG_RGB565_LITTLE_ENDIAN, 0xffffffff);
-  // Serial.println(pDraw->y);
-  //Serial.println(pDraw);S
-  /*
-  Serial.print(usPixels[4], BIN);
-  Serial.print(" ");
-  Serial.print(usPixels[6], BIN);
-  Serial.print(" ");
-  Serial.print(usPixels[8], BIN);
-  */
 
-  for (int i = 0; i < 10; i++) {
-      rawimage[pDraw->y][i] = usPixels[i];
+  for (int i = 0; i < 800; i += 4) {
+    uint8_t value = 0;
+    value |= mapTo2Bits(usPixels[i]) << 6;
+    value |= mapTo2Bits(usPixels[i + 1]) << 4;
+    value |= mapTo2Bits(usPixels[i + 2]) << 2;
+    value |= mapTo2Bits(usPixels[i + 3]);
+    
+    gImage_7in3g[pDraw->y * 200 + i / 4] = value;
   }
-
-  
-
-  
-// Serial.println(" Line");
-
-  // tft.writeRect(0, pDraw->y + 24, pDraw->iWidth, 1, usPixels);
 }
+/*
+  Serial.print(pDraw->y);
+  Serial.print(": ");
+  Serial.print(usPixels[0]);
+  Serial.print(" ");
+  Serial.print(usPixels[479]);
+  Serial.print(" ");
+  Serial.print(usPixels[480]);
+  Serial.print(" ");
+  Serial.println(usPixels[799]);
+
+  delay(10);
+  */
+  /* WORKING!
+  for (int x = 0; x < 200; x++) {
+    //if (usPixels[x*4 + 800*pDraw->y] != 0) {
+    if (usPixels[x*4] != 0) {
+      gImage_7in3g[x+200*pDraw->y] = 0x55;
+    }
+    else {
+    //if (usPixels[x*4 + 800*pDraw->y] == 0) {
+      gImage_7in3g[x+200*pDraw->y] = 0x00;
+    }
+  }
+  */
+/*
+  for (int x = 0; x < 800; x++) {
+    char pxgroup;
+    
+    if (usPixels[x + 800*pDraw->y] == 0) {
+      // Black 00
+      bitWrite(pxgroup, x%4, 0);
+      bitWrite(pxgroup, x%4+1, 0);
+    }
+    if (usPixels[x + 800*pDraw->y] != 0) {
+      // White 01
+      bitWrite(pxgroup, x%4, 0);
+      bitWrite(pxgroup, x%4+1, 1);
+    }
+    if (x%4 == 0) {
+      // Neue Gruppe
+      gImage_7in3g[(x+800*pDraw->y)/4] = pxgroup;
+    }
+    
+    /*
+    if (usPixels[x + 800*pDraw->y] != 0) {
+      Serial.print("F");
+      delay(1);
+    }
+    //Serial.print(usPixels[x + 800*pDraw->y]);
+    */
+
+  //}
+  // Serial.println(pDraw->y);
+  /*
+  for (int x = 0; x < 800/4; x++) {
+      char byte;
+      for (int i = 0; i < 4; i++) {
+        if (usPixels[x*4+i] == 0000000000000000) {
+        // Black 00
+          bitWrite(byte, i, 0);
+          bitWrite(byte, i+1, 0);
+          Serial.print(usPixels[x*4+i]);
+          // Serial.println(" ");
+        } else if (usPixels[x*4+i] == 1111111111111111) {
+          // White 01
+          bitWrite(byte, i, 0);
+          bitWrite(byte, i+1, 1);
+          Serial.print(usPixels[x*4+i]);
+          // Serial.println("Weiß");
+        }
+      }
+      // Serial.println(byte, HEX);
+
+
+      // gImage_7in3g[pDraw->y*480/4 + x] = byte;
+      // rawimage[pDraw->y][i] = usPixels[x];
+  }*/
+  
+// delay(15);
+  // tft.writeRect(0, pDraw->y + 24, pDraw->iWidth, 1, usPixels);
+
 
 
 #define FORMAT_LITTLEFS_IF_FAILED true
@@ -89,8 +178,7 @@ void listDir(fs::FS &fs, const char *dirname, uint8_t levels) {
       struct tm *tmstruct = localtime(&t);
       Serial.printf(
         "  LAST WRITE: %d-%02d-%02d %02d:%02d:%02d\n", (tmstruct->tm_year) + 1900, (tmstruct->tm_mon) + 1, tmstruct->tm_mday, tmstruct->tm_hour,
-        tmstruct->tm_min, tmstruct->tm_sec
-      );
+        tmstruct->tm_min, tmstruct->tm_sec);
 
       if (levels) {
         listDir(fs, file.name(), levels - 1);
@@ -105,28 +193,9 @@ void listDir(fs::FS &fs, const char *dirname, uint8_t levels) {
       struct tm *tmstruct = localtime(&t);
       Serial.printf(
         "  LAST WRITE: %d-%02d-%02d %02d:%02d:%02d\n", (tmstruct->tm_year) + 1900, (tmstruct->tm_mon) + 1, tmstruct->tm_mday, tmstruct->tm_hour,
-        tmstruct->tm_min, tmstruct->tm_sec
-      );
+        tmstruct->tm_min, tmstruct->tm_sec);
     }
     file = root.openNextFile();
-  }
-}
-
-void createDir(fs::FS &fs, const char *path) {
-  Serial.printf("Creating Dir: %s\n", path);
-  if (fs.mkdir(path)) {
-    Serial.println("Dir created");
-  } else {
-    Serial.println("mkdir failed");
-  }
-}
-
-void removeDir(fs::FS &fs, const char *path) {
-  Serial.printf("Removing Dir: %s\n", path);
-  if (fs.rmdir(path)) {
-    Serial.println("Dir removed");
-  } else {
-    Serial.println("rmdir failed");
   }
 }
 
@@ -178,138 +247,6 @@ void appendFile(fs::FS &fs, const char *path, const char *message) {
   file.close();
 }
 
-void renameFile(fs::FS &fs, const char *path1, const char *path2) {
-  Serial.printf("Renaming file %s to %s\r\n", path1, path2);
-  if (fs.rename(path1, path2)) {
-    Serial.println("- file renamed");
-  } else {
-    Serial.println("- rename failed");
-  }
-}
-
-void deleteFile(fs::FS &fs, const char *path) {
-  Serial.printf("Deleting file: %s\r\n", path);
-  if (fs.remove(path)) {
-    Serial.println("- file deleted");
-  } else {
-    Serial.println("- delete failed");
-  }
-}
-
-// SPIFFS-like write and delete file
-
-// See: https://github.com/esp8266/Arduino/blob/master/libraries/LittleFS/src/LittleFS.cpp#L60
-void writeFile2(fs::FS &fs, const char *path, const char *message) {
-  if (!fs.exists(path)) {
-    if (strchr(path, '/')) {
-      Serial.printf("Create missing folders of: %s\r\n", path);
-      char *pathStr = strdup(path);
-      if (pathStr) {
-        char *ptr = strchr(pathStr, '/');
-        while (ptr) {
-          *ptr = 0;
-          fs.mkdir(pathStr);
-          *ptr = '/';
-          ptr = strchr(ptr + 1, '/');
-        }
-      }
-      free(pathStr);
-    }
-  }
-
-  Serial.printf("Writing file to: %s\r\n", path);
-  File file = fs.open(path, FILE_WRITE);
-  if (!file) {
-    Serial.println("- failed to open file for writing");
-    return;
-  }
-  if (file.print(message)) {
-    Serial.println("- file written");
-  } else {
-    Serial.println("- write failed");
-  }
-  file.close();
-}
-
-// See:  https://github.com/esp8266/Arduino/blob/master/libraries/LittleFS/src/LittleFS.h#L149
-void deleteFile2(fs::FS &fs, const char *path) {
-  Serial.printf("Deleting file and empty folders on path: %s\r\n", path);
-
-  if (fs.remove(path)) {
-    Serial.println("- file deleted");
-  } else {
-    Serial.println("- delete failed");
-  }
-
-  char *pathStr = strdup(path);
-  if (pathStr) {
-    char *ptr = strrchr(pathStr, '/');
-    if (ptr) {
-      Serial.printf("Removing all empty folders on path: %s\r\n", path);
-    }
-    while (ptr) {
-      *ptr = 0;
-      fs.rmdir(pathStr);
-      ptr = strrchr(pathStr, '/');
-    }
-    free(pathStr);
-  }
-}
-
-void testFileIO(fs::FS &fs, const char *path) {
-  Serial.printf("Testing file I/O with %s\r\n", path);
-
-  static uint8_t buf[512];
-  size_t len = 0;
-  File file = fs.open(path, FILE_WRITE);
-  if (!file) {
-    Serial.println("- failed to open file for writing");
-    return;
-  }
-
-  size_t i;
-  Serial.print("- writing");
-  uint32_t start = millis();
-  for (i = 0; i < 2048; i++) {
-    if ((i & 0x001F) == 0x001F) {
-      Serial.print(".");
-    }
-    file.write(buf, 512);
-  }
-  Serial.println("");
-  uint32_t end = millis() - start;
-  Serial.printf(" - %u bytes written in %u ms\r\n", 2048 * 512, end);
-  file.close();
-
-  file = fs.open(path);
-  start = millis();
-  end = start;
-  i = 0;
-  if (file && !file.isDirectory()) {
-    len = file.size();
-    size_t flen = len;
-    start = millis();
-    Serial.print("- reading");
-    while (len) {
-      size_t toRead = len;
-      if (toRead > 512) {
-        toRead = 512;
-      }
-      file.read(buf, toRead);
-      if ((i++ & 0x001F) == 0x001F) {
-        Serial.print(".");
-      }
-      len -= toRead;
-    }
-    Serial.println("");
-    end = millis() - start;
-    Serial.printf("- %u bytes read in %u ms\r\n", flen, end);
-    file.close();
-  } else {
-    Serial.println("- failed to open file for reading");
-  }
-}
-
 void setup() {
   Serial.begin(115200);
   if (!LittleFS.begin(FORMAT_LITTLEFS_IF_FAILED)) {
@@ -340,37 +277,140 @@ void setup() {
   deleteFile(LittleFS, "/test.txt");
   */
 
-int rc, filecount = 0;
 
 
 
 
-const char *name = "/test.png";
-const int len = strlen(name);
-delay(200);
-rc = png.open((const char *)name, myOpen, myClose, myRead, mySeek, PNGDraw);
-Serial.println(png.getWidth());
-Serial.println(png.getHeight());
-delay(200);
+  int rc, filecount = 0;
 
-rc = png.decode(NULL, 0);
 
-png.close();
+  //gImage_7in3g = (unsigned char*)ps_malloc(96000);
+  //Serial.println(&gImage_7in3g);
 
-delay(200);
 
-for (int y = 0; y < 10; y++) {
-  for (int x = 0; x < 9; x++) {
-    Serial.print(rawimage[y][x], BIN);
-    Serial.print(" ");
+
+  // rawimage = (uint16_t *)ps_malloc(800 * 480 * sizeof(uint16_t));
+  /*
+  rawimage = (uint16_t*) heap_caps_malloc(800 * 480 * sizeof(uint16_t), MALLOC_CAP_SPIRAM);
+  if (rawimage == NULL) {
+Serial.println("Fehler: Konnte keinen Speicher im PSRAM zuweisen.");
+    while (1);
+  } else {
+    Serial.println("Speicher im PSRAM erfolgreich zugewiesen.");
+    // Serial.println(&rawimage);
   }
-  Serial.println(rawimage[y][9], BIN);
-}
+  */
 
+  const char *name = "/st3.png";
+  const int len = strlen(name);
+  delay(200);
+  rc = png.open((const char *)name, myOpen, myClose, myRead, mySeek, PNGDraw);
+  Serial.println(png.getWidth());
+  Serial.println(png.getHeight());
+  delay(200);
+
+  rc = png.decode(NULL, 0);
+
+  png.close();
+
+  delay(1000);
+/*
+  byte pxgroup;
+
+  bitWrite(pxgroup, 0, 1);
+  bitWrite(pxgroup, 1, 1);
+  bitWrite(pxgroup, 2, 1);
+  bitWrite(pxgroup, 3, 1);
+  bitWrite(pxgroup, 4, 1);
+  bitWrite(pxgroup, 5, 1);
+  bitWrite(pxgroup, 6, 1);
+  bitWrite(pxgroup, 7, 1);
+  
+  Serial.println(pxgroup, HEX);
+
+  bitWrite(pxgroup, 0, 0);
+  bitWrite(pxgroup, 1, 1);
+  bitWrite(pxgroup, 2, 0);
+  bitWrite(pxgroup, 3, 1);
+  bitWrite(pxgroup, 4, 0);
+  bitWrite(pxgroup, 5, 1);
+  bitWrite(pxgroup, 6, 0);
+  bitWrite(pxgroup, 7, 1);
+  
+  Serial.println(pxgroup, HEX);
+*/
+
+/*
+  for (int y = 0; y < 480; y++) {
+    for (int x = 0; x < 199; x++) {
+      Serial.print(gImage_7in3g[x + 200*y], HEX);
+    }
+    Serial.println(gImage_7in3g[200 + 200*y], HEX);
+    delay(10);
+  }
+  */
+
+/*
+  for (int y = 0; y < 10; y++) {
+    for (int x = 0; x < 9; x++) {
+      Serial.print(rawimage[y*10 +x], BIN);
+      Serial.print(" ");
+    }
+    Serial.println(rawimage[y*10 + 9], BIN);
+  }*/
+/*
+  for (int i = 0; i < 96000; i++) {
+    gImage_7in3g[i] = 0xFF;
+  }
+  */
+
+  Serial.println(gImage_7in3g[0], HEX);
+  Serial.println(gImage_7in3g[4000], HEX);
+  Serial.println(gImage_7in3g[48000], HEX);
+
+    printf("EPD_7IN3G_test Demo\r\n");
+    DEV_Module_Init();
+
+    printf("e-Paper Init and Clear...\r\n");
+    EPD_7IN3G_Init();
+
+    EPD_7IN3G_Clear(EPD_7IN3G_WHITE);
+    DEV_Delay_ms(2000);
+
+    //Create a new image cache
+    UBYTE *BlackImage;
+    UDOUBLE Imagesize = ((EPD_7IN3G_WIDTH % 4 == 0)? (EPD_7IN3G_WIDTH / 4 ): (EPD_7IN3G_WIDTH / 4 + 1)) * EPD_7IN3G_HEIGHT;
+    if((BlackImage = (UBYTE *)malloc(Imagesize)) == NULL) {
+        printf("Failed to apply for black memory...\r\n");
+        while (1);
+    }
+    printf("Paint_NewImage\r\n");
+    Paint_NewImage(BlackImage, EPD_7IN3G_WIDTH, EPD_7IN3G_HEIGHT, 0, EPD_7IN3G_WHITE);
+    Paint_SetScale(4);
+
+#if 1   // show bmp
+    printf("show BMP-----------------\r\n");
+    Paint_SelectImage(BlackImage);
+    Paint_DrawBitMap(gImage_7in3g);
+    EPD_7IN3G_Display(BlackImage);
+    DEV_Delay_ms(8000);
+#endif  
+
+    printf("Clear...\r\n");
+    EPD_7IN3G_Clear(EPD_7IN3G_WHITE);
+
+    printf("Goto Sleep...\r\n");
+    EPD_7IN3G_Sleep();
+    free(BlackImage);
+    BlackImage = NULL;
+    DEV_Delay_ms(2000);//important, at least 2s
+    // close 5V
+    printf("close 5V, Module enters 0 power consumption ...\r\n");
 
   Serial.println("Test complete");
   delay(200);
   Serial.println("Test complete");
+  delay(20000);
 }
 
 void loop() {}
