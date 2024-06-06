@@ -4,21 +4,32 @@
 #include "AppNetwork.h"
 #include "AppDefault.h"
 #include "Log.h"
+#include "MCU.h"
 
 Application* Application::Create(std::string_view mode) {
     Log::Info("Starting application");
     Log::Info("App mode: %s", mode.data());
 
+    Application* app = nullptr;
+
     if (mode == "Standalone") {
-        return new AppStandalone();
+        app = new AppStandalone();
     }
     else if (mode == "Network") {
-        return new AppNetwork();
+        app = new AppNetwork();
     }
     else if (mode == "Server") {
         // TODO Implement AppServer
-        // return new AppServer();
+        // app = new AppServer();
     }
-    return new AppDefault();
+    else {
+        app = new AppDefault();
+    }
 
+    if (app == nullptr) {
+        Log::Fatal("Failed to create application");
+        MCU::Restart();
+    }
+
+    return app;
 }

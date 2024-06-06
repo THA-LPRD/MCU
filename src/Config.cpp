@@ -1,82 +1,94 @@
 #include <ArduinoJson.h>
 #include <fstream>
-#include <string>
+#include <unordered_map>
 #include "Config.h"
 #include "Log.h"
+#include <Filesystem.h>
 
 namespace Config
 {
     namespace
     { // Private members
-        static const char* m_FileName = "/littlefs/config.json";
+        constexpr char m_FileName[] = "/config.json";
+        std::unordered_map<Key, std::string> m_Config;
     } // namespace
 
-    void LoadDefaultConfig() {
-        Log::Debug("Loading default config");
-        SetOperatingMode("Standalone");
-        SetWiFiSSID("THA-LPRD-001");
-        SetWiFiPassword("password");
-        SetDisplayDriver("WS_7IN3F");
+    std::string GetDefault(Key key) {
+        if (m_Items.find(key) == m_Items.end()) {
+            Log::Error("[Config] Key not found in Config");
+            return "";
+        }
+        return m_Items.at(key).default_value;
     }
 
-    void LoadConfig() {
+    void LoadDefault() {
+        Log::Debug("[Config] Loading default config");
+        for (const auto &item: m_Items) {
+            m_Config[item.first] = item.second.default_value;
+        }
+    }
+
+    void Load() {
         Log::Debug("Loading config from file.");
-        std::ifstream file(m_FileName);
+        std::ifstream file(MCU::Filesystem::GetPath(m_FileName));
 
         if (!file) {
-            Log::Warning("Failed to open config file for reading - loading default config");
-            LoadDefaultConfig();
-            SaveConfig();
+            Log::Warning("[Config] Failed to open config file for reading - loading default config");
+            LoadDefault();
+            Save();
             return;
         }
 
         JsonDocument doc;
 
         if (deserializeJson(doc, file) != DeserializationError::Ok) {
-            Log::Error("Failed to parse config file");
+            Log::Error("[Config] Failed to parse config file");
             file.close();
             return;
         }
-        const char* data = doc["OperatingMode"];
-        SetOperatingMode(data);
-        data = doc["WiFiSSID"];
-        SetWiFiSSID(data);
-        data = doc["WiFiPassword"];
-        SetWiFiPassword(data);
-        data = doc["DisplayDriver"];
-        SetDisplayDriver(data);
+
+        for (JsonObject::iterator it = doc.as<JsonObject>().begin(); it != doc.as<JsonObject>().end(); ++it) {
+            m_Config[m_ReverseItems.at(it->key().c_str())] = it->value().as<std::string>();
+        }
 
         file.close();
-        return;
     }
 
-    void SaveConfig() {
+    void Save() {
         Log::Debug("Saving config to file");
-        std::ofstream file(m_FileName);
+        std::ofstream file(MCU::Filesystem::GetPath(m_FileName));
         if (!file) {
-            Log::Error("Failed to open config file for writing");
+            Log::Error("[Config] Failed to open config file for writing");
             return;
         }
 
         JsonDocument doc;
-        doc["OperatingMode"] = GetOperatingMode();
-        doc["WiFiSSID"] = GetWiFiSSID();
-        doc["WiFiPassword"] = GetWiFiPassword();
-        doc["DisplayDriver"] = GetDisplayDriver();
+        for (const auto &pair: m_Config) {
+            doc[m_Items.at(pair.first).name] = pair.second;
+        }
 
         serializeJson(doc, file);
         file.close();
     }
 
-#define DEFINE_CONFIG_KEY(name, type) \
-    namespace { static type m_##name; } \
-    void Set##name(const type& value) { m_##name = value; } \
-    const type& Get##name() { return m_##name; }
+    bool Set(Key key, std::string_view value) {
+        if (m_Items.find(key) == m_Items.end()) {
+            Log::Error("[Config] Key not found in Config");
+            return false;
+        }
+        if (!m_Items.at(key).validator(value)) {
+            Log::Error("[Config] Value for key %s is invalid", m_Items.at(key).name);
+            return false;
+        }
+        m_Config[key] = value;
+        return true;
+    }
 
-    DEFINE_CONFIG_KEY(OperatingMode, std::string);
-    DEFINE_CONFIG_KEY(WiFiSSID, std::string);
-    DEFINE_CONFIG_KEY(WiFiPassword, std::string);
-    DEFINE_CONFIG_KEY(DisplayDriver, std::string);
-
-#undef DEFINE_CONFIG_KEY
+    std::string Get(Key key) {
+        if (m_Config.find(key) == m_Config.end()) {
+            Log::Error("[Config] Key not found in Config");
+            return "";
+        }
+        return m_Config.at(key);
+    }
 } // namespace Config

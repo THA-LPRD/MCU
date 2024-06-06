@@ -26,16 +26,19 @@ namespace MCU
             Log::Error("[MCU] SPI not initialized");
             return;
         }
-        if (m_MOSI != -1) {
-            GPIO::Write(m_CS, 0);
-            for (int i = 0; i < 8; i++) {
-                GPIO::Write(m_MOSI, data & 0x80);
-                GPIO::Write(m_SCK, 1);
-                GPIO::Write(m_SCK, 0);
-                data <<= 1;
-            }
-            GPIO::Write(m_CS, 1);
+        if (m_MOSI == -1) {
+            Log::Error("[MCU] Write operation attempted without MOSI line configured");
         }
+        Log::Trace("[MCU] SPI Write. Data: 0x%02X", data);
+        GPIO::Write(m_CS, 0);
+        for (int i = 0; i < 8; i++) {
+            GPIO::Write(m_MOSI, data & 0x80);
+            GPIO::Write(m_SCK, 1);
+            GPIO::Write(m_SCK, 0);
+            data <<= 1;
+        }
+        GPIO::Write(m_CS, 1);
+        Log::Trace("[MCU] SPI Write complete");
     }
 
     uint8_t SWSPI::Read() {
@@ -47,6 +50,7 @@ namespace MCU
             Log::Error("[MCU] Read operation attempted without MISO line configured");
             return 0;
         }
+        Log::Trace("[MCU] SPI Read.");
         uint8_t data = 0;
         GPIO::Write(m_CS, 0);
         for (int i = 0; i < 8; i++) {
@@ -56,6 +60,7 @@ namespace MCU
             GPIO::Write(m_SCK, 0);
         }
         GPIO::Write(m_CS, 1);
+        Log::Trace("[MCU] SPI Read complete. Data: 0x%02X", data);
         return data;
     }
 }

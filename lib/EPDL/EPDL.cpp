@@ -33,7 +33,7 @@ namespace EPDL
     }
 
     void LoadDriver(std::string_view type) {
-        if (type == "WS_7IN3F") {
+        if (type == "WS_7IN3G") {
             m_Driver = std::make_unique<WS_7IN3G>();
         }
         else {
@@ -89,5 +89,12 @@ namespace EPDL
             return 0;
         }
         return m_Driver->GetWidth();
+    }
+
+    uint16_t GetHeight() {
+        if (m_Driver == nullptr) {
+            return 0;
+        }
+        return m_Driver->GetHeight();
     }
 } // namespace EPDL

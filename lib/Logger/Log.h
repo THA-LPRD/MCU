@@ -14,11 +14,14 @@ namespace Log
         ERROR,
         WARNING,
         INFO,
-        DEBUG
+        DEBUG,
+        TRACE,
+        MAX
     };
 
     void SetLogLevel(Level level);
     void SetLogFunction(std::function<void(char* msg)> logFunction);
+    void Trace(const char* format, ...);
     void Debug(const char* format, ...);
     void Info(const char* format, ...);
     void Warning(const char* format, ...);

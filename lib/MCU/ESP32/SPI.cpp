@@ -63,6 +63,11 @@ namespace MCU
             Log::Error("[MCU] SPI not initialized");
             return;
         }
+        if (m_MOSI == -1) {
+            Log::Error("[MCU] Write operation attempted without MOSI line configured");
+            return;
+        }
+        Log::Trace("[MCU] SPI Write. Data: 0x%02X", data);
         GPIO::Write(m_CS, 0);
         spi_transaction_t t;
         memset(&t, 0, sizeof(t));
@@ -73,6 +78,7 @@ namespace MCU
             Log::Error("[MCU] Failed to Write to SPI");
         }
         GPIO::Write(m_CS, 1);
+        Log::Trace("[MCU] SPI Write complete");
     }
 
     uint8_t ESP32SPI::Read() {
@@ -84,6 +90,7 @@ namespace MCU
             Log::Error("[MCU] Read operation attempted without MISO line configured");
             return 0;
         }
+        Log::Trace("[MCU] SPI Read.");
         uint8_t rx_data = 0;
         GPIO::Write(m_CS, 0);
         spi_transaction_t t;
@@ -97,6 +104,7 @@ namespace MCU
             return 0;
         }
         GPIO::Write(m_CS, 1);
+        Log::Trace("[MCU] SPI Read complete. Data: 0x%02X", rx_data);
         return rx_data;
     }
 } // namespace MCU

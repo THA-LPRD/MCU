@@ -10,7 +10,7 @@ namespace Log
         static Level m_LogLevel = Level::INFO;
         static std::function<void(char* msg)> m_LogFunction = [](char* msg) {
             Serial.println(msg);
-            };
+        };
 
         void LogMessage(const char* level, const char* format, va_list args) {
             char buffer[LOG_BUFFER_SIZE] = {0};
@@ -25,6 +25,15 @@ namespace Log
     }
     void SetLogFunction(std::function<void(char* msg)> logFunction) {
         m_LogFunction = logFunction;
+    }
+
+    void Trace(const char* format, ...) {
+        if (m_LogLevel >= Level::TRACE) {
+            va_list args;
+            va_start(args, format);
+            LogMessage("TRACE - ", format, args);
+            va_end(args);
+        }
     }
 
     void Debug(const char* format, ...) {

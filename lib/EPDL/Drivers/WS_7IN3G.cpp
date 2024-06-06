@@ -120,7 +120,6 @@ namespace EPDL
     void WS_7IN3G::SwapBuffers() {
         Log::Debug("[EPDL] Swap buffers");
         uint16_t scale = 8 / m_PixelSize;
-//        PowerOn();
         StartDataTransmission();
         for (uint16_t j = 0; j < m_Height; j++) {
             for (uint16_t i = 0; i < m_Width / scale; i++) {
@@ -131,14 +130,6 @@ namespace EPDL
                 SendData(data);
             }
         }
-//        Refresh();
-//        PowerOff();
-//        SendCommand(0x12);
-//        SendData(0x00);
-//        WaitUntilReady();
-//        SendCommand(0x02);
-//        SendData(0x00);
-//        WaitUntilReady();
     }
 
     void WS_7IN3G::SendCommand(uint8_t command) {
