@@ -6,7 +6,7 @@
 
         <meta charset="utf-8">
 
-        <meta name="LPRD" content="Bitmap Übertragung">
+        <meta name="LPRD" content="PNG Übertragung">
 
         <link rel="stylesheet" type="text/css" href="style.css">
         <script src="./html2canvas.min.js"></script>
@@ -17,14 +17,15 @@
 
     <body>
 
-      <header>
+    
+
+    <header>
 
         <div id="settings"> <a href="./settings.html"><img src="./icons8-settings-25-w.png"></a> </div>
         <img src="LPRD-Logo.webp" alt="Logo"> 
         <h1> Low-Power-Raumanzeige</h1>
 
     </header>
-
 
     <div class="container">
 
@@ -40,9 +41,9 @@
 
         <div id="intro">
             <h2>
-                Vielen Dank, dass Sie sich für einen <br>LPRD-Display entschieden haben. <br></br>
-                Sie haben 2 Möglichkeiten <br>personalisierte Inhalte darzustellen:<br>
-                Upload eines <a onclick="displayPngUpload()"><u>PNGs</u></a> oder  <a onclick="displayHtmlUpload()"><u>Design via HTML</u></a>
+                Vielen Dank, dass Sie sich für einen LPRD-Display entschieden haben. <br></br>
+                Sie haben 2 Möglichkeiten personalisierte Inhalte anzuzeigen:<br>
+                Upload eines <a onclick="displayPngUpload()"><u>PNGs</u></a> oder  <a onclick="displayHtmlUpload()"><u>Design via HTML</u></a>.
 
             </h2>
         </div>
@@ -51,33 +52,34 @@
 
         <br></br>
 
-          <div id="pngUpload">
-            <h3 id="pngHeading"><u>Hochladen von PNGs:</u></h3>
-            <p id="pngText">Bitte laden Sie PNGs in dem <b>exakten Pixelformat</b> Ihres Displays hoch (<span id="displayWidth"></span> x <span id="displayHeight"></span> px). <br> 
-                Geben Sie außerdem die <b>Uhrzeit (HH:MM)</b> an, wann ihr hochgeladenes Bild angezeigt werden soll. <br> Lassen Sie das Feld leer, wenn es sofort auf dem Display dargestellt werden soll.</p>
-                
-            <input type="file" id="fileInput" accept="image/png" multiple/>
+        <div id="pngUpload">
 
-            <button id="addButton">Weitere Bilder hinzufügen</button>
+
+            <h3 id="pngHeading"><u>Hochladen von PNGs:</u></h3>
+            <div id="pngText">Bitte laden Sie ein PNG in dem <b>exakten Pixelformat</b> Ihres Displays hoch <b>(<span id="displayWidth"></span> x <span id="displayHeight"></span> px)</b>. </div>
+            <div id="warning"><b>Achtung: wird ein PNG im falschen Pixelformat hochgeladen, so kann es nicht auf dem Display dargestellt werden!</b></div>
+            <input type="file" id="fileInput" accept="image/png" onchange="displayImage(event)">
 
             <div id="imageContainer"></div>
 
-            <button id="uploadButton">Upload an Display</button>
+            <button onclick="pngUpload()">Upload an Display</button>
 
             <br><br>
         </div>
         
-        
 
 
-          <div id="htmlUpload">
+        <div id="htmlUpload">
 
 
             <ol>
                 <h3 id="list-header"><u>Eigenes Design mit HTML erstellen:</u></h3>
 
-                <li>HTML-Code in das Textfeld eingeben <br>(Achtung hierbei auf die Pixel-Auflösung des Displays (<span id="displayWidth"></span> x <span id="displayHeight"></span>), die Layoutgröße muss <b>genau der Pixelanzahl</b> entsprechen)</li>
-                <li>Eine Vorschau Ihres HTML-Designs können Sie im 2. Feld sehen, sie wird automatisch aktualisiert</li>
+                <li>HTML-Code in das Textfeld eingeben <br>
+                    <div id="htmlwarning">Achtung hierbei auf die Pixel-Auflösung des Displays <u>(<span id="displayWidth"></span> x <span id="displayHeight"></span>)</u>: 
+                     die Layoutgröße muss <u>genau der Pixelanzahl</u> entsprechen, sonst kann es nicht auf dem Display angezeigt werden!</div></li><br>
+                <li>Eine Vorschau Ihres HTML-Designs können Sie im 2. Feld sehen; sie wird automatisch aktualisiert <br>
+                    Der Rahmen des Vorschau-Feldes dient als Orientierung für die Layoutgröße, er ist bereits im richtigen Format (<span id="displayWidth"></span> x <span id="displayHeight"></span>) </li>
                 <li>Wenn Sie zufrieden mit Ihrem Design sind, können Sie über den Upload-Button Ihr fertiges HTML-Layout an das Display schicken</li>
                 <li>Nun müssen Sie nur noch einen kurzen Moment warten, bis das Display seinen Inhalt aktualisiert hat</li>
             </ol> 
@@ -89,9 +91,7 @@
 
             </div>
 
-
-
-            <textarea id="inputText" rows="20" cols="97" oninput="convertToHTML()"></textarea> 
+            <textarea id="inputText" rows="20" cols="97" oninput="convertToHTML(); scaleHTML()"></textarea> 
 
             <br></br>
 
@@ -102,7 +102,7 @@
             </div>
 
 
-            <button onclick="convertAndUpload()">Upload an Display</button>
+            <button onclick="convertAndUploadHtml()">Upload an Display</button>
             <br><br>
 
             <img id="previewImg" src="" />
@@ -118,7 +118,7 @@
         <p id="icons8"><a target="_blank" href="https://icons8.com/icon/2969/settings">Settings</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a></p>
     </footer>
 
-      
 
     </body>
+
 </html>
