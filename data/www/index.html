@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ESP WiFi Configuration</title>
+    <script src="/utils.js"></script>
+    <script type="text/javascript">
+        async function SetWiFiCred() {
+            const form = document.getElementById('SetWiFiCred-form');
+            const ssid = form.querySelector('#ssid').value;
+            const password = form.querySelector('#password').value;
+            const response = await SubmitFormData('/api/v1/SetWiFiCred', {ssid, password});
+            const responseElement = document.getElementById('SetWiFiCred-response');
+            if (responseElement) {
+                responseElement.innerText = response;
+            }
+            else {
+                console.error('Response element for SetWiFiCred not found.');
+            }
+        }
+
+        function SetupSetWiFiCredForm() {
+            const form = document.getElementById('SetWiFiCred-form');
+            form.querySelector('#ssid').addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') {
+                    form.querySelector('#password').focus();
+                }
+            });
+            form.querySelector('#password').addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') {
+                    SetWiFiCred();
+                }
+            });
+        }
+
+        window.onload = function () {
+            Redirect();
+            SetupSetWiFiCredForm();
+        };
+    </script>
+</head>
+<body>
+<h1>Configure WiFi</h1>
+<div id="SetWiFiCred-form">
+    <label for="ssid">SSID:</label><br>
+    <input type="text" id="ssid" name="ssid" required>
+    <br><br>
+    <label for="password">Password:</label><br>
+    <input type="password" id="password" name="password" required>
+    <br><br>
+    <button onclick="SetWiFiCred()">Submit</button>
+    <p id="SetWiFiCred-response"></p>
+</div>
+</body>
+</html>
