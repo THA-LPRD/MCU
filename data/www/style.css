@@ -144,6 +144,13 @@ button {
 #previewImg {
     width: 800px;
     height: 480px;
+    image-rendering: pixelated;
+}
+
+#outputCanvas {
+    width: 800px;
+    height: 480px;
+    image-rendering: pixelated;
 }
 
 footer {

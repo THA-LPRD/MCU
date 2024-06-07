@@ -106,7 +106,6 @@
             <br><br>
 
             <img id="previewImg" src="" />
-
         </main>
     </div>
 
@@ -191,8 +190,10 @@
                 var img = canvas.toDataURL("image/png");
                 document.getElementById('previewImg').src = img;
                 var context = canvas.getContext("2d");
-                createImageBitmap(document.getElementById('previewImg'), 0, 0, 800, 480).data;
+                // createImageBitmap(document.getElementById('previewImg'), 0, 0, 800, 480).data;
+                
                 var imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+
 
                 var byteArray = convertImageDataToByteArray(imageData);
 
