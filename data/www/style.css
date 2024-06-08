@@ -128,10 +128,10 @@ button {
 }
 
 #previewContainer {
-    /* width: 800px;
-    height: 480px; */
-    width: 1200px;
-    height: 825px;
+    width: 800px;
+    height: 480px;
+    /* width: 1200px;
+    height: 825px; */
     border: 1px solid #ccc;
     margin: auto;
 
@@ -144,18 +144,18 @@ button {
 }
 
 #previewImg {
-    /* width: 800px;
-    height: 480px; */
-    width: 1200px;
-    height: 825px;
+    width: 800px;
+    height: 480px;
+    /* width: 1200px;
+    height: 825px; */
     image-rendering: pixelated;
 }
 
 #outputCanvas {
-    /* width: 800px;
-    height: 480px; */
-    width: 1200px;
-    height: 825px;
+    width: 800px;
+    height: 480px;
+    /* width: 1200px;
+    height: 825px; */
     image-rendering: pixelated;
 }
 
