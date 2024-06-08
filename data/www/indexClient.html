@@ -102,6 +102,15 @@
             <label for="customInput1">Eingabefeld 1:</label>
             <input id="customInput1" type="text" oninput="convertToHTML()"></input>
             </br>
+            <label for="customInput2">Eingabefeld 2:</label>
+            <input id="customInput2" type="text" oninput="convertToHTML()"></input>
+            </br>
+            <label for="customInput3">Eingabefeld 3:</label>
+            <input id="customInput3" type="text" oninput="convertToHTML()"></input>
+            </br>
+            <label for="customInput4">Eingabefeld 4:</label>
+            <input id="customInput4" type="text" oninput="convertToHTML()"></input>
+            </br>
             <textarea id="inputText" rows="20" cols="97" oninput="convertToHTML()"></textarea>
 
             <br></br>
@@ -192,6 +201,7 @@
             console.log("Laden vom Template");
             var url = './layouts/Timetable_1.html';
 
+            // Only working when properly hosted
             // // Configuration of the Fetch request
             // var requestOptions = {
             //     method: 'GET',
@@ -213,11 +223,21 @@
 
             // Set the preview content
             preview.innerHTML = inputText;
-            try { document.getElementById("customTextfield1").innerHTML = document.getElementById("customInput1").value }
-            catch (error) {
+            try { 
+                document.getElementById("customTextfield1").innerHTML = document.getElementById("customInput1").value 
+            } catch (error) {}
 
-            }
+            try { 
+                document.getElementById("customTextfield2").innerHTML = document.getElementById("customInput2").value 
+            } catch (error) {}
 
+            try { 
+                document.getElementById("customTextfield3").innerHTML = document.getElementById("customInput3").value 
+            } catch (error) {}
+
+            try { 
+                document.getElementById("customTextfield4").innerHTML = document.getElementById("customInput4").value 
+            } catch (error) {}
         }
 
 
