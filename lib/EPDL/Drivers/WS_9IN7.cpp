@@ -19,6 +19,9 @@ namespace EPDL
         // Software reset
         Reset();
 
+        // GetDisplayInfo();
+        
+
         // Initialize Display Register
         SendCommand(0xAA);
         SendData(0x49);
@@ -150,6 +153,8 @@ namespace EPDL
     void WS_9IN7::WaitUntilReady() {
         //LOW: idle, HIGH: busy
         Log::Debug("[EPDL] Waiting for display");
+
+
         while (MCU::GPIO::Read(EPDL::Pin::BUSY) == 0) {
             MCU::Sleep(5);
         }
@@ -157,14 +162,10 @@ namespace EPDL
     }
 
     void WS_9IN7::Reset() {
-        MCU::GPIO::Write(EPDL::Pin::RST, 1);
-        MCU::Sleep(20);
         MCU::GPIO::Write(EPDL::Pin::RST, 0);
-        MCU::Sleep(2);
+        MCU::Sleep(1000);
         MCU::GPIO::Write(EPDL::Pin::RST, 1);
         MCU::Sleep(20);
-        WaitUntilReady();
-        MCU::Sleep(100);
     }
 
     void WS_9IN7::PowerOff() {

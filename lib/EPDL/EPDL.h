@@ -40,7 +40,7 @@ namespace EPDL
 #endif
 
 
-    int Init();
+    int Init(std::string_view type);
     void Terminate();
     void LoadDriver(std::string_view type);
     ImageHandle CreateImage(std::unique_ptr<ImageData> data);

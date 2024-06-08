@@ -23,8 +23,18 @@ namespace EPDL
         uint16_t GetWidth() const override { return m_Width; }
         uint16_t GetHeight() const override { return m_Height; }
     private:
+        typedef struct
+        {
+            uint16_t usPanelW;
+            uint16_t usPanelH;
+            uint16_t usImgBufAddrL;
+            uint16_t usImgBufAddrH;
+            uint16_t usFWVersion[8];   //16 Bytes String
+            uint16_t usLUTVersion[8];  //16 Bytes String
+        } IT8951DevInfo;
         void SendCommand(uint8_t command);
         void SendData(uint8_t data);
+        uint8_t ReadData(uint8_t data);
         void WaitUntilReady();
         void Reset();
         void PowerOff();
@@ -32,7 +42,6 @@ namespace EPDL
         void Sleep();
         void StartDataTransmission();
         void Refresh();
-    private:
         uint16_t m_Width = 1200;
         uint16_t m_Height = 825;
         uint8_t m_PixelSize = 4;
