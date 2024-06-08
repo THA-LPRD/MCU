@@ -11,6 +11,8 @@ namespace EPDL
 {
     typedef int ImageHandle;
 
+    #ifdef MCU_ESP32
+    // ESP32 Devmodule
     enum Pin : uint8_t {
         BUSY = 27,
         RST = 26,
@@ -19,6 +21,19 @@ namespace EPDL
         SCK = 14,
         MOSI = 13
     };
+    #endif
+
+    #ifdef MCU_ESP32S3
+    enum Pin : uint8_t {
+            BUSY = 27,
+            RST = 26,
+            DC = 25,
+            CS = 15,
+            SCK = 14,
+            MOSI = 13
+        };
+    #endif
+
 
     int Init();
     void Terminate();
