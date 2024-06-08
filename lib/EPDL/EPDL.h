@@ -6,12 +6,17 @@
 #include <memory>
 #include <cstdint>
 #include "ImageData.h"
+#include "SPI.h"
 
 namespace EPDL
 {
     typedef int ImageHandle;
 
-    #ifdef MCU_ESP32
+    enum SPI {
+        SPIDevice = MCU::SPIDevice::SPI1,
+    };
+
+#ifdef MCU_ESP32
     // ESP32 Devmodule
     enum Pin : uint8_t {
         BUSY = 27,
@@ -21,18 +26,18 @@ namespace EPDL
         SCK = 14,
         MOSI = 13
     };
-    #endif
+#endif
 
-    #ifdef MCU_ESP32S3
+#ifdef MCU_ESP32S3
     enum Pin : uint8_t {
-            BUSY = 27,
-            RST = 26,
-            DC = 25,
-            CS = 15,
-            SCK = 14,
-            MOSI = 13
+            BUSY = 1,
+            RST = 2,
+            DC = 3,
+            CS = 4,
+            SCK = 7,
+            MOSI = 9
         };
-    #endif
+#endif
 
 
     int Init();

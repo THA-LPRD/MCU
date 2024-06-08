@@ -5,18 +5,83 @@
 
 namespace MCU
 {
-    SPI* SPI::Create(int8_t mosi, int8_t miso, int8_t sck, int8_t cs, bool swspi) {
-        if (swspi) { return new SWSPI(mosi, miso, sck, cs); }
-        else { return CreateHardwareSPI(mosi, miso, sck, cs); }
+    namespace
+    {
+        bool SPI0_Initialized = false;
+        bool SPI1_Initialized = false;
+        bool SPI2_Initialized = false;
+        bool SPI3_Initialized = false;
     }
 
-    SWSPI::SWSPI(int8_t mosi, int8_t miso, int8_t sck, int8_t cs) : SPI(mosi, miso, sck, cs) {
+    SPI* SPI::Create(SPIDevice spiDevice, int8_t mosi, int8_t miso, int8_t sck, int8_t cs, bool swspi) {
+        if (spiDevice < SPIDevice::SPI0 || spiDevice >= SPIDevice::MAX) {
+            Log::Error("[MCU] Invalid SPI device");
+            return nullptr;
+        }
+
+        switch (spiDevice) {
+            case SPIDevice::SPI0:
+                if (SPI0_Initialized) {
+                    Log::Error("[MCU] SPI0 already initialized");
+                    return nullptr;
+                }
+                break;
+            case SPIDevice::SPI1:
+                if (SPI1_Initialized) {
+                    Log::Error("[MCU] SPI1 already initialized");
+                    return nullptr;
+                }
+                break;
+            case SPIDevice::SPI2:
+                if (SPI2_Initialized) {
+                    Log::Error("[MCU] SPI2 already initialized");
+                    return nullptr;
+                }
+                break;
+            case SPIDevice::SPI3:
+                if (SPI3_Initialized) {
+                    Log::Error("[MCU] SPI3 already initialized");
+                    return nullptr;
+                }
+                break;
+        }
+
+        if (mosi == -1 && miso == -1) {
+            Log::Error("[MCU] Invalid SPI configuration. MOSI and MISO cannot both be -1");
+            return nullptr;
+        }
+        if (sck == -1 || cs == -1) {
+            Log::Error("[MCU] Invalid SPI configuration. SCK and CS must be configured");
+            return nullptr;
+        }
+
+        if (swspi) { return new SWSPI(spiDevice, mosi, miso, sck, cs); }
+        else { return CreateHardwareSPI(spiDevice, mosi, miso, sck, cs); }
+    }
+
+    SWSPI::SWSPI(SPIDevice spiDevice, int8_t mosi, int8_t miso, int8_t sck, int8_t cs) :
+            SPI(spiDevice, mosi, miso, sck, cs) {
         GPIO::SetMode(sck, MCU::GPIO::Mode::Output);
         GPIO::SetMode(mosi, MCU::GPIO::Mode::Output);
         GPIO::SetMode(cs, MCU::GPIO::Mode::Output);
 
         GPIO::Write(cs, 1);
         GPIO::Write(sck, 0);
+
+        switch (spiDevice) {
+            case SPIDevice::SPI0:
+                SPI0_Initialized = true;
+                break;
+            case SPIDevice::SPI1:
+                SPI1_Initialized = true;
+                break;
+            case SPIDevice::SPI2:
+                SPI2_Initialized = true;
+                break;
+            case SPIDevice::SPI3:
+                SPI3_Initialized = true;
+                break;
+        }
 
         m_Initialized = true;
     }

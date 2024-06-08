@@ -1,6 +1,6 @@
-#ifdef MCU_ESP32
+#ifdef MCU_ESP32S3
 
-#include "ESP32SPI.h"
+#include "ESP32S3SPI.h"
 #include <cstring>
 #include <Log.h>
 #include "GPIO.h"
@@ -42,29 +42,29 @@ namespace MCU
         esp_err_t ret;
         switch (spiDevice) {
             case SPI0:
-                ret = spi_bus_initialize(HSPI_HOST, &buscfg, 1);
+                ret = spi_bus_initialize(SPI2_HOST, &buscfg, 1);
                 if (ret != ESP_OK) {
                     Log::Error("[MCU] Failed to Create SPI Controller");
                     return;
                 }
 
-                ret = spi_bus_add_device(HSPI_HOST, &devcfg, &m_SPI);
+                ret = spi_bus_add_device(SPI2_HOST, &devcfg, &m_SPI);
                 if (ret != ESP_OK) {
-                    spi_bus_free(HSPI_HOST);
+                    spi_bus_free(SPI2_HOST);
                     Log::Error("[MCU] Failed to Create SPI Controller");
                     return;
                 }
                 break;
             case SPI1:
-                ret = spi_bus_initialize(VSPI_HOST, &buscfg, 1);
+                ret = spi_bus_initialize(SPI3_HOST, &buscfg, 1);
                 if (ret != ESP_OK) {
                     Log::Error("[MCU] Failed to Create SPI Controller");
                     return;
                 }
 
-                ret = spi_bus_add_device(VSPI_HOST, &devcfg, &m_SPI);
+                ret = spi_bus_add_device(SPI3_HOST, &devcfg, &m_SPI);
                 if (ret != ESP_OK) {
-                    spi_bus_free(VSPI_HOST);
+                    spi_bus_free(SPI3_HOST);
                     Log::Error("[MCU] Failed to Create SPI Controller");
                     return;
                 }
@@ -81,10 +81,10 @@ namespace MCU
         spi_bus_remove_device(m_SPI);
         switch (m_SPIDevice) {
             case SPI0:
-                spi_bus_free(HSPI_HOST);
+                spi_bus_free(SPI2_HOST);
                 break;
             case SPI1:
-                spi_bus_free(VSPI_HOST);
+                spi_bus_free(SPI3_HOST);
                 break;
         }
     }
@@ -140,4 +140,4 @@ namespace MCU
     }
 } // namespace MCU
 
-#endif // MCU_ESP32
+#endif // MCU_ESP32S3

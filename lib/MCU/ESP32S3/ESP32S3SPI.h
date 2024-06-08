@@ -1,6 +1,6 @@
-#ifdef MCU_ESP32
-#ifndef MCU_ESP32SPI_H
-#define MCU_ESP32SPI_H
+#ifdef MCU_ESP32S3
+#ifndef MCU_ESP32S3SPI_H
+#define MCU_ESP32S3SPI_H
 
 #include "SPI.h"
 #include "driver/spi_master.h"
@@ -20,8 +20,8 @@ namespace MCU
     };
 } // namespace MCU
 
-#endif //MCU_ESP32SPI_H
-#endif // MCU_ESP32
+#endif //MCU_ESP32S3SPI_H
+#endif // MCU_ESP32S3
 
 
 

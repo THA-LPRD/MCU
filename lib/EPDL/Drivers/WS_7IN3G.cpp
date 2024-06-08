@@ -9,7 +9,12 @@ namespace EPDL
     WS_7IN3G::WS_7IN3G() : m_FrameBuffer(m_Width, m_Height, m_PixelSize) {
         Log::Debug("[EPDL] Initializing WS_7IN3G display driver");
 
-        m_SPIController = MCU::SPI::Create(EPDL::Pin::MOSI, -1, EPDL::Pin::SCK, EPDL::Pin::CS, false);
+        m_SPIController = MCU::SPI::Create(static_cast<MCU::SPIDevice>(EPDL::SPI::SPIDevice),
+                                           EPDL::Pin::MOSI,
+                                           -1,
+                                           EPDL::Pin::SCK,
+                                           EPDL::Pin::CS,
+                                           false);
 
         // Software reset
         Reset();
@@ -151,7 +156,7 @@ namespace EPDL
         Log::Debug("[EPDL] Display ready");
     }
 
-    void WS_7IN3G::Reset(){
+    void WS_7IN3G::Reset() {
         MCU::GPIO::Write(EPDL::Pin::RST, 1);
         MCU::Sleep(20);
         MCU::GPIO::Write(EPDL::Pin::RST, 0);
@@ -162,28 +167,28 @@ namespace EPDL
         MCU::Sleep(100);
     }
 
-    void WS_7IN3G::PowerOff(){
+    void WS_7IN3G::PowerOff() {
         WaitUntilReady();
         SendCommand(0x02);
         SendData(0x00);
     }
 
-    void WS_7IN3G::PowerOn(){
+    void WS_7IN3G::PowerOn() {
         SendCommand(0x04);
     }
 
-    void WS_7IN3G::Sleep(){
+    void WS_7IN3G::Sleep() {
         WaitUntilReady();
         SendCommand(0x07);
         SendData(0xA5);
     }
 
-    void WS_7IN3G::StartDataTransmission(){
+    void WS_7IN3G::StartDataTransmission() {
         WaitUntilReady();
         SendCommand(0x10);
     }
 
-    void WS_7IN3G::Refresh(){
+    void WS_7IN3G::Refresh() {
         SendCommand(0x12);
         SendData(0x00);
     }
