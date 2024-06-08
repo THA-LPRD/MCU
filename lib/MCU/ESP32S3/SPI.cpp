@@ -42,7 +42,7 @@ namespace MCU
         esp_err_t ret;
         switch (spiDevice) {
             case SPI0:
-                ret = spi_bus_initialize(SPI2_HOST, &buscfg, 1);
+                ret = spi_bus_initialize(SPI2_HOST, &buscfg, 3);
                 if (ret != ESP_OK) {
                     Log::Error("[MCU] Failed to Create SPI Controller");
                     return;
@@ -56,7 +56,7 @@ namespace MCU
                 }
                 break;
             case SPI1:
-                ret = spi_bus_initialize(SPI3_HOST, &buscfg, 1);
+                ret = spi_bus_initialize(SPI3_HOST, &buscfg, 3);
                 if (ret != ESP_OK) {
                     Log::Error("[MCU] Failed to Create SPI Controller");
                     return;
