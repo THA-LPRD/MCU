@@ -1,0 +1,163 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #333;
+}
+
+header {
+    max-width: 940px;
+    margin: auto;
+    margin-top: 10px;
+    padding: 10px 0;
+    background-color: #FF0350;
+    color: #fff;
+    text-align: center;
+
+}
+
+h1 {
+    vertical-align: middle;
+    font-size: 40px;
+    font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+}
+
+header img {
+    max-height: 100px;
+    vertical-align: middle;
+    margin-left: 10px;
+}
+
+#trenner {
+    height: 2px;
+    max-width: 940px;
+    background-color: #333;
+    margin: auto;
+  
+}
+
+.container {
+    max-width: 900px;
+    margin: auto;
+    padding: 20px;
+    background-color: #fff; /* Hintergrundfarbe für den Hauptinhalt */
+
+}
+
+main {
+    padding: 50px 0; 
+    text-align: center;
+
+}
+
+a {
+    color: black; 
+}
+
+#intro {
+    width: 500px;
+    margin: auto;
+    color:#FF0350;
+    font-family: arial, sans-serif;
+    font-weight: light;
+    font-style: italic;
+    border: 1px solid #FF0350;
+    padding: 3px;
+}
+
+#png-upload {
+    text-align: left;
+    margin-left: 70px; 
+    margin-top: 40px;
+}
+
+#pngUploadButton {
+    margin-left: 350px;
+
+}
+
+#pngText {
+    float: left;
+    margin-left: 70px;
+
+}
+
+#imageContainer {
+    width: 800px;
+    margin:auto;
+    display: block;
+    padding-bottom: 100px;
+    border-bottom: 2px dashed black;
+}
+
+#uploadForm {
+    float: left;
+    margin-left: 70px;
+}
+
+#designByHtml {
+    border-top: 2px dashed black;
+    width:800px;
+    padding-top: 30px;
+    margin: auto;
+
+}
+
+#list-header{
+    padding-top: 20px;
+    padding-left: 5px;
+}
+
+ol {
+    text-align: left;
+    margin-left: 25px;
+    max-width: 800px;
+}
+
+ol li {
+    padding: 5px;
+}
+
+#inputText {
+    width: 800px;
+}
+
+button {
+    margin-top: 5px;
+    margin-bottom: 10px;
+}
+
+#previewContainer {
+    width: 800px;
+    height: 480px;
+    border: 1px solid #ccc;
+    margin: auto;
+
+}
+
+#preview {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+#previewImg {
+    width: 800px;
+    height: 480px;
+    image-rendering: pixelated;
+}
+
+#outputCanvas {
+    width: 800px;
+    height: 480px;
+    image-rendering: pixelated;
+}
+
+footer {
+    max-width: 940px;
+    margin: 0 auto;
+    padding: 10px 0;
+    background-color: #FF0350;
+    color: #fff;
+    text-align: center;
+}

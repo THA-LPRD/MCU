@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>ESP WiFi Configuration</title>
+    <script src="/utils.js"></script>
+    <script type="text/javascript">
+        async function SetOpMode() {
+            const form = document.getElementById('SetOpMode-form');
+            const opmode = form.querySelector('#opmode').value;
+            const response = await SubmitFormData('/api/v1/SetOpMode', {opmode});
+            const responseElement = document.getElementById('SetOpMode-response');
+            if (responseElement) {
+                responseElement.innerText = response;
+            } else {
+                console.error('Response element for SetOpMode not found.');
+            }
+        }
+
+        window.onload = function () {
+            Redirect();
+        };
+    </script>
+</head>
+
+<body>
+<h1>Configure Operating Mode</h1>
+<div id="SetOpMode-form">
+    <label for="opmode">Operating Mode:</label><br>
+    <select id="opmode" name="opmode" required>
+        <option value="Standalone">Standalone</option>
+        <option value="Network">Network</option>
+        <option value="Server">Server</option>
+    </select>
+    <br><br>
+    <button onclick="SetOpMode()">Submit</button>
+    <p id="SetOpMode-response"></p>
+</div>
+</body>
+
+</html>
