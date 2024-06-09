@@ -1,5 +1,6 @@
 {
     "OperatingMode": "Default",
     "WiFiSSID": "",
-    "WiFiPassword": ""
+    "WiFiPassword": "",
+    "DisplayDriver": "WS_7IN3G"
 }

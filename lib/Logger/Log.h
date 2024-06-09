@@ -1,5 +1,5 @@
-#ifndef LOG_H_
-#define LOG_H_
+#ifndef LOGGER_LOG_H_
+#define LOGGER_LOG_H_
 
 #include <functional>
 
@@ -14,11 +14,14 @@ namespace Log
         ERROR,
         WARNING,
         INFO,
-        DEBUG
+        DEBUG,
+        TRACE,
+        MAX
     };
 
     void SetLogLevel(Level level);
     void SetLogFunction(std::function<void(char* msg)> logFunction);
+    void Trace(const char* format, ...);
     void Debug(const char* format, ...);
     void Info(const char* format, ...);
     void Warning(const char* format, ...);
@@ -27,4 +30,4 @@ namespace Log
 } // namespace Log
 
 
-#endif /*LOG_H_*/
+#endif /*LOGGER_LOG_H_*/

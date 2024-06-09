@@ -3,13 +3,15 @@
 #include <string>
 #include "Application.h"
 #include "Log.h"
-#include "Clock.h"
+#include <Clock.h>
 #include "Config.h"
-
-#define RESET_BUTTON_PIN 44
+#include <GPIO.h>
+#include <MCU.h>
+#include <Filesystem.h>
+#include <fstream>
 
 void FuncLog(char* msg) {
-    time_t time = Clock::GetTime();
+    time_t time = MCU::Clock::GetTime();
     struct tm* timeinfo = localtime(&time);
     char time_str[18];
     strftime(time_str, 18, "%y-%m-%d %H:%M:%S", timeinfo);
@@ -20,47 +22,38 @@ Application* app = nullptr;
 
 void setup() {
     Serial.begin(115200);
-    
-    pinMode(RESET_BUTTON_PIN, INPUT_PULLUP); 
 
-    Clock::SetTime(2024, 1, 1, 0, 0, 0, -1);
+    MCU::GPIO::SetMode(Config::Pin::RST, MCU::GPIO::Mode::InputPullup);
+
+    MCU::Clock::SetTime(2024, 1, 1, 0, 0, 0, -1);
 
     Log::SetLogFunction(FuncLog);
     Log::SetLogLevel(Log::Level::DEBUG);
 
     Log::Debug("Starting File System");
-    if (!LittleFS.begin(true)) {
-        Log::Fatal("Failed to start file system");
-        return;
-    }
+    MCU::Filesystem::Init();
 
-    Config::LoadConfig();
+    Config::Load();
+    EPDL::Init();
+    EPDL::LoadDriver(Config::Get(Config::Key::DisplayDriver));
 
-    if (digitalRead(RESET_BUTTON_PIN) == LOW) {
+    if (MCU::GPIO::Read(Config::Pin::RST) == 0) {
         Log::Info("Reset button pressed. Loading default configuration.");
-        Config::LoadDefaultConfig;
-        return;
+        Config::Set(Config::Key::OperatingMode, "Default");
+        Config::Save();
     }
-    else 
+    else {
         Log::Debug("Reset button not pressed. Continuing Setup.");
-
-    app = Application::Create(Config::GetOperatingMode());
-    if (app == nullptr) {
-        Log::Fatal("Failed to create application");
-        return;
     }
 
-    if (app->Init()) {
-        return;
-    }
+    app = Application::Create(Config::Get(Config::Key::OperatingMode));
+    if (app->Init()) { return; }
 
     Log::Fatal("Failed to initialize application. Starting default app");
     delete app;
-    Application* app = Application::Create("Default");
-    if (app == nullptr) {
-        Log::Fatal("Failed to create default application.");
-    }
-    return;
+    Config::LoadDefault();
+    app = Application::Create("Default");
+    if (app->Init()) { exit(1); }
 }
 
 void loop() {

@@ -1,32 +1,35 @@
-#include <Arduino.h>
-#include <WiFi.h>
 #include <string>
 #include "Application.h"
 #include "AppStandalone.h"
 #include "AppNetwork.h"
 #include "AppDefault.h"
 #include "Log.h"
-#include "Clock.h"
-#include "Config.h"
+#include "MCU.h"
 
 Application* Application::Create(std::string_view mode) {
     Log::Info("Starting application");
-    
-    if (mode == "Default"){
-        return new AppDefault();
-    }
-    else if(mode == "Standalone") {
-        return new AppStandalone();
+    Log::Info("App mode: %s", mode.data());
+
+    Application* app = nullptr;
+
+    if (mode == "Standalone") {
+        app = new AppStandalone();
     }
     else if (mode == "Network") {
-        return new AppNetwork();
+        app = new AppNetwork();
     }
     else if (mode == "Server") {
         // TODO Implement AppServer
-        // return new AppServer();
+        // app = new AppServer();
     }
     else {
-        Log::Fatal("Configuration wrong. Starting default app");
-        return new AppDefault();
+        app = new AppDefault();
     }
+
+    if (app == nullptr) {
+        Log::Fatal("Failed to create application");
+        MCU::Restart();
+    }
+
+    return app;
 }

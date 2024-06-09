@@ -3,17 +3,22 @@
 #include "AppDefault.h"
 #include "Log.h"
 #include "Config.h"
-
+#include <Filesystem.h>
 
 bool AppDefault::Init() {
     Log::Debug("Initializing default application");
+    Config::LoadDefault();
 
-    if (!SetupWiFi()) {
-        Log::Fatal("Failed to setup WiFi");
-        return false;
-    }
+    SetupWiFi();
 
     m_Server.Init();
+    std::map<std::string, std::string> filesToServe = {
+            {"/index.html", "/www/Configuration.html"},
+            {"/utils.js",   "/www/utils.js"}
+    };
+    m_Server.SetFilesToServe(filesToServe);
+    m_Server.AddAPISetOpMode();
+    m_Server.AddAPISetWiFiCred();
 
     return true;
 }
@@ -21,10 +26,12 @@ bool AppDefault::Init() {
 bool AppDefault::SetupWiFi() {
     Log::Debug("Setting up Default WiFi Access Point");
 
-    WiFi.softAP(DEFAULT_WIFI_AP_SSID, DEFAULT_WIFI_PASSWORD);
-    
-    Log::Info("WiFi AP started: %s", DEFAULT_WIFI_AP_SSID);
+    WiFi.softAP(Config::GetDefault(Config::Key::WiFiSSID).c_str(),
+                Config::GetDefault(Config::Key::WiFiPassword).c_str());
+    Log::Info("WiFi AP started: %s", Config::GetDefault(Config::Key::WiFiSSID).c_str());
     Log::Info("IP address: %s", WiFi.softAPIP().toString().c_str());
 
+    Log::Debug("Setting up DNS server");
+    m_DNSServer.start(53, "*", WiFi.softAPIP());
     return true;
 }

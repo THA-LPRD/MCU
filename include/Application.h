@@ -1,12 +1,12 @@
 #ifndef APPLICATION_H_
 #define APPLICATION_H_
 
+#include "EPDL.h"
 #include "HTTPServer.h"
 
-class Application
-{
+class Application {
 public:
-    Application() {};
+    Application() = default;
     virtual ~Application() = default;
     virtual bool Init() = 0;
     virtual void Run() = 0;
