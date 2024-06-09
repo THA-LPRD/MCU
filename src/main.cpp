@@ -21,14 +21,14 @@ void FuncLog(char* msg) {
 Application* app = nullptr;
 
 void setup() {
+    MCU::Sleep(5000);
     Serial.begin(115200);
-
     MCU::GPIO::SetMode(Config::Pin::RST, MCU::GPIO::Mode::InputPullup);
 
     MCU::Clock::SetTime(2024, 1, 1, 0, 0, 0, -1);
 
     Log::SetLogFunction(FuncLog);
-    Log::SetLogLevel(Log::Level::DEBUG);
+    Log::SetLogLevel(Log::Level::TRACE);
 
     Log::Debug("Starting File System");
     MCU::Filesystem::Init();
@@ -47,6 +47,7 @@ void setup() {
     }
 
     app = Application::Create(Config::Get(Config::Key::OperatingMode));
+
     if (app->Init()) { return; }
 
     Log::Fatal("Failed to initialize application. Starting default app");
@@ -54,6 +55,7 @@ void setup() {
     Config::LoadDefault();
     app = Application::Create("Default");
     if (app->Init()) { exit(1); }
+
 }
 
 void loop() {
