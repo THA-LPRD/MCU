@@ -70,6 +70,8 @@ void setup() {
     delete app;
     Config::LoadDefault();
     app = Application::Create("Default");
+    if (app->Init()) { exit(1); }
+
 }
 
 void loop() {

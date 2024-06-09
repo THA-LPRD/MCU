@@ -8,15 +8,18 @@ namespace Log
     namespace
     { // Private members
         static Level m_LogLevel = Level::INFO;
+        char m_Buffer[LOG_BUFFER_SIZE] = {0};
         static std::function<void(char* msg)> m_LogFunction = [](char* msg) {
             Serial.println(msg);
         };
 
+        // Note: This function is not thread safe
         void LogMessage(const char* level, const char* format, va_list args) {
-            char buffer[LOG_BUFFER_SIZE] = {0};
-            snprintf(buffer, LOG_BUFFER_SIZE, "%s", level);
-            vsnprintf(buffer + strlen(level), LOG_BUFFER_SIZE - strlen(level), format, args);
-            m_LogFunction(buffer);
+            int offset = snprintf(m_Buffer, LOG_BUFFER_SIZE, "%s", level);
+            if (offset < 0) { return; }
+            vsnprintf(m_Buffer + offset, LOG_BUFFER_SIZE - offset, format, args);
+            m_Buffer[LOG_BUFFER_SIZE - 1] = '\0';
+            m_LogFunction(m_Buffer);
         }
     } // namespace
 

@@ -16,6 +16,9 @@ public:
     void AddAPISetOpMode();
     void AddAPISetWiFiCred();
     void AddAPIUploadImg(std::function<void(std::string_view filePath)> callback = nullptr);
+    void AddAPIls();
+    void AddAPIrm();
+    void AddAPImkdir();
 private:
     PsychicHttpServer m_Server;
     bool status_AddAPIUploadImg = false;

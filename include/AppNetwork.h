@@ -9,7 +9,7 @@ public:
     AppNetwork() = default;
     ~AppNetwork() = default;
     bool Init() override;
-    void Run() override {};
+    void Run() override;
 private:
     bool SetupWiFi();
 private:
