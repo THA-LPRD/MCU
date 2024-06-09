@@ -7,14 +7,14 @@
 
 namespace MCU
 {
-    class ESP32SPI : public SPI {
+    class ESP32S3SPI : public SPI {
     public:
-        ESP32SPI(SPIDevice spiDevice, int8_t mosi, int8_t miso, int8_t sck, int8_t cs);
-        ~ESP32SPI();
+        ESP32S3SPI(SPIDevice spiDevice, int8_t mosi, int8_t miso, int8_t sck, int8_t cs);
+        ~ESP32S3SPI();
         void Write(uint8_t data) override;
         uint8_t Read() override;
     private:
-        ESP32SPI(SPIDevice spiDevice, int8_t mosi, int8_t miso, int8_t sck, int8_t cs, spi_bus_config_t buscfg,
+        ESP32S3SPI(SPIDevice spiDevice, int8_t mosi, int8_t miso, int8_t sck, int8_t cs, spi_bus_config_t buscfg,
                  spi_device_interface_config_t devcfg);
         spi_device_handle_t m_SPI = nullptr;
     };

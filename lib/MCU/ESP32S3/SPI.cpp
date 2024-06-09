@@ -12,11 +12,11 @@ namespace MCU
         uint8_t s_SPIBusCount = 0;
     }
     SPI* SPI::CreateHardwareSPI(SPIDevice spiDevice, int8_t mosi, int8_t miso, int8_t sck, int8_t cs) {
-        return new ESP32SPI(spiDevice, mosi, miso, sck, cs);
+        return new ESP32S3SPI(spiDevice, mosi, miso, sck, cs);
     }
 
-    ESP32SPI::ESP32SPI(SPIDevice spiDevice, int8_t mosi, int8_t miso, int8_t sck, int8_t cs) :
-            ESP32SPI(spiDevice, mosi, miso, sck, cs,
+    ESP32S3SPI::ESP32S3SPI(SPIDevice spiDevice, int8_t mosi, int8_t miso, int8_t sck, int8_t cs) :
+            ESP32S3SPI(spiDevice, mosi, miso, sck, cs,
                      spi_bus_config_t{
                              .mosi_io_num = mosi,
                              .miso_io_num = miso,
@@ -32,7 +32,7 @@ namespace MCU
                              .queue_size = 7                     // We want to be able to queue 7 transactions at a time
                      }
             ) {}
-    ESP32SPI::ESP32SPI(SPIDevice spiDevice,
+    ESP32S3SPI::ESP32S3SPI(SPIDevice spiDevice,
                        int8_t mosi,
                        int8_t miso,
                        int8_t sck,
@@ -77,7 +77,7 @@ namespace MCU
         m_Initialized = true;
     }
 
-    ESP32SPI::~ESP32SPI() {
+    ESP32S3SPI::~ESP32S3SPI() {
         spi_bus_remove_device(m_SPI);
         switch (m_SPIDevice) {
             case SPI0:
@@ -89,7 +89,7 @@ namespace MCU
         }
     }
 
-    void ESP32SPI::Write(uint8_t data) {
+    void ESP32S3SPI::Write(uint8_t data) {
         if (!m_Initialized) {
             Log::Error("[MCU] SPI not initialized");
             return;
@@ -112,7 +112,7 @@ namespace MCU
         Log::Trace("[MCU] SPI Write complete");
     }
 
-    uint8_t ESP32SPI::Read() {
+    uint8_t ESP32S3SPI::Read() {
         if (!m_Initialized) {
             Log::Error("[MCU] SPI not initialized");
             return 0;

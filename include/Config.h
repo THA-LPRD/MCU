@@ -11,7 +11,7 @@ namespace Config
 {
     namespace Pin
     {
-        constexpr uint8_t RST = 2;
+        constexpr uint8_t RST = 44;
     } // namespace Pin
 
     enum class Key {

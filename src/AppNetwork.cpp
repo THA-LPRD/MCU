@@ -27,12 +27,21 @@ bool AppNetwork::Init() {
     m_Server.AddAPISetOpMode();
     m_Server.AddAPISetWiFiCred();
     m_Server.AddAPIUploadImg([this](std::string_view filePath) {
+        Log::Debug("Current image path: %s", m_ImagePath.c_str());
         if (m_ImagePath != "") {
+            Log::Debug("Removing previous image: %s", MCU::Filesystem::GetPath(m_ImagePath).c_str());
             EPDL::DeleteImage(m_ImageHandle);
-            MCU::Filesystem::rm(m_ImagePath);
+            if (m_ImagePath != filePath) {
+                MCU::Filesystem::rm(m_ImagePath);
+            }
+        }
+        if (!MCU::Filesystem::exists(filePath)) {
+            Log::Error("File not found: %s", MCU::Filesystem::GetPath(filePath).c_str());
+            m_ImagePath = "";
+            return;
         }
         m_ImagePath = filePath;
-        m_ImageHandle = EPDL::CreateImage(std::make_unique<EPDL::ImageData>(filePath,
+        m_ImageHandle = EPDL::CreateImage(std::make_unique<EPDL::ImageData>(MCU::Filesystem::GetPath(filePath),
                                                                             EPDL::GetWidth(),
                                                                             EPDL::GetHeight(),
                                                                             3));
@@ -40,6 +49,16 @@ bool AppNetwork::Init() {
     });
 
     return true;
+}
+
+void AppNetwork::Run() {
+    if (m_ProcessImage) {
+        m_ProcessImage = false;
+        EPDL::BeginFrame();
+        EPDL::DrawImage(m_ImageHandle, 0, 0);
+        EPDL::SwapBuffers();
+        EPDL::EndFrame();
+    }
 }
 
 bool AppNetwork::SetupWiFi() {
