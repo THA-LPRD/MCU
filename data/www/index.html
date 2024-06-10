@@ -2,175 +2,205 @@
 
 <html>
 
-<head>
-    <meta charset="utf-8">
-    <meta name="LPRD" content="PNG Übertragung">
-    <link rel="stylesheet" type="text/css" href="style.css">
-    <script src="./html2canvas.min.js"></script>
-    <script src="./script.js"></script>
-</head>
+	<head>
 
-<body>
+        <meta charset="utf-8">
+
+        <meta name="LPRD" content="PNG Übertragung">
+
+        <link rel="stylesheet" type="text/css" href="style.css">
+        <script src="./html2canvas.min.js"></script>
+        <script src="./script.js"></script>
+
+    </head>
+
+
+    <body>
+
+    
 
     <header>
-        <div id="settings"><a href="./settings.html"><img src="./icons8-settings-25-w.png"></a></div>
-        <img src="LPRD-Logo.webp" alt="Logo">
+
+        <div id="settings"> <a href="./settings.html"><img src="./icons8-settings-25-w.png"></a> </div>
+        <img src="LPRD-Logo.webp" alt="Logo"> 
         <h1> Low-Power-Raumanzeige</h1>
+
     </header>
 
     <div class="container">
+
         <nav>
             <ul>
                 <li><a onclick="displayPngUpload()">PNG Upload</a></li>
                 <li><a onclick="displayHtmlDesign()">HTML Design</a></li>
-                <!--            <li><a onclick="displayHtmlVorlage()">HTML Vorlagen</a></li> -->
+  <!--            <li><a onclick="displayHtmlVorlage()">HTML Vorlagen</a></li> -->
             </ul>
         </nav>
 
+        <div id="restart">
+            <button onclick="restart()">Restart</button>     
+        </div>
+
         <main>
-            <div id="intro">
-                <h2>
-                    Vielen Dank, dass Sie sich für einen LPRD-Display entschieden haben. <br></br>
-                    Sie haben 2 Möglichkeiten personalisierte Inhalte anzuzeigen:<br>
-                    Upload eines <a onclick="displayPngUpload()"><u>PNGs</u></a> oder <a
-                        onclick="displayHtmlDesign()"><u>Design via HTML</u></a>.
-                    <!--<br>HTML Vorlagen finden Sie <a onclick="displayHtmlVorlage()"><u>hier</u></a>.-->
-                </h2>
-            </div>
 
-            <br></br>
+        
 
-            <div id="pngUpload">
-                <h3 id="pngHeading"><u>Hochladen von PNGs:</u></h3>
-                <div id="pngText">Bitte laden Sie ein PNG in dem <b>exakten Pixelformat</b> Ihres Displays hoch
-                    <b>(<span class="displayWidth"></span> x <span class="displayHeight"></span>px)</b>.
-                </div>
-                <div id="warning"><b>Achtung: wird ein PNG im falschen Pixelformat hochgeladen, so kann es nicht auf dem
-                        Display dargestellt werden!</b></div>
+            
 
-                <input type="file" id="fileInput" accept="image/png" onchange="displayImage(event)">
-                <div id="pngText">
-                    <label>
-                        <input type="checkbox"> Dithering aktiv (empfohlen bei grafisch komplexeren Bildern)
-                    </label>
-                </div>
+        <div id="displayError"></div>          
+            
 
-                <div id="imageContainer"></div>
+        <div id="intro">
+            <h2>
+                Vielen Dank, dass Sie sich für einen LPRD-Display entschieden haben. <br></br>
+                Sie haben 2 Möglichkeiten personalisierte Inhalte anzuzeigen:<br>
+                Upload eines <a onclick="displayPngUpload()"><u>PNGs</u></a> oder  <a onclick="displayHtmlDesign()"><u>Design via HTML</u></a>. 
+                <!--<br>HTML Vorlagen finden Sie <a onclick="displayHtmlVorlage()"><u>hier</u></a>.-->
 
-                <button onclick="pngUpload()">Upload an Display</button>
+            </h2>
+        </div>
 
-                <br><br>
-            </div>
-
-            <div id="htmlDesign">
-                <ol>
-                    <h3 id="list-header"><u>Eigenes Design mit HTML erstellen:</u></h3>
-
-                    <li>
-                        HTML-Code in das Textfeld eingeben <br>
-                        <div id="htmlwarning">
-                            Achtung hierbei auf die Pixel-Auflösung des Displays <u>(<span class="displayWidth"></span>
-                                x <span class="displayHeight"></span>px)</u>:
-                            die Layoutgröße muss <u>genau der Pixelanzahl</u> entsprechen, sonst kann es nicht auf dem
-                            Display angezeigt werden!
-                        </div>
-                    </li>
-                    <li>
-                        Eine Vorschau Ihres HTML-Designs können Sie im 2. Feld sehen - sie wird automatisch aktualisiert
-                    </li>
-                    <li>
-                        Wenn Sie zufrieden mit Ihrem Design sind, können Sie über den Upload-Button Ihr fertiges
-                        HTML-Layout an das Display schicken
-                    </li>
-                    <li>
-                        Nun müssen Sie nur noch einen kurzen Moment warten, bis das Display seinen Inhalt aktualisiert
-                        hat
-                    </li>
-                </ol>
-
-                <div id="designByHtml">
-                    Bitte geben Sie in das Textfeld Ihren HTML Code ein.
-                </div>
-
-                <textarea id="inputText" rows="20" cols="97" oninput="convertToHTML()"></textarea>
-
-                <br></br>
-
-                <h3><b>Ihre Design-Vorschau:</b></h3>
-
-                <div id="previewContainer">
-                    <div id="preview"></div>
-                </div>
-
-                <div id="ditheringCheckbox">
-                    <label>
-                        <input type="checkbox"> Dithering aktiv (empfohlen bei grafisch komplexeren Bildern)
-                    </label>
-                </div>
-
-                <button onclick="convertAndUploadHtml()">Upload an Display</button>
-
-                <br><br>
-            </div>
-            <!--
-
-    <div id="htmlVorlage">
-
-        <h3><label for="template">Vorlage: </label>
-        <select name="template" id="template" onchange="loadTemplate()">
-            <option value="mercedes">Weiß net</option>
-            <option value="Timetable_1.html">Stundenplan</option>
-            <option value="THA_Announcement_1.html">THA Ankündigung</option>
-
-        </select>
-    </h3>
-        </br><br>
-
-
-        <label for="customInput1">Eingabefeld 1:</label>
-        <input id="customInput1" type="text" oninput="convertToHTML()"></input>
-        </br><br>
-        <label for="customInput2">Eingabefeld 2:</label>
-        <input id="customInput2" type="text" oninput="convertToHTML()"></input>
-        </br><br>
-        <label for="customInput3">Eingabefeld 3:</label>
-        <input id="customInput3" type="text" oninput="convertToHTML()"></input>
-        </br><br>
-        <label for="customInput4">Eingabefeld 4:</label>
-        <input id="customInput4" type="text" oninput="convertToHTML()"></input>
-        </br><br>
-
-
-        <b>HTML-Code:</b>
-        <textarea id="inputText2" rows="1" cols="90" oninput="convertToHTML()"></textarea>
 
 
         <br></br>
 
-        <h3><b>Ihre Design-Vorschau:</b></h3>
+        <div id="pngUpload">
 
 
-        <div id="previewContainer2">
-            <div id="preview2"></div>
+            <h3 id="pngHeading"><u>Hochladen von PNGs:</u></h3>
+            <div id="pngText">Bitte laden Sie ein PNG in dem <b>exakten Pixelformat</b> Ihres Displays hoch <b>(<span class="displayWidth"></span> x <span class="displayHeight"></span>px)</b>. </div>
+            <div id="warning"><b>Achtung: Das PNG muss <u>genau</u> dem angegebenen Pixelformat entsprechen, sonst kann es nicht auf dem Display angezeigt werden!</b></div>
+            
+            <input type="file" id="fileInput" accept="image/png" onchange="displayImage(event)">
+            <div id="pngText">
+                <label>
+                    <input type="checkbox"> Dithering aktiv (empfohlen bei grafisch komplexeren Bildern)
+                </label>
+            </div>
+
+            <div id="imageContainer"></div>
+
+            <button onclick="pngUpload()">Upload an Display</button>
+
+            <br><br>
+            <div class="response"></div> <!-- Place to display the response message -->
+
+            <br><br>
+        </div>
+        
+
+
+        <div id="htmlDesign">
+
+
+            <ol>
+                <h3 id="list-header"><u>Eigenes Design mit HTML erstellen:</u></h3>
+
+                <li>HTML-Code in das Textfeld eingeben <br>
+                    <div id="htmlwarning">Achtung hierbei auf die Pixel-Auflösung des Displays <u>(<span class="displayWidth"></span> x <span class="displayHeight"></span>px)</u>: 
+                     die Layoutgröße muss <u>genau der Pixelanzahl</u> entsprechen, sonst kann es nicht auf dem Display angezeigt werden!</div></li>
+                <li>Eine Vorschau Ihres HTML-Designs können Sie im 2. Feld sehen - sie wird automatisch aktualisiert </li>
+                <li>Wenn Sie zufrieden mit Ihrem Design sind, können Sie über den Upload-Button Ihr fertiges HTML-Layout an das Display schicken</li>
+                <li>Nun müssen Sie nur noch einen kurzen Moment warten, bis das Display seinen Inhalt aktualisiert hat</li>
+            </ol> 
+
+
+            <div id="designByHtml">
+                Bitte geben Sie in das Textfeld Ihren HTML Code ein.
+
+            </div>
+                <textarea id="inputText" rows="20" cols="97" oninput="convertToHTML()"></textarea>
+            <br></br>
+
+            <h3><b>Ihre Design-Vorschau:</b></h3>
+
+            <div id="previewContainer">
+                <div id="preview"></div>
+            </div>
+
+            <div id="ditheringCheckbox">
+                <label>
+                    <input type="checkbox"> Dithering aktiv (empfohlen bei grafisch komplexeren Bildern)
+                </label>
+            </div>
+
+
+            <button onclick="convertAndUploadHtml()">Upload an Display</button>
+
+            <br><br>
+
+            <div class="response"></div> <!-- Place to display the response message -->
+
+            <br><br>
+
         </div>
 
-        <div id="ditheringCheckbox">
-            <label>
-                <input type="checkbox"> Dithering aktiv (empfohlen bei grafisch komplexeren Bildern)
-            </label>
-        </div>
+        <!--
 
-        <button onclick="convertAndUploadHtml()">Upload an Display</button>
-        <br><br>
-    </div> -->
+        <div id="htmlVorlage">
+            
+            <h3><label for="template">Vorlage: </label>
+            <select name="template" id="template" onchange="loadTemplate()">
+                <option value="mercedes">Weiß net</option>
+                <option value="Timetable_1.html">Stundenplan</option>
+                <option value="THA_Announcement_1.html">THA Ankündigung</option>
+               
+            </select>
+        </h3>
+            </br><br>
+        
+
+            <label for="customInput1">Eingabefeld 1:</label>
+            <input id="customInput1" type="text" oninput="convertToHTML()"></input>
+            </br><br>
+            <label for="customInput2">Eingabefeld 2:</label>
+            <input id="customInput2" type="text" oninput="convertToHTML()"></input>
+            </br><br>
+            <label for="customInput3">Eingabefeld 3:</label>
+            <input id="customInput3" type="text" oninput="convertToHTML()"></input>
+            </br><br>
+            <label for="customInput4">Eingabefeld 4:</label>
+            <input id="customInput4" type="text" oninput="convertToHTML()"></input>
+            </br><br>
+
+
+            <b>HTML-Code:</b>
+            <textarea id="inputText2" rows="1" cols="90" oninput="convertToHTML()"></textarea> 
+
+
+            <br></br>
+
+            <h3><b>Ihre Design-Vorschau:</b></h3>
+
+
+            <div id="previewContainer2">
+                <div id="preview2"></div>
+            </div>
+
+            <div id="ditheringCheckbox">
+                <label>
+                    <input type="checkbox"> Dithering aktiv (empfohlen bei grafisch komplexeren Bildern)
+                </label>
+            </div>
+
+            <button onclick="convertAndUploadHtml()">Upload an Display</button>
+            <br><br>
+
+
+    
+        </div> -->
+
         </main>
     </div>
 
+
     <footer>
         <p>© Projektarbeit Low-Power-Raumanzeige LPRD SoSe24</p>
-        <p id="icons8"><a target="_blank" href="https://icons8.com/icon/2969/settings">Settings</a> icon by <a
-                target="_blank" href="https://icons8.com">Icons8</a></p>
+        <p id="icons8"><a target="_blank" href="https://icons8.com/icon/2969/settings">Settings</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a></p>
     </footer>
-</body>
 
+
+    </body>
+
+    
 </html>
