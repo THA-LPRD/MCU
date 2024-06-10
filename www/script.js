@@ -3,6 +3,9 @@ window.onload = function() {
     getDisplayDimensions()
 }
 
+  
+let displayWidth, displayHeight;
+
    async function getDisplayDimensions() {
     try {
         let widthResponse = await fetch('http://127.0.0.1:5000/api/v1/getDisplayWidth');
@@ -17,8 +20,8 @@ window.onload = function() {
         }
         let heightData = await heightResponse.json();
 
-        let displayWidth = widthData.displayWidth;
-        let displayHeight = heightData.displayHeight;
+        displayWidth = widthData.displayWidth;
+        displayHeight = heightData.displayHeight;
 
         // Update the DOM elements with the fetched dimensions
         document.querySelectorAll('.displayWidth').forEach(elem => elem.textContent = displayWidth);
@@ -26,13 +29,30 @@ window.onload = function() {
 
     } catch (error) {
         console.error('Error fetching display dimensions:', error);
-        
+        document.getElementById('displayError').textContent = 'Fehler beim Abrufen der Displayabmessungen: ' + error.message;
+
         // Display default width and height
         document.querySelectorAll('.displayWidth').forEach(elem => elem.textContent = ' - ');
         document.querySelectorAll('.displayHeight').forEach(elem => elem.textContent = ' - ');
     }
    }
 
+   async function restart() {
+    try {
+    const response = await fetch('/api/v1/restart', {
+    method: 'POST'
+    });
+
+    if (!response.ok) {
+    throw new Error('Network response was not ok');
+    }
+
+    return 'Neustart erfolgreich!';
+    } catch (error) {
+    console.error('Error during restart:', error);
+    return 'Neustart fehlgeschlagen.';
+    }
+   }
 
    function displayIndex() {
     //document.getElementById("htmlVorlage").style.display = "none";
@@ -109,7 +129,7 @@ window.onload = function() {
 
         // Flag hinzufügen
         var ditheringCheckbox = document.getElementById('ditheringCheckbox');
-        var flag = ditheringCheckbox.checked ? 'dithering_aktiv' : 'kein_dithering';
+        var flag = ditheringCheckbox.checked ? 'on' : 'off';
         formData.append('flag', flag);
 
         var url = 'http://127.0.0.1:5000/api/v1/uploadpng';
@@ -175,7 +195,13 @@ window.onload = function() {
         var inputText = document.getElementById("inputText").value;
         var preview = document.getElementById("preview");
 
-            html2canvas(preview, { scale: 1 }).then(canvas => {
+        
+        html2canvas(preview, { scale: 1 }).then(canvas => {
+            if (canvas.width !== displayWidth || canvas.height !== displayHeight) {
+                alert('Ihr Design ist nicht im richtigen Pixelformat für das angeschlossene Display');
+                return;
+            }
+
                 // Erstellen eines Blob-Objekts aus dem Canvas-Bild
                 canvas.toBlob(function(blob) {
                     var url = 'http://127.0.0.1:5000/api/v1/uploadpng';
@@ -184,7 +210,7 @@ window.onload = function() {
 
                  // Flag hinzufügen
                  var ditheringCheckbox = document.getElementById('ditheringCheckbox');
-                 var flag = ditheringCheckbox.checked ? 'dithering_aktiv' : 'kein_dithering';
+                 var flag = ditheringCheckbox.checked ? 'on' : 'off';
                  formData.append('flag', flag);
 
     

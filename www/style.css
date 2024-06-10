@@ -67,6 +67,16 @@ nav a:hover {
     margin-left: -35px;
 }
 
+#restart {
+    float: right;
+    margin-right: 40px;
+
+}
+
+#displayError {
+    color:#FF0350;
+    font-style: italic;
+}
 
 main {
     text-align: center;
@@ -198,11 +208,16 @@ button {
     height: 100%;
 }
 
+.response {
+    color:#FF0350;
+    font-style: bold;;
+}
 
 #htmlOption{
     margin-top:2%;
-
 }
+
+
 
 footer {
     max-width: 940px;

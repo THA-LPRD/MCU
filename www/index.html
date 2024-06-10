@@ -37,7 +37,17 @@
             </ul>
         </nav>
 
+        <div id="restart">
+            <button onclick="restart()">Restart</button>     
+        </div>
+
         <main>
+
+        
+
+            
+
+        <div id="displayError"></div>          
             
 
         <div id="intro">
@@ -59,7 +69,7 @@
 
             <h3 id="pngHeading"><u>Hochladen von PNGs:</u></h3>
             <div id="pngText">Bitte laden Sie ein PNG in dem <b>exakten Pixelformat</b> Ihres Displays hoch <b>(<span class="displayWidth"></span> x <span class="displayHeight"></span>px)</b>. </div>
-            <div id="warning"><b>Achtung: wird ein PNG im falschen Pixelformat hochgeladen, so kann es nicht auf dem Display dargestellt werden!</b></div>
+            <div id="warning"><b>Achtung: Das PNG muss <u>genau</u> dem angegebenen Pixelformat entsprechen, sonst kann es nicht auf dem Display angezeigt werden!</b></div>
             
             <input type="file" id="fileInput" accept="image/png" onchange="displayImage(event)">
             <div id="pngText">
@@ -71,6 +81,9 @@
             <div id="imageContainer"></div>
 
             <button onclick="pngUpload()">Upload an Display</button>
+
+            <br><br>
+            <div class="response"></div> <!-- Place to display the response message -->
 
             <br><br>
         </div>
@@ -113,6 +126,11 @@
 
 
             <button onclick="convertAndUploadHtml()">Upload an Display</button>
+
+            <br><br>
+
+            <div class="response"></div> <!-- Place to display the response message -->
+
             <br><br>
 
         </div>
