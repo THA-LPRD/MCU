@@ -53,7 +53,8 @@ namespace Config
                 {
                         Key::DisplayDriver, {
                         Key::DisplayDriver, "DisplayDriver", "WS_7IN3G", [](std::string_view value) {
-                            return value == "WS_7IN3G";
+                            return value == "WS_7IN3G" || 
+                                   value == "WS_9IN7";
                         }}}
                 };
                 const std::unordered_map<std::string, Key> m_ReverseItems =[]() {

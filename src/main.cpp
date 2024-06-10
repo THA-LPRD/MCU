@@ -21,16 +21,11 @@ void FuncLog(char* msg) {
 Application* app = nullptr;
 
 void setup() {
-    MCU::Sleep(1000);
+    MCU::Sleep(100);
     Serial.begin(115200);
     MCU::Clock::SetTime(2024, 1, 1, 0, 0, 0, -1);
     Log::SetLogFunction(FuncLog);
     Log::SetLogLevel(Log::Level::DEBUG);
-    MCU::Sleep(5000);
-    Log::Debug("Starting Serial");
-    Log::Debug("Starting Serial");
-    Log::Debug("Starting Serial");
-    MCU::Sleep(1000);
     Log::Debug("Starting Serial");
     
     // MCU::GPIO::SetMode(Config::Pin::RST, MCU::GPIO::Mode::InputPullup);
@@ -57,10 +52,10 @@ void setup() {
     MCU::GPIO::Write(MCU::GPIO::VCC, 1);
 
     // EPD Part
-    EPDL::Init(Config::Get(Config::Key::DisplayDriver));
-    EPDL::LoadDriver(Config::Get(Config::Key::DisplayDriver));
+    EPDL::Init("WS_9IN7"/*Config::Get(Config::Key::DisplayDriver)*/);
+    EPDL::LoadDriver("WS_9IN7"/*'Config::Get(Config::Key::DisplayDriver)*/);
 
-    
+    MCU::Sleep(100000);
 
     app = Application::Create(Config::Get(Config::Key::OperatingMode));
 
