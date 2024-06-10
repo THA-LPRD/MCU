@@ -29,7 +29,7 @@ namespace Config
     }
 
     void Load() {
-        Log::Debug("Loading config from file.");
+        Log::Debug("[Config] Loading config from file.");
         std::ifstream file(MCU::Filesystem::GetPath(m_FileName));
 
         if (!file) {

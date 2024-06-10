@@ -7,6 +7,7 @@
 #include <Log.h>
 #include <MCU.h>
 #include <Filesystem.h>
+#include <EPDL.h>
 
 void HTTPServer::Init() {
     Log::Debug("[HTTPServer] Initializing HTTP server");
@@ -44,7 +45,7 @@ void HTTPServer::AddAPISetOpMode() {
         Log::Trace("[HTTPServer] Body: %s", request->body().c_str());
 
         if (!request->hasParam("opmode")) {
-            Log::Debug("Invalid request, missing parameters");
+            Log::Debug("[HTTPServer] Invalid request, missing parameters");
             return request->reply(400, "text/plain", "Missing Operating Mode");
         }
 
@@ -54,7 +55,7 @@ void HTTPServer::AddAPISetOpMode() {
             return request->reply(400, "text/plain", "Invalid Operating Mode");
         }
 
-        Log::Debug("Operating Mode set to %s", pOpMode->value().c_str());
+        Log::Debug("[HTTPServer] Operating Mode set to %s", Config::Get(Config::Key::OperatingMode).c_str());
         Config::Save();
         request->reply(200, "text/plain", "Operating Mode set. Restarting device in 3 seconds.");
         MCU::Sleep(3000);
@@ -165,6 +166,88 @@ void HTTPServer::AddAPIUploadImg(std::function<void(std::string_view filePath)> 
     });
 
     m_Server.on("/api/v1/UploadImg", HTTP_POST, UploadImgHandler);
+}
+
+void HTTPServer::AddAPIGetDisplayModule() {
+    Log::Debug("[HTTPServer] Adding API endpoint /api/v1/GetDisplayModule");
+    PsychicWebHandler* GetDisplayModuleHandler = new PsychicWebHandler();
+    GetDisplayModuleHandler->onRequest([](PsychicRequest* request) {
+        Log::Debug("[HTTPServer] Received GetDisplayModule request from client %s",
+                   request->client()->remoteIP().toString().c_str());
+        Log::Trace("[HTTPServer] Body: %s", request->body().c_str());
+
+        std::string displayModule = Config::Get(Config::Key::DisplayDriver);
+        return request->reply(200, "text/plain", displayModule.c_str());;
+    });
+    m_Server.on("/api/v1/GetDisplayModule", HTTP_GET, GetDisplayModuleHandler);
+}
+
+void HTTPServer::AddAPISetDisplayModule() {
+    Log::Debug("[HTTPServer] Adding API endpoint /api/v1/SetDisplayModule");
+    PsychicWebHandler* SetDisplayModuleHandler = new PsychicWebHandler();
+    SetDisplayModuleHandler->onRequest([](PsychicRequest* request) {
+        Log::Debug("[HTTPServer] Received SetDisplayModule request from client %s",
+                   request->client()->remoteIP().toString().c_str());
+        Log::Trace("[HTTPServer] Body: %s", request->body().c_str());
+
+        if (!request->hasParam("displayModule")) {
+            Log::Debug("[HTTPServer] Invalid request, missing parameters");
+            return request->reply(400, "text/plain", "Missing Display Module");
+        }
+
+        PsychicWebParameter* pDisplayModule = request->getParam("displayModule");
+        if (!Config::Set(Config::Key::DisplayDriver, pDisplayModule->value().c_str())) {
+            Log::Error("[HTTPServer] Invalid Display Module");
+            return request->reply(400, "text/plain", "Invalid Display Module");
+        }
+
+        Log::Debug("[HTTPServer] Display Module set to %s", pDisplayModule->value().c_str());
+        Config::Save();
+        return request->reply(200, "text/plain", "Display Module set. Please restart the device.");
+    });
+    m_Server.on("/api/v1/SetDisplayModule", HTTP_POST, SetDisplayModuleHandler);
+}
+
+void HTTPServer::AddAPIGetOpMode() {
+    Log::Debug("[HTTPServer] Adding API endpoint /api/v1/GetOpMode");
+    PsychicWebHandler* GetOpModeHandler = new PsychicWebHandler();
+    GetOpModeHandler->onRequest([](PsychicRequest* request) {
+        Log::Debug("[HTTPServer] Received GetOpMode request from client %s",
+                   request->client()->remoteIP().toString().c_str());
+        Log::Trace("[HTTPServer] Body: %s", request->body().c_str());
+
+        std::string opMode = Config::Get(Config::Key::OperatingMode);
+        return request->reply(200, "text/plain", opMode.c_str());
+    });
+    m_Server.on("/api/v1/GetOpMode", HTTP_GET, GetOpModeHandler);
+}
+
+void HTTPServer::AddAPIGetDisplayWidth() {
+    Log::Debug("[HTTPServer] Adding API endpoint /api/v1/GetDisplayWidth");
+    PsychicWebHandler* GetDisplayWidthHandler = new PsychicWebHandler();
+    GetDisplayWidthHandler->onRequest([](PsychicRequest* request) {
+        Log::Debug("[HTTPServer] Received GetDisplayWidth request from client %s",
+                   request->client()->remoteIP().toString().c_str());
+        Log::Trace("[HTTPServer] Body: %s", request->body().c_str());
+
+        std::string displayWidth = std::to_string(EPDL::GetWidth());
+        return request->reply(200, "text/plain", displayWidth.c_str());
+    });
+    m_Server.on("/api/v1/GetDisplayWidth", HTTP_GET, GetDisplayWidthHandler);
+}
+
+void HTTPServer::AddAPIGetDisplayHeight() {
+    Log::Debug("[HTTPServer] Adding API endpoint /api/v1/GetDisplayHeight");
+    PsychicWebHandler* GetDisplayHeightHandler = new PsychicWebHandler();
+    GetDisplayHeightHandler->onRequest([](PsychicRequest* request) {
+        Log::Debug("[HTTPServer] Received GetDisplayHeight request from client %s",
+                   request->client()->remoteIP().toString().c_str());
+        Log::Trace("[HTTPServer] Body: %s", request->body().c_str());
+
+        std::string displayHeight = std::to_string(EPDL::GetHeight());
+        return request->reply(200, "text/plain", displayHeight.c_str());
+    });
+    m_Server.on("/api/v1/GetDisplayHeight", HTTP_GET, GetDisplayHeightHandler);
 }
 
 void HTTPServer::AddAPIls() {

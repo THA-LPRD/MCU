@@ -37,7 +37,7 @@ void setup() {
     EPDL::Init();
     EPDL::LoadDriver(Config::Get(Config::Key::DisplayDriver));
 
-    if (MCU::GPIO::Read(Config::Pin::RST) == 0) {
+    if (MCU::GPIO::Read(Config::Pin::RST) == 1) {
         Log::Info("Reset button pressed. Loading default configuration.");
         Config::Set(Config::Key::OperatingMode, "Default");
         Config::Save();

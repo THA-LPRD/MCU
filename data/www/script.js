@@ -5,13 +5,13 @@ window.onload = function() {
 
    async function getDisplayDimensions() {
     try {
-        let widthResponse = await fetch('http://127.0.0.1:5000/api/v1/getDisplayWidth');
+        let widthResponse = await fetch('/api/v1/GetDisplayWidth');
         if (!widthResponse.ok) {
             throw new Error('Network response was not ok');
         }
         let widthData = await widthResponse.json();
 
-        let heightResponse = await fetch('http://127.0.0.1:5000/api/v1/getDisplayHeight');
+        let heightResponse = await fetch('/api/v1/GetDisplayHeight');
         if (!heightResponse.ok) {
             throw new Error('Network response was not ok');
         }
@@ -112,7 +112,7 @@ window.onload = function() {
         var flag = ditheringCheckbox.checked ? 'dithering_aktiv' : 'kein_dithering';
         formData.append('flag', flag);
 
-        var url = 'http://127.0.0.1:5000/api/v1/uploadpng';
+        var url = '/api/v1/UploadImg';
 
         fetch(url, {
             method: 'POST',
@@ -178,7 +178,7 @@ window.onload = function() {
             html2canvas(preview, { scale: 1 }).then(canvas => {
                 // Erstellen eines Blob-Objekts aus dem Canvas-Bild
                 canvas.toBlob(function(blob) {
-                    var url = 'http://127.0.0.1:5000/api/v1/uploadpng';
+                    var url = '/api/v1/UploadImg';
                     var formData = new FormData();
                     formData.append('file', blob, 'html_conversion.png');
 
