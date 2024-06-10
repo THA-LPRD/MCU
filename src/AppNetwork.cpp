@@ -44,10 +44,7 @@ bool AppNetwork::Init() {
             return;
         }
         m_ImagePath = filePath;
-        m_ImageHandle = EPDL::CreateImage(std::make_unique<EPDL::ImageData>(MCU::Filesystem::GetPath(filePath),
-                                                                            EPDL::GetWidth(),
-                                                                            EPDL::GetHeight(),
-                                                                            3));
+        m_ImageHandle = EPDL::CreateImage(std::make_unique<EPDL::ImageData>(MCU::Filesystem::GetPath(filePath)));
         m_ProcessImage = true;
     });
     m_Server.AddAPIGetDisplayModule();

@@ -47,7 +47,7 @@ namespace MCU { namespace Filesystem
         std::string nativePath = GetPath(path.data());
         struct stat st;
         if (stat(nativePath.c_str(), &st) != 0) {
-            Log::Trace("[Filesystem] exists: File does not exist: %s", nativePath.c_str());
+            Log::LoTrace("[Filesystem] exists: File does not exist: %s", nativePath.c_str());
             return false;
         }
         return true;
@@ -73,7 +73,7 @@ namespace MCU { namespace Filesystem
             status = LittleFS.remove(path.data());
         }
 
-        if (status) { Log::Trace("[Filesystem] rm: Removed file: %s", nativePath.c_str()); }
+        if (status) { Log::LoTrace("[Filesystem] rm: Removed file: %s", nativePath.c_str()); }
         else { Log::Error("[Filesystem] rm: Failed to remove file: %s", nativePath.c_str()); }
         return status;
     }
@@ -96,7 +96,7 @@ namespace MCU { namespace Filesystem
             return false;
         }
         if (stat(nativeToPath.c_str(), &st) == 0) {
-            Log::Trace("[Filesystem] mv: Destination file already exists removing it");
+            Log::LoTrace("[Filesystem] mv: Destination file already exists removing it");
             if (!rm(to, true)) { return false; }
             status = LittleFS.rename(from.data(), to.data());
         }
@@ -105,7 +105,7 @@ namespace MCU { namespace Filesystem
         }
 
         if (status) {
-            Log::Trace("[Filesystem] mv: Moved file: %s to %s",
+            Log::LoTrace("[Filesystem] mv: Moved file: %s to %s",
                        nativeFromPath.c_str(),
                        nativeToPath.c_str());
         }
@@ -147,11 +147,11 @@ namespace MCU { namespace Filesystem
                 result.pop_back();
             }
 
-            Log::Trace("[Filesystem] ls: Directory: %s", pathStr.c_str());
+            Log::LoTrace("[Filesystem] ls: Directory: %s", pathStr.c_str());
             return result;
         }
         else if (S_ISREG(st.st_mode)) {
-            Log::Trace("[Filesystem] ls: File: %s", pathStr.c_str());
+            Log::LoTrace("[Filesystem] ls: File: %s", pathStr.c_str());
             return path.data();
         }
         else {
@@ -163,7 +163,7 @@ namespace MCU { namespace Filesystem
     bool mkdir(std::string_view path) {
         std::string pathStr = GetPath(path.data());
         if (LittleFS.mkdir(path.data())) {
-            Log::Trace("[Filesystem] mkdir: Created directory: %s", pathStr.c_str());
+            Log::LoTrace("[Filesystem] mkdir: Created directory: %s", pathStr.c_str());
             return true;
         }
         Log::Error("[Filesystem] mkdir: Failed to create directory: %s", pathStr.c_str());

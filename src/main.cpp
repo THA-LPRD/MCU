@@ -21,9 +21,12 @@ void FuncLog(char* msg) {
 Application* app = nullptr;
 
 void setup() {
+    MCU::Sleep(10000);
     Serial.begin(115200);
 
     MCU::GPIO::SetMode(Config::Pin::RST, MCU::GPIO::Mode::InputPullup);
+    MCU::GPIO::SetMode(43, MCU::GPIO::Mode::Output);
+    MCU::GPIO::Write(43, 1);
 
     MCU::Clock::SetTime(2024, 1, 1, 0, 0, 0, -1);
 
@@ -46,6 +49,9 @@ void setup() {
         Log::Debug("Reset button not pressed. Continuing Setup.");
     }
 
+    // Print left heap size
+    size_t free = heap_caps_get_free_size(MALLOC_CAP_8BIT);
+    Log::Debug("Free heap size %d", free);
     app = Application::Create(Config::Get(Config::Key::OperatingMode));
     if (app->Init()) { return; }
 

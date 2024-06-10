@@ -10,10 +10,15 @@
 
 bool AppStandalone::Init() {
     Log::Debug("Initializing standalone application");
-
+    // Print left heap size
+    size_t free = heap_caps_get_free_size(MALLOC_CAP_8BIT);
+    Log::Debug("Free heap size %d", free);
     SetupWiFi();
 
     m_Server.Init();
+    // Print left heap size
+    free = heap_caps_get_free_size(MALLOC_CAP_8BIT);
+    Log::Debug("Free heap size %d", free);
     std::map<std::string, std::string> filesToServe = {
             {"/index.html",               "/www/index.html"},
             {"/settings.html",            "/www/settings.html"},
@@ -24,6 +29,9 @@ bool AppStandalone::Init() {
             {"/utils.js",                 "/www/utils.js"},
             {"/script.js",                "/www/script.js"}
     };
+    // Print left heap size
+    free = heap_caps_get_free_size(MALLOC_CAP_8BIT);
+    Log::Debug("Free heap size %d", free);
     m_Server.SetFilesToServe(filesToServe);
     m_Server.AddAPISetOpMode();
     m_Server.AddAPISetWiFiCred();
@@ -42,10 +50,15 @@ bool AppStandalone::Init() {
             return;
         }
         m_ImagePath = filePath;
-        m_ImageHandle = EPDL::CreateImage(std::make_unique<EPDL::ImageData>(MCU::Filesystem::GetPath(filePath),
-                                                                            EPDL::GetWidth(),
-                                                                            EPDL::GetHeight(),
-                                                                            3));
+        // Does not fit in Stack hence crashes
+//        m_ImageHandle = EPDL::CreateImage(std::make_unique<EPDL::ImageData>(MCU::Filesystem::GetPath(filePath),
+//                                                                            EPDL::GetWidth(),
+//                                                                            EPDL::GetHeight(),
+//                                                                            3));
+//        m_ImageHandle = EPDL::CreateImage(std::make_unique<EPDL::ImageData>(filePath,
+//                                                                            EPDL::GetWidth(),
+//                                                                            EPDL::GetHeight(),
+//                                                                            3));
         m_ProcessImage = true;
     });
     m_Server.AddAPIGetDisplayModule();
@@ -53,7 +66,9 @@ bool AppStandalone::Init() {
     m_Server.AddAPIGetOpMode();
     m_Server.AddAPIGetDisplayWidth();
     m_Server.AddAPIGetDisplayHeight();
-
+    // Print left heap size
+    free = heap_caps_get_free_size(MALLOC_CAP_8BIT);
+    Log::Debug("Free heap size %d", free);
     return true;
 }
 
@@ -61,10 +76,21 @@ void AppStandalone::Run() {
     m_DNSServer.processNextRequest();
     if (m_ProcessImage) {
         m_ProcessImage = false;
+        Log::Debug("Current image path: %s", m_ImagePath.c_str());
+        // Print left heap size
+        size_t free = heap_caps_get_free_size(MALLOC_CAP_8BIT);
+        Log::Debug("Free heap size %d", free);
+        std::unique_ptr<EPDL::ImageData> imageData = std::make_unique<EPDL::ImageData>(m_ImagePath);
+        Log::Debug("Created Image");
+        m_ImageHandle = EPDL::CreateImage(std::move(imageData));
+        Log::Debug("Got handle: %d", m_ImageHandle);
         EPDL::BeginFrame();
         EPDL::DrawImage(m_ImageHandle, 0, 0);
         EPDL::SwapBuffers();
         EPDL::EndFrame();
+        Log::Debug("Ready for next image");
+        free = heap_caps_get_free_size(MALLOC_CAP_8BIT);
+        Log::Debug("Free heap size %d", free);
     }
 }
 

@@ -30,7 +30,7 @@ namespace Log
         m_LogFunction = logFunction;
     }
 
-    void Trace(const char* format, ...) {
+    void LoTrace(const char* format, ...) {
         if (m_LogLevel >= Level::TRACE) {
             va_list args;
             va_start(args, format);

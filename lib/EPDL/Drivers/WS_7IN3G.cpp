@@ -99,14 +99,7 @@ namespace EPDL
     void WS_7IN3G::DrawImage(ImageHandle handle, int x, int y) {
         Log::Debug("[EPDL] Drawing image %d at (%d, %d)", handle, x, y);
         ImageData* imageData = m_ImageData[handle].get();
-        for (uint16_t j = 0; j < imageData->GetHeight(); j++) {
-            for (uint16_t i = 0; i < imageData->GetWidth(); i++) {
-                if (i + x >= m_Width || j + y >= m_Height) {
-                    continue;
-                }
-                m_FrameBuffer.SetPixel(i + x, j + y, imageData->GetPixel(i, j));
-            }
-        }
+        imageData->DrawImage(&m_FrameBuffer, x, y);
     }
 
     void WS_7IN3G::BeginFrame() {

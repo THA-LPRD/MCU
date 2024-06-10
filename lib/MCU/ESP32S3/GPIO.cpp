@@ -25,7 +25,7 @@ namespace MCU { namespace GPIO
 
 // SetMode function
     void SetMode(uint8_t pin, uint8_t mode) {
-        Log::Trace("[GPIO] Set pin mode start. Pin: %d, Mode: %d", pin, mode);
+        Log::LoTrace("[GPIO] Set pin mode start. Pin: %d, Mode: %d", pin, mode);
         gpio_config_t io_conf = {};
         io_conf.pin_bit_mask = (1ULL << pin);
         io_conf.mode = ModeToEspMode(mode);
@@ -49,22 +49,22 @@ namespace MCU { namespace GPIO
         if (err != ESP_OK) {
             Log::Error("[GPIO] Failed to set pin mode: %d", pin);
         }
-        Log::Trace("[GPIO] Set pin mode end");
+        Log::LoTrace("[GPIO] Set pin mode end");
     }
 
     void Write(uint8_t pin, uint8_t value) {
-        Log::Trace("[GPIO] Write to pin start. Pin: %d, Value: %d", pin, value);
+        Log::LoTrace("[GPIO] Write to pin start. Pin: %d, Value: %d", pin, value);
         esp_err_t err = gpio_set_level((gpio_num_t) pin, value);
         if (err != ESP_OK) {
             Log::Error("[GPIO] Failed to write to pin: %d", pin);
         }
-        Log::Trace("[GPIO] Write to pin end");
+        Log::LoTrace("[GPIO] Write to pin end");
     }
 
     uint8_t Read(uint8_t pin) {
-        Log::Trace("[GPIO] Read from pin start. Pin: %d", pin);
+        Log::LoTrace("[GPIO] Read from pin start. Pin: %d", pin);
         int value = gpio_get_level((gpio_num_t) pin);
-        Log::Trace("[GPIO] Read from pin end. Value: %d", value);
+        Log::LoTrace("[GPIO] Read from pin end. Value: %d", value);
         return value;
     }
 }} // namespace MCU::GPIO

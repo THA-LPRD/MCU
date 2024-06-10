@@ -42,7 +42,7 @@ void HTTPServer::AddAPISetOpMode() {
     SetOpModeHandler->onRequest([](PsychicRequest* request) {
         Log::Debug("[HTTPServer] Received ConfigOpMode request from client %s",
                    request->client()->remoteIP().toString().c_str());
-        Log::Trace("[HTTPServer] Body: %s", request->body().c_str());
+        Log::LoTrace("[HTTPServer] Body: %s", request->body().c_str());
 
         if (!request->hasParam("opmode")) {
             Log::Debug("[HTTPServer] Invalid request, missing parameters");
@@ -71,7 +71,7 @@ void HTTPServer::AddAPISetWiFiCred() {
     SetWiFiCredHandler->onRequest([](PsychicRequest* request) {
         Log::Debug("[HTTPServer] Received SetWiFiCred request from client %s",
                    request->client()->remoteIP().toString().c_str());
-        Log::Trace("[HTTPServer] Body: %s", request->body().c_str());
+        Log::LoTrace("[HTTPServer] Body: %s", request->body().c_str());
 
         if (!request->hasParam("ssid") && !request->hasParam("password")) {
             Log::Debug("[HTTPServer] Invalid request, missing parameters");
@@ -174,7 +174,7 @@ void HTTPServer::AddAPIGetDisplayModule() {
     GetDisplayModuleHandler->onRequest([](PsychicRequest* request) {
         Log::Debug("[HTTPServer] Received GetDisplayModule request from client %s",
                    request->client()->remoteIP().toString().c_str());
-        Log::Trace("[HTTPServer] Body: %s", request->body().c_str());
+        Log::LoTrace("[HTTPServer] Body: %s", request->body().c_str());
 
         std::string displayModule = Config::Get(Config::Key::DisplayDriver);
         return request->reply(200, "text/plain", displayModule.c_str());;
@@ -188,7 +188,7 @@ void HTTPServer::AddAPISetDisplayModule() {
     SetDisplayModuleHandler->onRequest([](PsychicRequest* request) {
         Log::Debug("[HTTPServer] Received SetDisplayModule request from client %s",
                    request->client()->remoteIP().toString().c_str());
-        Log::Trace("[HTTPServer] Body: %s", request->body().c_str());
+        Log::LoTrace("[HTTPServer] Body: %s", request->body().c_str());
 
         if (!request->hasParam("displayModule")) {
             Log::Debug("[HTTPServer] Invalid request, missing parameters");
@@ -214,7 +214,7 @@ void HTTPServer::AddAPIGetOpMode() {
     GetOpModeHandler->onRequest([](PsychicRequest* request) {
         Log::Debug("[HTTPServer] Received GetOpMode request from client %s",
                    request->client()->remoteIP().toString().c_str());
-        Log::Trace("[HTTPServer] Body: %s", request->body().c_str());
+        Log::LoTrace("[HTTPServer] Body: %s", request->body().c_str());
 
         std::string opMode = Config::Get(Config::Key::OperatingMode);
         return request->reply(200, "text/plain", opMode.c_str());
@@ -228,7 +228,7 @@ void HTTPServer::AddAPIGetDisplayWidth() {
     GetDisplayWidthHandler->onRequest([](PsychicRequest* request) {
         Log::Debug("[HTTPServer] Received GetDisplayWidth request from client %s",
                    request->client()->remoteIP().toString().c_str());
-        Log::Trace("[HTTPServer] Body: %s", request->body().c_str());
+        Log::LoTrace("[HTTPServer] Body: %s", request->body().c_str());
 
         std::string displayWidth = std::to_string(EPDL::GetWidth());
         return request->reply(200, "text/plain", displayWidth.c_str());
@@ -242,7 +242,7 @@ void HTTPServer::AddAPIGetDisplayHeight() {
     GetDisplayHeightHandler->onRequest([](PsychicRequest* request) {
         Log::Debug("[HTTPServer] Received GetDisplayHeight request from client %s",
                    request->client()->remoteIP().toString().c_str());
-        Log::Trace("[HTTPServer] Body: %s", request->body().c_str());
+        Log::LoTrace("[HTTPServer] Body: %s", request->body().c_str());
 
         std::string displayHeight = std::to_string(EPDL::GetHeight());
         return request->reply(200, "text/plain", displayHeight.c_str());
@@ -256,7 +256,7 @@ void HTTPServer::AddAPIls() {
     SetlsHandler->onRequest([](PsychicRequest* request) {
         Log::Debug("[HTTPServer] Received ls request from client %s",
                    request->client()->remoteIP().toString().c_str());
-        Log::Trace("[HTTPServer] Body: %s", request->body().c_str());
+        Log::LoTrace("[HTTPServer] Body: %s", request->body().c_str());
 
         if (!request->hasParam("path")) {
             Log::Debug("Invalid request, missing parameters");
@@ -277,7 +277,7 @@ void HTTPServer::AddAPIrm() {
     SetrmHandler->onRequest([](PsychicRequest* request) {
         Log::Debug("[HTTPServer] Received rm request from client %s",
                    request->client()->remoteIP().toString().c_str());
-        Log::Trace("[HTTPServer] Body: %s", request->body().c_str());
+        Log::LoTrace("[HTTPServer] Body: %s", request->body().c_str());
 
         if (!request->hasParam("path")) {
             Log::Debug("Invalid request, missing parameters");
@@ -302,7 +302,7 @@ void HTTPServer::AddAPImkdir() {
     SetmkdirHandler->onRequest([](PsychicRequest* request) {
         Log::Debug("[HTTPServer] Received mkdir request from client %s",
                    request->client()->remoteIP().toString().c_str());
-        Log::Trace("[HTTPServer] Body: %s", request->body().c_str());
+        Log::LoTrace("[HTTPServer] Body: %s", request->body().c_str());
 
         if (!request->hasParam("path")) {
             Log::Debug("[HTTPServer] Invalid request, missing parameters");
