@@ -186,6 +186,14 @@ ol li {
     box-sizing: border-box;
 }
 
+#inputText2 {
+    padding: 5px;
+    max-width: 90%;
+    width: calc(100% - 40px);
+    margin: auto;
+    box-sizing: border-box;
+}
+
 
 button {
     margin-top: 2%;
@@ -193,17 +201,29 @@ button {
 }
 
 #previewContainer {
-    width: 802px;
-    height: 482px;
+    width: 800px;
+    height: 480px;
     overflow: auto;
     position: relative;
     border: 1px solid #ccc;
     margin: auto;
- 
 }
 
-
 #preview {
+    width: 100%; /* Ensures the content takes its natural width*/
+    height: 100%;
+}
+
+#previewContainer2 {
+    width: 800px;
+    height: 480px;
+    overflow: auto;
+    position: relative;
+    border: 1px solid #ccc;
+    margin: auto;
+}
+
+#preview2 {
     width: 100%; /* Ensures the content takes its natural width*/
     height: 100%;
 }

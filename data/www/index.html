@@ -33,7 +33,7 @@
             <ul>
                 <li><a onclick="displayPngUpload()">PNG Upload</a></li>
                 <li><a onclick="displayHtmlDesign()">HTML Design</a></li>
-  <!--            <li><a onclick="displayHtmlVorlage()">HTML Vorlagen</a></li> -->
+                <li><a onclick="displayHtmlVorlage()">HTML Vorlagen</a></li> 
             </ul>
         </nav>
 
@@ -55,7 +55,7 @@
                 Vielen Dank, dass Sie sich für einen LPRD-Display entschieden haben. <br></br>
                 Sie haben 2 Möglichkeiten personalisierte Inhalte anzuzeigen:<br>
                 Upload eines <a onclick="displayPngUpload()"><u>PNGs</u></a> oder  <a onclick="displayHtmlDesign()"><u>Design via HTML</u></a>. 
-                <!--<br>HTML Vorlagen finden Sie <a onclick="displayHtmlVorlage()"><u>hier</u></a>.-->
+                <br>HTML Vorlagen finden Sie <a onclick="displayHtmlVorlage()"><u>hier</u></a>.
 
             </h2>
         </div>
@@ -135,40 +135,33 @@
 
         </div>
 
-        <!--
+        
 
         <div id="htmlVorlage">
             
             <h3><label for="template">Vorlage: </label>
-            <select name="template" id="template" onchange="loadTemplate()">
-                <option value="mercedes">Weiß net</option>
+            <select name="template" id="template" onclick="loadTemplate()">
                 <option value="Timetable_1.html">Stundenplan</option>
-                <option value="THA_Announcement_1.html">THA Ankündigung</option>
+                <option value="coffee_break.html">Türschild Kaffeepause</option>
+                <option value="THA_Announcement.html">THA Ankündigung (personalisierbar)</option>
                
             </select>
-        </h3>
-            </br><br>
+            </h3>
         
 
-            <label for="customInput1">Eingabefeld 1:</label>
-            <input id="customInput1" type="text" oninput="convertToHTML()"></input>
-            </br><br>
-            <label for="customInput2">Eingabefeld 2:</label>
-            <input id="customInput2" type="text" oninput="convertToHTML()"></input>
-            </br><br>
-            <label for="customInput3">Eingabefeld 3:</label>
-            <input id="customInput3" type="text" oninput="convertToHTML()"></input>
-            </br><br>
-            <label for="customInput4">Eingabefeld 4:</label>
-            <input id="customInput4" type="text" oninput="convertToHTML()"></input>
-            </br><br>
+            <label for="customInput1">Name:</label>
+            <input id="customInput1" type="text" oninput="convertToHTML2()"></input>
+            </br>
+            <br></br>
 
 
             <b>HTML-Code:</b>
-            <textarea id="inputText2" rows="1" cols="90" oninput="convertToHTML()"></textarea> 
+            <textarea id="inputText2" rows="1" cols="90"></textarea> 
+            <br>
+            <button onclick="convertToHTML2()">Übernehmen</button>
 
 
-            <br></br>
+            <br>
 
             <h3><b>Ihre Design-Vorschau:</b></h3>
 
@@ -188,7 +181,7 @@
 
 
     
-        </div> -->
+        </div> 
 
         </main>
     </div>

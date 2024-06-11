@@ -8,13 +8,13 @@ let displayWidth, displayHeight;
 
    async function getDisplayDimensions() {
     try {
-        let widthResponse = await fetch('http://127.0.0.1:5000/api/v1/getDisplayWidth');
+        let widthResponse = await fetch('/api/v1/GetDisplayWidth');
         if (!widthResponse.ok) {
             throw new Error('Network response was not ok');
         }
         let widthData = await widthResponse.json();
 
-        let heightResponse = await fetch('http://127.0.0.1:5000/api/v1/getDisplayHeight');
+        let heightResponse = await fetch('/api/v1/GetDisplayHeight');
         if (!heightResponse.ok) {
             throw new Error('Network response was not ok');
         }
@@ -55,14 +55,14 @@ let displayWidth, displayHeight;
    }
 
    function displayIndex() {
-    //document.getElementById("htmlVorlage").style.display = "none";
+    document.getElementById("htmlVorlage").style.display = "none";
     document.getElementById("htmlDesign").style.display = "none";
     document.getElementById("pngUpload").style.display = "none"; 
     document.getElementById("intro").style.display = "block";
    }
 
    function displayPngUpload() {
-    //document.getElementById("htmlVorlage").style.display = "none";
+    document.getElementById("htmlVorlage").style.display = "none";
     document.getElementById("intro").style.display = "none";
     document.getElementById("htmlDesign").style.display = "none"; 
     document.getElementById("pngUpload").style.display = "block"; 
@@ -71,17 +71,17 @@ let displayWidth, displayHeight;
    function displayHtmlDesign() {
     document.getElementById("pngUpload").style.display = "none"
     document.getElementById("intro").style.display = "none";
-    //document.getElementById("htmlVorlage").style.display = "none"; 
+    document.getElementById("htmlVorlage").style.display = "none"; 
     document.getElementById("htmlDesign").style.display = "block"; 
    }
 
- /*  function displayHtmlVorlage() {
+    function displayHtmlVorlage() {
     document.getElementById("pngUpload").style.display = "none"
     document.getElementById("intro").style.display = "none";
     document.getElementById("htmlDesign").style.display = "none"; 
     document.getElementById("htmlVorlage").style.display = "block"; 
    }
-*/
+
 
    function displayImage(event) {
     var file = event.target.files[0];
@@ -96,6 +96,8 @@ let displayWidth, displayHeight;
     }
     reader.readAsDataURL(file);
    }
+
+
 
    function pngUpload() {
     var fileInput = document.getElementById('fileInput');
@@ -124,35 +126,22 @@ let displayWidth, displayHeight;
         }
 
         // Wenn die Größe korrekt ist, weiterhin den Upload durchführen
-        var formData = new FormData();
-        formData.append('file', file, file.name);
+        var reader = new FileReader();
+        reader.onload = function(event) {
+            var fileContent = event.target.result;
 
-        // Flag hinzufügen
-        var ditheringCheckbox = document.getElementById('ditheringCheckbox');
-        var flag = ditheringCheckbox.checked ? 'on' : 'off';
-        formData.append('flag', flag);
+            // Datei hochladen
+            uploadFile(file.name, fileContent.split(',')[1], function() {
+                // Nach dem erfolgreichen Hochladen der Datei, Flag senden
+                sendFlag();
+            });
+        };
 
-        var url = 'http://127.0.0.1:5000/api/v1/uploadpng';
-
-        fetch(url, {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Fehler beim Senden der Daten. Statuscode: ' + response.status);
-            }
-            return response.json();
-        })
-        .then(data => {
-            alert('Daten erfolgreich gesendet: ' + JSON.stringify(data));
-        })
-        .catch(error => {
-            alert('Fehler beim Senden der Daten: ' + error.message);
-        });
+        reader.readAsDataURL(file);
     };
     img.src = URL.createObjectURL(file);
    }
+
 
    function convertToHTML() {
         var inputText = document.getElementById("inputText").value;
@@ -162,28 +151,54 @@ let displayWidth, displayHeight;
         preview.innerHTML = inputText;
    }
 
-  /* function loadTemplate() {
-    document.getElementById("inputText2").value = "Hallo!"
-    console.log("Laden vom Template");
-    var url = './layouts/Timetable_1.html';
 
-    // Only working when properly hosted
-    // // Configuration of the Fetch request
-    // var requestOptions = {
-    //     method: 'GET',
-    // };
-    //         fetch(url, requestOptions)
-    //                     .then(function (response) {
-    //                         // Check if the request was successful (status code 200)
-    //                         if (!response.ok) {
-    //                             throw new Error('Fehler beim Senden der Daten. Statuscode: ' + response.status);
-    //                         }
-    //                         document.getElementById("inputText").value = response.value();
-    //                                 // return response.json(); // Return the JSON stream of the response
-    //                         return response.value();
-    //                     });
-}
-*/
+   function convertToHTML2() {
+    var inputText = document.getElementById("inputText2").value;
+    var preview = document.getElementById("preview2");
+
+    // Set the preview content
+    preview.innerHTML = inputText;
+    try { 
+        document.getElementById("customTextfield1").innerHTML = document.getElementById("customInput1").value 
+    } catch (error) {}
+
+    }
+
+   
+   function loadTemplate() {
+    var selectElement = document.getElementById("template");
+    var selectedTemplate = selectElement.value;
+
+    // URL zur ausgewählten Vorlagendatei im layouts-Ordner
+    var url = './layouts/' + selectedTemplate;
+
+    // Fetch-Anfrage um die Datei zu laden
+    fetch(url)
+        .then(function(response) {
+            // Überprüfen, ob die Anfrage erfolgreich war (Statuscode 200)
+            if (!response.ok) {
+                throw new Error('Fehler beim Laden der Datei. Statuscode: ' + response.status);
+            }
+            return response.text(); // Rückgabe des Textinhalts der Antwort
+        })
+        .then(function(data) {
+            // Den Inhalt der Textarea einfügen
+            document.getElementById("inputText2").value = data;
+        })
+        .catch(function(error) {
+            console.error('Fehler beim Laden der Datei:', error);
+            document.getElementById("inputText2").value = "Fehler beim Laden der Vorlage.";
+        });
+   }
+
+
+
+   document.getElementById('inputText2').addEventListener('input', () => {
+       const inputText = document.getElementById("inputText2").value;
+       const preview = document.getElementById("preview2");
+       preview.innerHTML = inputText;
+    });
+
    
    document.getElementById('inputText').addEventListener('input', () => {
         const inputText = document.getElementById("inputText").value;
@@ -192,47 +207,79 @@ let displayWidth, displayHeight;
    });
 
    function convertAndUploadHtml() {
-        var inputText = document.getElementById("inputText").value;
-        var preview = document.getElementById("preview");
+    var inputText = document.getElementById("inputText").value;
+    var preview = document.getElementById("preview");
 
-        
-        html2canvas(preview, { scale: 1 }).then(canvas => {
-            if (canvas.width !== displayWidth || canvas.height !== displayHeight) {
-                alert('Ihr Design ist nicht im richtigen Pixelformat für das angeschlossene Display');
-                return;
-            }
+    html2canvas(preview, { scale: 1 }).then(canvas => {
+        if (canvas.width !== displayWidth || canvas.height !== displayHeight) {
+            alert('Ihr Design ist nicht im richtigen Pixelformat für das angeschlossene Display');
+            return;
+        }
 
-                // Erstellen eines Blob-Objekts aus dem Canvas-Bild
-                canvas.toBlob(function(blob) {
-                    var url = 'http://127.0.0.1:5000/api/v1/uploadpng';
-                    var formData = new FormData();
-                    formData.append('file', blob, 'html_conversion.png');
+        // Erstellen eines Blob-Objekts aus dem Canvas-Bild
+        canvas.toBlob(function(blob) {
+            var reader = new FileReader();
+            reader.onloadend = function() {
+                var fileContent = reader.result.split(',')[1]; // Entfernt das Data-URL-Präfix
 
-                 // Flag hinzufügen
-                 var ditheringCheckbox = document.getElementById('ditheringCheckbox');
-                 var flag = ditheringCheckbox.checked ? 'on' : 'off';
-                 formData.append('flag', flag);
+                // Datei hochladen
+                uploadFile('html_conversion.png', fileContent, function() {
+                    // Nach dem erfolgreichen Hochladen der Datei, Flag senden
+                    sendFlag();
+                });
+            };
 
-    
-                    // Senden des Bildes an den Server
-                    fetch(url, {
-                        method: 'POST',
-                        body: formData
-                    })
-                    .then(function(response) {
-                        if (!response.ok) {
-                            throw new Error('Fehler beim Senden der Daten. Statuscode: ' + response.status);
-                        }
-                        return response.json();
-                    })
-                    .then(function(data) {
-                        // Erfolgsmeldung anzeigen
-                        alert('Daten erfolgreich gesendet: ' + JSON.stringify(data));
-                    })
-                    .catch(function(error) {
-                        // Fehlermeldung anzeigen
-                        alert('Fehler beim Senden der Daten: ' + error.message);
-                    });
-                }, 'image/png');
-            });
+            reader.readAsDataURL(blob);
+        }, 'image/png');
+    });
    }
+
+   function uploadFile(fileName, fileContent, callback) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '/api/v1/UploadImg', true);
+    xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
+
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === XMLHttpRequest.DONE) {
+            if (xhr.status === 200) {
+                alert('Datei erfolgreich hochgeladen: ' + xhr.responseText);
+                callback();
+            } else {
+                alert('Fehler beim Hochladen der Datei. Statuscode: ' + xhr.status);
+            }
+        }
+    };
+
+    var data = {
+        fileName: fileName,
+        fileContent: fileContent
+    };
+
+    xhr.send(JSON.stringify(data));
+   }
+
+   function sendFlag() {
+    var ditheringCheckbox = document.getElementById('ditheringCheckbox');
+    var flag = ditheringCheckbox.checked ? 'on' : 'off';
+
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '/api/v1/UploadFlag', true);
+    xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
+
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === XMLHttpRequest.DONE) {
+            if (xhr.status === 200) {
+                alert('Flag erfolgreich gesendet: ' + xhr.responseText);
+            } else {
+                alert('Fehler beim Senden des Flags. Statuscode: ' + xhr.status);
+            }
+        }
+    };
+
+    var data = {
+        flag: flag
+    };
+
+    xhr.send(JSON.stringify(data));
+   }
+
