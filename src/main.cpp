@@ -16,14 +16,11 @@ void FuncLog(char* msg) {
     char time_str[18];
     strftime(time_str, 18, "%y-%m-%d %H:%M:%S", timeinfo);
     std::string log_msg = "[" + std::string(time_str) + "] - " + std::string(msg);
-    Serial.println(log_msg.c_str());
+    printf("%s\n", log_msg.c_str());
 }
 Application* app = nullptr;
 
 void setup() {
-    MCU::Sleep(10000);
-    Serial.begin(115200);
-
     MCU::GPIO::SetMode(Config::Pin::RST, MCU::GPIO::Mode::InputPullup);
     MCU::GPIO::SetMode(43, MCU::GPIO::Mode::Output);
     MCU::GPIO::Write(43, 1);
@@ -33,6 +30,11 @@ void setup() {
     Log::SetLogFunction(FuncLog);
     Log::SetLogLevel(Log::Level::DEBUG);
 
+    //Wait for serial connect
+    for (int i = 0; i < 5; i++) {
+        delay(1000);
+        Log::Debug("Waiting for serial connection");
+    }
     Log::Debug("Starting File System");
     MCU::Filesystem::Init();
 
@@ -49,9 +51,6 @@ void setup() {
         Log::Debug("Reset button not pressed. Continuing Setup.");
     }
 
-    // Print left heap size
-    size_t free = heap_caps_get_free_size(MALLOC_CAP_8BIT);
-    Log::Debug("Free heap size %d", free);
     app = Application::Create(Config::Get(Config::Key::OperatingMode));
     if (app->Init()) { return; }
 

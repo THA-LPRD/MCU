@@ -6,7 +6,14 @@
 
 namespace EPDL
 {
-    WS_7IN3G::WS_7IN3G() : m_FrameBuffer(m_Width, m_Height, m_PixelSize) {
+    WS_7IN3G::WS_7IN3G() :
+            m_FrameBuffer(m_Width, m_Height, m_PixelSize),
+            m_ColorPalette({
+                                   {0,   0,   0},   // Black (0b00)
+                                   {255, 255, 255}, // White (0b01)
+                                   {255, 255, 0},   // Yellow (0b10)
+                                   {255, 0,   0}    // Red (0b11)
+                           }) {
         Log::Debug("[EPDL] Initializing WS_7IN3G display driver");
 
         m_SPIController = MCU::SPI::Create(static_cast<MCU::SPIDevice>(EPDL::SPI::SPIDevice),
@@ -99,7 +106,13 @@ namespace EPDL
     void WS_7IN3G::DrawImage(ImageHandle handle, int x, int y) {
         Log::Debug("[EPDL] Drawing image %d at (%d, %d)", handle, x, y);
         ImageData* imageData = m_ImageData[handle].get();
-        imageData->DrawImage(&m_FrameBuffer, x, y);
+        ImageData::DecodeInfo decodeInfo{
+                &m_FrameBuffer,
+                &m_ColorPalette,
+                static_cast<size_t>(x),
+                static_cast<size_t>(y)
+        };
+        imageData->DrawImage(decodeInfo);
     }
 
     void WS_7IN3G::BeginFrame() {

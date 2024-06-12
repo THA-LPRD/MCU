@@ -5,20 +5,12 @@
 #include "Config.h"
 #include "EPDL.h"
 #include "Filesystem.h"
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
 
 bool AppStandalone::Init() {
     Log::Debug("Initializing standalone application");
-    // Print left heap size
-    size_t free = heap_caps_get_free_size(MALLOC_CAP_8BIT);
-    Log::Debug("Free heap size %d", free);
     SetupWiFi();
 
     m_Server.Init();
-    // Print left heap size
-    free = heap_caps_get_free_size(MALLOC_CAP_8BIT);
-    Log::Debug("Free heap size %d", free);
     std::map<std::string, std::string> filesToServe = {
             {"/index.html",               "/www/index.html"},
             {"/settings.html",            "/www/settings.html"},
@@ -27,11 +19,9 @@ bool AppStandalone::Init() {
             {"/icons8-settings-25-w.png", "/www/icons8-settings-25-w.png"},
             {"/html2canvas.min.js",       "/www/html2canvas.min.js"},
             {"/utils.js",                 "/www/utils.js"},
-            {"/script.js",                "/www/script.js"}
+            {"/script.js",                "/www/script.js"},
+            {"/layouts",                  "/www/layouts"}
     };
-    // Print left heap size
-    free = heap_caps_get_free_size(MALLOC_CAP_8BIT);
-    Log::Debug("Free heap size %d", free);
     m_Server.SetFilesToServe(filesToServe);
     m_Server.AddAPISetOpMode();
     m_Server.AddAPISetWiFiCred();
@@ -66,9 +56,6 @@ bool AppStandalone::Init() {
     m_Server.AddAPIGetOpMode();
     m_Server.AddAPIGetDisplayWidth();
     m_Server.AddAPIGetDisplayHeight();
-    // Print left heap size
-    free = heap_caps_get_free_size(MALLOC_CAP_8BIT);
-    Log::Debug("Free heap size %d", free);
     return true;
 }
 
@@ -77,10 +64,7 @@ void AppStandalone::Run() {
     if (m_ProcessImage) {
         m_ProcessImage = false;
         Log::Debug("Current image path: %s", m_ImagePath.c_str());
-        // Print left heap size
-        size_t free = heap_caps_get_free_size(MALLOC_CAP_8BIT);
-        Log::Debug("Free heap size %d", free);
-        std::unique_ptr<EPDL::ImageData> imageData = std::make_unique<EPDL::ImageData>(m_ImagePath);
+        std::unique_ptr<EPDL::ImageData> imageData = std::make_unique<EPDL::ImageData>(MCU::Filesystem::GetPath(m_ImagePath));
         Log::Debug("Created Image");
         m_ImageHandle = EPDL::CreateImage(std::move(imageData));
         Log::Debug("Got handle: %d", m_ImageHandle);
@@ -89,8 +73,6 @@ void AppStandalone::Run() {
         EPDL::SwapBuffers();
         EPDL::EndFrame();
         Log::Debug("Ready for next image");
-        free = heap_caps_get_free_size(MALLOC_CAP_8BIT);
-        Log::Debug("Free heap size %d", free);
     }
 }
 
