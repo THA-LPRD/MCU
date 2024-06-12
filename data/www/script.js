@@ -12,16 +12,14 @@ let displayWidth, displayHeight;
         if (!widthResponse.ok) {
             throw new Error('Network response was not ok');
         }
-        let widthData = await widthResponse.json();
+        displayWidth = await widthResponse.text();
 
         let heightResponse = await fetch('/api/v1/GetDisplayHeight');
         if (!heightResponse.ok) {
             throw new Error('Network response was not ok');
         }
-        let heightData = await heightResponse.json();
+        displayHeight = await heightResponse.text();
 
-        displayWidth = widthData.displayWidth;
-        displayHeight = heightData.displayHeight;
 
         // Update the DOM elements with the fetched dimensions
         document.querySelectorAll('.displayWidth').forEach(elem => elem.textContent = displayWidth);
@@ -116,30 +114,26 @@ let displayWidth, displayHeight;
         return;
     }
 
-    // Erstellen eines Image-Objekts, um die Größe des PNG-Bildes zu überprüfen
-    var img = new Image();
-    img.onload = function() {
-        // Überprüfen, ob die Breite und Höhe des Bildes 800x480px sind
-        if (img.width !== displayWidth || img.height !== displayHeight) {
-            alert('Das PNG ist nicht im richtigen Pixelformat für das angeschlossene Display');
-            return;
-        }
-
-        // Wenn die Größe korrekt ist, weiterhin den Upload durchführen
+        // Verwenden eines FileReader, um die Bilddatei zu lesen
         var reader = new FileReader();
         reader.onload = function(event) {
-            var fileContent = event.target.result;
+            var img = new Image();
+            img.onload = function() {
+                const displayWidth = 800;
+                const displayHeight = 480;
 
-            // Datei hochladen
-            uploadFile(file.name, fileContent.split(',')[1], function() {
-                // Nach dem erfolgreichen Hochladen der Datei, Flag senden
-                sendFlag();
-            });
+                // Überprüfen, ob die Breite und Höhe des Bildes 800x480px sind
+                if (img.width !== displayWidth || img.height !== displayHeight) {
+                    alert('Das PNG ist nicht im richtigen Pixelformat für das angeschlossene Display');
+                    return;
+                }
+
+                // Datei hochladen, wenn das Bild die richtigen Abmessungen hat
+                uploadFile(file.name, file);
+            };
+            img.src = event.target.result;
         };
-
         reader.readAsDataURL(file);
-    };
-    img.src = URL.createObjectURL(file);
    }
 
 
@@ -206,56 +200,46 @@ let displayWidth, displayHeight;
         preview.innerHTML = inputText;
    });
 
-   function convertAndUploadHtml() {
-    var inputText = document.getElementById("inputText").value;
-    var preview = document.getElementById("preview");
+   function convertAndUploadHtml(previewId, inputTextId) {
+    var inputText = document.getElementById(inputTextId).value;
+    var preview = document.getElementById(previewId);
 
     html2canvas(preview, { scale: 1 }).then(canvas => {
-        if (canvas.width !== displayWidth || canvas.height !== displayHeight) {
+        if (canvas.width !== Number(displayWidth) || canvas.height !== Number(displayHeight)) {
             alert('Ihr Design ist nicht im richtigen Pixelformat für das angeschlossene Display');
             return;
         }
 
         // Erstellen eines Blob-Objekts aus dem Canvas-Bild
         canvas.toBlob(function(blob) {
-            var reader = new FileReader();
-            reader.onloadend = function() {
-                var fileContent = reader.result.split(',')[1]; // Entfernt das Data-URL-Präfix
-
-                // Datei hochladen
-                uploadFile('html_conversion.png', fileContent, function() {
-                    // Nach dem erfolgreichen Hochladen der Datei, Flag senden
-                    sendFlag();
-                });
-            };
-
-            reader.readAsDataURL(blob);
+            sendFlag();
+            // Datei hochladen
+            uploadFile('html_conversion.png', blob).catch(error => {
+                console.error('Fehler beim Hochladen der Datei:', error);
+            });
         }, 'image/png');
     });
    }
 
-   function uploadFile(fileName, fileContent, callback) {
-    var xhr = new XMLHttpRequest();
-    xhr.open('POST', '/api/v1/UploadImg', true);
-    xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
+   async function uploadFile(fileName, fileBlob) {
+    try {
+        let formData = new FormData();
+        formData.append('file', fileBlob, fileName);
 
-    xhr.onreadystatechange = function() {
-        if (xhr.readyState === XMLHttpRequest.DONE) {
-            if (xhr.status === 200) {
-                alert('Datei erfolgreich hochgeladen: ' + xhr.responseText);
-                callback();
-            } else {
-                alert('Fehler beim Hochladen der Datei. Statuscode: ' + xhr.status);
-            }
+        let response = await fetch('/api/v1/UploadImg', {
+            method: 'POST',
+            body: formData
+        });
+
+        if (response.ok) {
+            let responseText = await response.text();
+            alert('Datei erfolgreich hochgeladen: ' + responseText);
+        } else {
+            alert('Fehler beim Hochladen der Datei. Statuscode: ' + response.status);
         }
-    };
-
-    var data = {
-        fileName: fileName,
-        fileContent: fileContent
-    };
-
-    xhr.send(JSON.stringify(data));
+    } catch (error) {
+        console.error('Fehler beim Hochladen der Datei:', error);
+    }
    }
 
    function sendFlag() {
