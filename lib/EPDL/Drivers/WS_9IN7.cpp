@@ -6680,7 +6680,7 @@ namespace EPDL
   0x00, 0x00, 0x01, 0x00, 0x11, 0x12, 0x21, 0x11
 };
     
-    WS_9IN7::WS_9IN7() : m_FrameBuffer(m_Width, m_Height, m_PixelSize) {
+    WS_9IN7::WS_9IN7() : m_FrameBuffer(400, 400, 4/*m_Width, m_Height, m_PixelSize*/) {
         Log::Debug("[EPDL] Initializing WS_9IN7 display driver");
 
         ::SPI.begin(EPDL::Pin::SCK, EPDL::Pin::DC, EPDL::Pin::MOSI, EPDL::Pin::CS);
@@ -6713,11 +6713,6 @@ namespace EPDL
 
         //Set to Enable I80 Packed mode
         IT8951WriteReg(WS_9IN7::I80::Cpcr, 0x0001);
-
-        // Init fertig
-        // Ab hier Bild laden
-
-        display_buffer(pic, 0, 0, 400, 400);
     }
 
 
@@ -6890,7 +6885,7 @@ namespace EPDL
         LCDWriteCmdCode(IT8951::TconLdImgEnd);
     }
 
-    void WS_9IN7::IT8951_BMP_Example(uint32_t x, uint32_t y, uint32_t w, uint32_t h) {
+    void WS_9IN7::IT8951_BMP_Example(const uint32_t addr, uint32_t x, uint32_t y, uint32_t w, uint32_t h) {
         IT8951LdImgInfo stLdImgInfo;
         IT8951AreaImgInfo stAreaImgInfo;
 
@@ -6900,7 +6895,7 @@ namespace EPDL
         IT8951WaitForDisplayReady();
 
         //Setting Load image information
-        stLdImgInfo.ulStartFBAddr = (uint32_t)gpFrameBuf;
+        stLdImgInfo.ulStartFBAddr = addr; //(uint32_t) gpFrameBuf;
         stLdImgInfo.usEndianType = IT8951EndianType::Little;
         stLdImgInfo.usPixelFormat = IT8951BppMode::Bpp4;
         stLdImgInfo.usRotate = IT8951RotateMode::Rotate0;
@@ -6964,20 +6959,42 @@ namespace EPDL
     }
 
     void WS_9IN7::IT8951HostAreaPackedPixelWrite(IT8951LdImgInfo* pstLdImgInfo, IT8951AreaImgInfo* pstAreaImgInfo) {
-        uint32_t i, j;
-        //Source buffer address of Host
-        uint16_t* pusFrameBuf = (uint16_t*)pstLdImgInfo->ulStartFBAddr;
+        //uint32_t x, y;
+        //Source buffer address of Host K
+        // uint16_t* pusFrameBuf = (uint16_t*)pstLdImgInfo->ulStartFBAddr;
+
+        // const uint8_t* pusFrameBuf = m_FrameBuffer.GetData()[0].data();
+
+        uint16_t byte;
+        uint8_t temp;
+        uint16_t extracted;
+        
+        // Log::Debug("16b: %i pus: %i", data16b,*pusFrameBuf);
+        //ImageData->DrawImage(&m_FrameBuffer, x, y);
 
         //Set Image buffer(IT8951) Base address
         IT8951SetImgBufBaseAddr(pstLdImgInfo->ulImgBufBaseAddr);
         //Send Load Image start Cmd
         IT8951LoadImgAreaStart(pstLdImgInfo, pstAreaImgInfo);
         //Host Write Data
-        for (j = 0; j < pstAreaImgInfo->usHeight; j++) {
-            for (i = 0; i < pstAreaImgInfo->usWidth / 2; i++) {
-                //Write a Word(2-Bytes) for each time
-                LCDWriteData(*pusFrameBuf);
-                pusFrameBuf++;
+
+        for (int y = 0; y < 400 /*pstAreaImgInfo->usHeigh*/; y++) {
+            for (int x = 0; x < 400 /*pstAreaImgInfo->usWidth*/; x += 4) {
+                uint16_t pixel = 0;
+                for (int i = 3; i >= 0; i--) {
+                    uint16_t temp = m_FrameBuffer.GetPixel(x + 3 - i, y);
+                    pixel |= temp << (i * 4);
+                    if (y < 1 && (x + 3 - i) < 20) {
+                        Log::Debug("X: %02i Y: %02i Get: %04x", (x + 3 - i), y, pixel);
+                    }
+                }
+                uint16_t temp1 = (pixel & 0x00ff) << 8;
+                uint16_t temp2 = (pixel & 0xff00) >> 8;
+                pixel = 0;
+                pixel |= temp1;
+                pixel |= temp2;
+
+                LCDWriteData(pixel);
             }
         }
         //Send Load Img End Command
@@ -7008,10 +7025,10 @@ namespace EPDL
         Log::Debug("[EPDL] WS_9IN7 display driver deinitialized");
     }
 
-    void WS_9IN7::display_buffer(uint8_t* addr, uint32_t x, uint32_t y, uint32_t w, uint32_t h) {
-        gpFrameBuf = addr;
+    void WS_9IN7::display_buffer(const uint8_t* addr, uint32_t x, uint32_t y, uint32_t w, uint32_t h) {
+        // gpFrameBuf = addr;
         // Serial.println("Sending image");
-        IT8951_BMP_Example(x, y, w, h);
+        IT8951_BMP_Example(*addr, x, y, w, h);
         // Serial.println("Displaying image");
         IT8951DisplayArea(x, y, w, h, 2);
         // Serial.println("Waiting for display ...");
@@ -7021,16 +7038,46 @@ namespace EPDL
         
 
     void WS_9IN7::DrawImage(ImageHandle handle, int x, int y) {
+        // Init fertig
+        // Ab hier Bild laden
         Log::Debug("[EPDL] Drawing image %d at (%d, %d)", handle, x, y);
-        ImageData* imageData = m_ImageData[handle].get();
-        for (uint16_t j = 0; j < imageData->GetHeight(); j++) {
-            for (uint16_t i = 0; i < imageData->GetWidth(); i++) {
-                if (i + x >= m_Width || j + y >= m_Height) {
-                    continue;
+
+        for (int i = 0; i < 80000; i++) {
+            uint8_t byte = pic[i];
+            uint8_t extracted = byte & 0xf0;
+            extracted = extracted >> 4;
+            m_FrameBuffer.SetPixel((i*2)%400, i/200, extracted);
+            if (i < 10) {
+                    Log::Debug("X: %02i Y: %02i Pix: %02x Set: %02x", (i*2)%400, i/200, byte, extracted);
                 }
-                m_FrameBuffer.SetPixel(i + x, j + y, imageData->GetPixel(i, j));
-            }
+            extracted = (byte & 0x0f);
+            m_FrameBuffer.SetPixel((i*2+1)%400, i/200, extracted);
+
+            if (i < 10) {
+                    Log::Debug("X: %02i Y: %02i Pic: %02x Set: %02x", (i*2+1)%400, i/200, byte, extracted);
+                }
         }
+
+        // for (int i = 0; i < 80000; i++) {
+        //     uint8_t byte = pic[i];
+        //     uint8_t extracted = byte & 0x0f;
+        //     extracted = extracted;
+        //     m_FrameBuffer.SetPixel((i*2)%400, i/200, extracted);
+        //     if (i < 10) {
+        //             Log::Debug("X: %02i Y: %02i Pix: %02x Set: %02x", (i*2)%400, i/200, byte, extracted);
+        //         }
+        //     extracted = (byte & 0xf0) >> 4;
+        //     m_FrameBuffer.SetPixel((i*2+1)%400, i/200, extracted);
+
+        //     if (i < 10) {
+        //             Log::Debug("X: %02i Y: %02i Pic: %02x Set: %02x", (i*2+1)%400, i/200, byte, extracted);
+        //         }
+        // }
+        
+        display_buffer(m_FrameBuffer.GetData()[0].data(), x, y, 400, 400);
+        
+        // ImageData* imageData = m_ImageData[handle].get();
+
     }
 
     void WS_9IN7::BeginFrame() {

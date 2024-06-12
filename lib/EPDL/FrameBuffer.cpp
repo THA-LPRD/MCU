@@ -17,11 +17,14 @@ namespace EPDL
         if (x < 0 || x >= m_Width || y < 0 || y >= m_Height) {
             return false;
         }
-
+        // Log::Debug("Color Parameter: %i", color);
         uint8_t pixel = m_Data[y][x / m_Scale];
-        uint8_t shift = m_PixelSize * (3 - (x % m_Scale));
+        // Log::Debug("Pixel: %i", pixel);
+        uint8_t shift = m_PixelSize * (m_Scale - 1 - (x % m_Scale));
+        // Log::Debug("Shift: %i", shift);
         pixel &= ~(m_Mask << shift);
         pixel |= (color & m_Mask) << shift;
+        // Log::Debug("Pixel: %i", pixel);
         m_Data[y][x / m_Scale] = pixel;
         return true;
     }
@@ -31,7 +34,7 @@ namespace EPDL
             return 0x0;
         }
         uint8_t pixel = m_Data[y][x / m_Scale];
-        uint8_t shift = m_PixelSize * (3 - (x % m_Scale));
+        uint8_t shift = m_PixelSize * (m_Scale - 1 - (x % m_Scale));
         return (pixel >> shift) & m_Mask;
     }
 

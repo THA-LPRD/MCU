@@ -132,8 +132,8 @@ Lisar = (Mcsr_Base_Addr + 0x0008),
         void IT8951WriteReg(uint16_t usRegAddr, uint16_t usValue);
         void LCDWriteData(uint16_t usData);
         void LCDWaitForReady();
-        void display_buffer(uint8_t* addr, uint32_t x, uint32_t y, uint32_t w, uint32_t h);
-        void IT8951_BMP_Example(uint32_t x, uint32_t y, uint32_t w, uint32_t h);
+        void display_buffer(const uint8_t* addr, uint32_t x, uint32_t y, uint32_t w, uint32_t h);
+        void IT8951_BMP_Example(const uint32_t addr, uint32_t x, uint32_t y, uint32_t w, uint32_t h);
         void IT8951WaitForDisplayReady();
         void IT8951HostAreaPackedPixelWrite(IT8951LdImgInfo* pstLdImgInfo, IT8951AreaImgInfo* pstAreaImgInfo);
         void IT8951SetImgBufBaseAddr(uint32_t ulImgBufAddr);
