@@ -34,10 +34,10 @@ namespace EPDL
         return closestColorIndex;
     }
 
-    uint64_t ColorPalette::GetSquaredEuclideanDistance(const RGBPixel &p, const RGBPixel &q) {
+    uint64_t ColorPalette::GetSquaredEuclideanDistance(const RGBPixel& p, const RGBPixel& q) {
         return (p.r - q.r) * (p.r - q.r) +
-               (p.g - q.g) * (p.g - q.g) +
-               (p.b - q.b) * (p.b - q.b);
+            (p.g - q.g) * (p.g - q.g) +
+            (p.b - q.b) * (p.b - q.b);
     }
 
     RGBPixel ColorPalette::ExtractRGB(uint16_t pixel) {
@@ -50,34 +50,34 @@ namespace EPDL
         g = (g * 255) / 63;
         b = (b * 255) / 31;
 
-        return {r, g, b};
+        return { r, g, b };
     }
 
     ImageData::ImageData(std::string_view filePath) :
-            m_FilePath(filePath),
-            m_PNG{
-                    .iWidth = 0,
-                    .iHeight = 0,
-                    .ucBpp = 0,
-                    .ucPixelType = 0,
-                    .ucMemType = 0,
-                    .pImage = nullptr,
-                    .iPitch = 0,
-                    .iHasAlpha = 0,
-                    .iInterlaced = 0,
-                    .iTransparent = 0,
-                    .iError = 0,
-                    .pfnRead = Read,
-                    .pfnSeek = Seek,
-                    .pfnOpen = Open,
-                    .pfnDraw = Draw,
-                    .pfnClose = Close,
-                    .PNGFile = {0, 0, nullptr, nullptr},
-                    .ucZLIB = {0},
-                    .ucPalette = {0},
-                    .ucPixels = {0},
-                    .ucFileBuf = {0}} {
-        Log::LoTrace("[ImageData] Creating ImageData object for file %s", filePath.data());
+        m_FilePath(filePath),
+        m_PNG{
+                .iWidth = 0,
+                .iHeight = 0,
+                .ucBpp = 0,
+                .ucPixelType = 0,
+                .ucMemType = 0,
+                .pImage = nullptr,
+                .iPitch = 0,
+                .iHasAlpha = 0,
+                .iInterlaced = 0,
+                .iTransparent = 0,
+                .iError = 0,
+                .pfnRead = Read,
+                .pfnSeek = Seek,
+                .pfnOpen = Open,
+                .pfnDraw = Draw,
+                .pfnClose = Close,
+                .PNGFile = {0, 0, nullptr, nullptr},
+                .ucZLIB = {0},
+                .ucPalette = {0},
+                .ucPixels = {0},
+                .ucFileBuf = {0} } {
+        Log::Trace("[ImageData] Creating ImageData object for file %s", filePath.data());
 
         m_PNG.PNGFile.fHandle = (*Open)(filePath.data(), &m_PNG.PNGFile.iSize);
         if (m_PNG.PNGFile.fHandle == NULL) {
@@ -94,36 +94,36 @@ namespace EPDL
     }
 
     ImageData::~ImageData() {
-        Log::LoTrace("[ImageData] Destroying ImageData object");
+        Log::Trace("[ImageData] Destroying ImageData object");
         Close(m_PNG.PNGFile.fHandle);
     }
 
     void ImageData::LogError() {
         switch (m_PNG.iError) {
-            case PNG_INVALID_PARAMETER:
-                Log::Error("[ImageData] Invalid parameter");
-                break;
-            case PNG_DECODE_ERROR:
-                Log::Error("[ImageData] Decode error");
-                break;
-            case PNG_MEM_ERROR:
-                Log::Error("[ImageData] Memory error");
-                break;
-            case PNG_NO_BUFFER:
-                Log::Error("[ImageData] No buffer");
-                break;
-            case PNG_UNSUPPORTED_FEATURE:
-                Log::Error("[ImageData] Unsupported feature");
-                break;
-            case PNG_INVALID_FILE:
-                Log::Error("[ImageData] Invalid file");
-                break;
-            case PNG_TOO_BIG:
-                Log::Error("[ImageData] Image too big");
-                break;
-            default:
-                Log::Error("[ImageData] Unknown error");
-                break;
+        case PNG_INVALID_PARAMETER:
+            Log::Error("[ImageData] Invalid parameter");
+            break;
+        case PNG_DECODE_ERROR:
+            Log::Error("[ImageData] Decode error");
+            break;
+        case PNG_MEM_ERROR:
+            Log::Error("[ImageData] Memory error");
+            break;
+        case PNG_NO_BUFFER:
+            Log::Error("[ImageData] No buffer");
+            break;
+        case PNG_UNSUPPORTED_FEATURE:
+            Log::Error("[ImageData] Unsupported feature");
+            break;
+        case PNG_INVALID_FILE:
+            Log::Error("[ImageData] Invalid file");
+            break;
+        case PNG_TOO_BIG:
+            Log::Error("[ImageData] Image too big");
+            break;
+        default:
+            Log::Error("[ImageData] Unknown error");
+            break;
         }
     }
 

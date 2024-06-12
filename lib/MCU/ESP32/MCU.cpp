@@ -9,9 +9,9 @@
 namespace MCU
 {
     void Sleep(uint32_t ms) {
-        Log::LoTrace("[MCU] Sleep start. Length: %d ms", ms);
+        Log::Trace("[MCU] Sleep start. Length: %d ms", ms);
         vTaskDelay(ms / portTICK_PERIOD_MS);
-        Log::LoTrace("[MCU] Sleep end");
+        Log::Trace("[MCU] Sleep end");
     }
 
     void Restart() {

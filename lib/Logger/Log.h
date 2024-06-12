@@ -21,7 +21,7 @@ namespace Log
 
     void SetLogLevel(Level level);
     void SetLogFunction(std::function<void(char* msg)> logFunction);
-    void LoTrace(const char* format, ...);
+    void Trace(const char* format, ...);
     void Debug(const char* format, ...);
     void Info(const char* format, ...);
     void Warning(const char* format, ...);

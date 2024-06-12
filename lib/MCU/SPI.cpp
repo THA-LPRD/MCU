@@ -20,30 +20,30 @@ namespace MCU
         }
 
         switch (spiDevice) {
-            case SPIDevice::SPI0:
-                if (SPI0_Initialized) {
-                    Log::Error("[MCU] SPI0 already initialized");
-                    return nullptr;
-                }
-                break;
-            case SPIDevice::SPI1:
-                if (SPI1_Initialized) {
-                    Log::Error("[MCU] SPI1 already initialized");
-                    return nullptr;
-                }
-                break;
-            case SPIDevice::SPI2:
-                if (SPI2_Initialized) {
-                    Log::Error("[MCU] SPI2 already initialized");
-                    return nullptr;
-                }
-                break;
-            case SPIDevice::SPI3:
-                if (SPI3_Initialized) {
-                    Log::Error("[MCU] SPI3 already initialized");
-                    return nullptr;
-                }
-                break;
+        case SPIDevice::SPI0:
+            if (SPI0_Initialized) {
+                Log::Error("[MCU] SPI0 already initialized");
+                return nullptr;
+            }
+            break;
+        case SPIDevice::SPI1:
+            if (SPI1_Initialized) {
+                Log::Error("[MCU] SPI1 already initialized");
+                return nullptr;
+            }
+            break;
+        case SPIDevice::SPI2:
+            if (SPI2_Initialized) {
+                Log::Error("[MCU] SPI2 already initialized");
+                return nullptr;
+            }
+            break;
+        case SPIDevice::SPI3:
+            if (SPI3_Initialized) {
+                Log::Error("[MCU] SPI3 already initialized");
+                return nullptr;
+            }
+            break;
         }
 
         if (mosi == -1 && miso == -1) {
@@ -60,7 +60,7 @@ namespace MCU
     }
 
     SWSPI::SWSPI(SPIDevice spiDevice, int8_t mosi, int8_t miso, int8_t sck, int8_t cs) :
-            SPI(spiDevice, mosi, miso, sck, cs) {
+        SPI(spiDevice, mosi, miso, sck, cs) {
         GPIO::SetMode(sck, MCU::GPIO::Mode::Output);
         GPIO::SetMode(mosi, MCU::GPIO::Mode::Output);
         GPIO::SetMode(cs, MCU::GPIO::Mode::Output);
@@ -69,18 +69,18 @@ namespace MCU
         GPIO::Write(sck, 0);
 
         switch (spiDevice) {
-            case SPIDevice::SPI0:
-                SPI0_Initialized = true;
-                break;
-            case SPIDevice::SPI1:
-                SPI1_Initialized = true;
-                break;
-            case SPIDevice::SPI2:
-                SPI2_Initialized = true;
-                break;
-            case SPIDevice::SPI3:
-                SPI3_Initialized = true;
-                break;
+        case SPIDevice::SPI0:
+            SPI0_Initialized = true;
+            break;
+        case SPIDevice::SPI1:
+            SPI1_Initialized = true;
+            break;
+        case SPIDevice::SPI2:
+            SPI2_Initialized = true;
+            break;
+        case SPIDevice::SPI3:
+            SPI3_Initialized = true;
+            break;
         }
 
         m_Initialized = true;
@@ -94,7 +94,7 @@ namespace MCU
         if (m_MOSI == -1) {
             Log::Error("[MCU] Write operation attempted without MOSI line configured");
         }
-        Log::LoTrace("[MCU] SPI Write. Data: 0x%02X", data);
+        Log::Trace("[MCU] SPI Write. Data: 0x%02X", data);
         GPIO::Write(m_CS, 0);
         for (int i = 0; i < 8; i++) {
             GPIO::Write(m_MOSI, data & 0x80);
@@ -103,7 +103,7 @@ namespace MCU
             data <<= 1;
         }
         GPIO::Write(m_CS, 1);
-        Log::LoTrace("[MCU] SPI Write complete");
+        Log::Trace("[MCU] SPI Write complete");
     }
 
     uint8_t SWSPI::Read() {
@@ -115,7 +115,7 @@ namespace MCU
             Log::Error("[MCU] Read operation attempted without MISO line configured");
             return 0;
         }
-        Log::LoTrace("[MCU] SPI Read.");
+        Log::Trace("[MCU] SPI Read.");
         uint8_t data = 0;
         GPIO::Write(m_CS, 0);
         for (int i = 0; i < 8; i++) {
@@ -125,7 +125,7 @@ namespace MCU
             GPIO::Write(m_SCK, 0);
         }
         GPIO::Write(m_CS, 1);
-        Log::LoTrace("[MCU] SPI Read complete. Data: 0x%02X", data);
+        Log::Trace("[MCU] SPI Read complete. Data: 0x%02X", data);
         return data;
     }
 }
