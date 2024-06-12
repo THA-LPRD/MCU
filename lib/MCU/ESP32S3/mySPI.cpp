@@ -100,7 +100,7 @@ namespace MCU
             return;
         }
         Log::Trace("[MCU] SPI Write. Data: 0x%02X", data);
-        // GPIO::Write(m_CS, 0);
+        GPIO::Write(m_CS, 0);
         spi_transaction_t t;
         memset(&t, 0, sizeof(t));
         t.length = 8;

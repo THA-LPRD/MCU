@@ -6684,12 +6684,12 @@ namespace EPDL
         Log::Debug("[EPDL] Initializing WS_9IN7 display driver");
 
         // ::SPI.begin(EPDL::Pin::SCK, EPDL::Pin::DC, EPDL::Pin::MOSI, EPDL::Pin::CS);
-
+        // Control ChipSelect manually 
         m_SPIController = MCU::SPI::Create(static_cast<MCU::SPIDevice>(EPDL::SPI::SPIDevice),
                                            EPDL::Pin::MOSI,
                                            EPDL::Pin::DC,
                                            EPDL::Pin::SCK,
-                                           EPDL::Pin::CS,
+                                           -1,
                                            false);
 
         Reset();
