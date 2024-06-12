@@ -21,8 +21,9 @@ void FuncLog(char* msg) {
 Application* app = nullptr;
 
 void setup() {
-    MCU::Sleep(100);
+    MCU::Sleep(1000);
     Serial.begin(115200);
+     MCU::Sleep(1000);
     MCU::Clock::SetTime(2024, 1, 1, 0, 0, 0, -1);
     Log::SetLogFunction(FuncLog);
     Log::SetLogLevel(Log::Level::DEBUG);
@@ -54,7 +55,8 @@ void setup() {
     // EPD Part
     EPDL::Init("WS_9IN7"/*Config::Get(Config::Key::DisplayDriver)*/);
     EPDL::LoadDriver("WS_9IN7"/*'Config::Get(Config::Key::DisplayDriver)*/);
-
+    // EPDL::DrawImage(0, 0, 0);
+/*
     MCU::Sleep(100000);
 
     app = Application::Create(Config::Get(Config::Key::OperatingMode));
@@ -66,9 +68,9 @@ void setup() {
     Config::LoadDefault();
     app = Application::Create("Default");
     if (app->Init()) { exit(1); }
-
+*/
 }
 
 void loop() {
-    app->Run();
+    //app->Run();
 }

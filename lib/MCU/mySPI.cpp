@@ -1,4 +1,4 @@
-#include "SPI.h"
+#include "mySPI.h"
 #include "GPIO.h"
 #include <Log.h>
 #include <cstring>

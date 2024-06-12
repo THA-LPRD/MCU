@@ -2,7 +2,7 @@
 #include "Log.h"
 #include <MCU.h>
 #include <GPIO.h>
-#include <SPI.h>
+#include <mySPI.h>
 // #include "/Users/mario.wegmann/Library/Arduino15/packages/esp32/hardware/esp32/2.0.14/libraries/SPI/src/SPI.h"
 
 namespace EPDL
@@ -6683,26 +6683,28 @@ namespace EPDL
     WS_9IN7::WS_9IN7() : m_FrameBuffer(400, 400, 4/*m_Width, m_Height, m_PixelSize*/) {
         Log::Debug("[EPDL] Initializing WS_9IN7 display driver");
 
-        ::SPI.begin(EPDL::Pin::SCK, EPDL::Pin::DC, EPDL::Pin::MOSI, EPDL::Pin::CS);
+        // ::SPI.begin(EPDL::Pin::SCK, EPDL::Pin::DC, EPDL::Pin::MOSI, EPDL::Pin::CS);
+
+        m_SPIController = MCU::SPI::Create(static_cast<MCU::SPIDevice>(EPDL::SPI::SPIDevice),
+                                           EPDL::Pin::MOSI,
+                                           EPDL::Pin::DC,
+                                           EPDL::Pin::SCK,
+                                           EPDL::Pin::CS,
+                                           false);
 
         Reset();
 
         IT8951DevInfo gstI80DevInfo;
-        
 
-        // BeginFrame();
-        // SwapBuffers();
-        // EndFrame();
-
-        // Log::Debug("[EPDL] WS_9IN7 display driver initialized");
+        Log::Debug("[EPDL] WS_9IN7 display driver initialized");
         // }
 
 
             // Init
         GetIT8951SystemInfo(&gstI80DevInfo);
 
-        // Log::Debug("10 Zoll Breite: ");
-        // Log::Debug("%i", gstI80DevInfo.usPanelW);
+        Log::Debug("10 Zoll Breite: ");
+        Log::Debug("%i", gstI80DevInfo.usPanelW);
 
         // Log::Debug("10 Zoll Hoehe: ");
         // Log::Debug("%i", gstI80DevInfo.usPanelH);
@@ -6713,8 +6715,8 @@ namespace EPDL
 
         //Set to Enable I80 Packed mode
         IT8951WriteReg(WS_9IN7::I80::Cpcr, 0x0001);
-    }
 
+    }
 
     void WS_9IN7::GetIT8951SystemInfo(void* pBuf) {
         uint16_t* pusWord = (uint16_t*)pBuf;
@@ -6747,21 +6749,21 @@ namespace EPDL
 
         // m_SPIController->Write((uint8_t*) &wPreamble, 2);
 
-        ::SPI.transfer(wPreamble >> 8);
-        ::SPI.transfer(wPreamble);
+        // ::SPI.transfer(wPreamble >> 8);
+        // ::SPI.transfer(wPreamble);
 
-        // m_SPIController->Write(wPreamble >> 8);
-        // m_SPIController->Write(wPreamble);
+        m_SPIController->Write(wPreamble >> 8);
+        m_SPIController->Write(wPreamble);
 
         LCDWaitForReady();
 
         // m_SPIController->Write((uint8_t*) &usCmdCode, 2);
 
-        ::SPI.transfer(usCmdCode >> 8);
-        ::SPI.transfer(usCmdCode);
+        // ::SPI.transfer(usCmdCode >> 8);
+        // ::SPI.transfer(usCmdCode);
 
-        // m_SPIController->Write(usCmdCode >> 8);
-        // m_SPIController->Write(usCmdCode);
+        m_SPIController->Write(usCmdCode >> 8);
+        m_SPIController->Write(usCmdCode);
 
         MCU::GPIO::Write(EPDL::Pin::CS, 1);
     }
@@ -6784,13 +6786,17 @@ namespace EPDL
 
         MCU::GPIO::Write(EPDL::Pin::CS, 0);
 
-        ::SPI.transfer(wPreamble >> 8);
-        ::SPI.transfer(wPreamble);
+        m_SPIController->Write((uint8_t*) &wPreamble, 2);
+
+        // ::SPI.transfer(wPreamble >> 8);
+        // ::SPI.transfer(wPreamble);
 
         LCDWaitForReady();
 
-        ::SPI.transfer(usData >> 8);
-        ::SPI.transfer(usData);
+        m_SPIController->Write((uint8_t*) &usData, 2);
+
+        // ::SPI.transfer(usData >> 8);
+        // ::SPI.transfer(usData);
 
         MCU::GPIO::Write(EPDL::Pin::CS, 1);
     }
@@ -6806,29 +6812,41 @@ namespace EPDL
 
         // m_SPIController->Write((uint8_t*)&wPreamble, 2);
 
-        ::SPI.transfer(wPreamble >> 8);
-        ::SPI.transfer(wPreamble);
+        // ::SPI.transfer(wPreamble >> 8);
+        // ::SPI.transfer(wPreamble);
 
-        // m_SPIController->Write(wPreamble >> 8);
-        // m_SPIController->Write(wPreamble);
+        m_SPIController->Write(wPreamble >> 8);
+        m_SPIController->Write(wPreamble);
 
         LCDWaitForReady();
 
-        pwBuf[0] = ::SPI.transfer(0x00);  //dummy
-        pwBuf[0] = ::SPI.transfer(0x00);  //dummy
+        std::vector<uint8_t> temp;
 
-        // pwBuf[0] = m_SPIController->Read();  //dummy
-        // pwBuf[0] = m_SPIController->Read();  //dummy
+        // temp = m_SPIController->Read(2);
+
+        // pwBuf[0] = temp[0] << 8;
+        // pwBuf[0] |= temp[1];
+
+        // pwBuf[0] = ::SPI.transfer(0x00);  //dummy
+        // pwBuf[0] = ::SPI.transfer(0x00);  //dummy
+
+        pwBuf[0] = m_SPIController->Read();  //dummy
+        pwBuf[0] = m_SPIController->Read();  //dummy
 
         LCDWaitForReady();
 
         // Log::Debug("Response Count %i", ulSizeWordCnt);
 
+        // temp = m_SPIController->Read(ulSizeWordCnt*2);
+
         for (i = 0; i < ulSizeWordCnt; i++) {
-            pwBuf[i] = ::SPI.transfer(0x00) << 8;
-            pwBuf[i] |= ::SPI.transfer(0x00);
-            // pwBuf[i] = m_SPIController->Read() << 8;
-            // pwBuf[i] |= m_SPIController->Read();
+            
+
+            // pwBuf[i] = temp[i*2] << 8;
+            // pwBuf[i] |= temp[i*2+1];
+            
+            pwBuf[i] = m_SPIController->Read() << 8;
+            pwBuf[i] |= m_SPIController->Read();
         }
 
         MCU::GPIO::Write(EPDL::Pin::CS, 1);
@@ -6843,18 +6861,32 @@ namespace EPDL
 
         MCU::GPIO::Write(EPDL::Pin::CS, 0);
 
-        ::SPI.transfer(wPreamble >> 8);
-        ::SPI.transfer(wPreamble);
+        m_SPIController->Write((uint8_t*)&wPreamble, 2);
+
+        // ::SPI.transfer(wPreamble >> 8);
+        // ::SPI.transfer(wPreamble);
 
         LCDWaitForReady();
 
-        wRData = ::SPI.transfer(0x00);  //dummy
-        wRData = ::SPI.transfer(0x00);  //dummy
+        std::vector<uint8_t> temp;
+
+        temp = m_SPIController->Read(2); //dummy
+
+        // wRData = temp[0] << 8; //dummy
+        // wRData |= temp[1]; //dummy
+
+        // wRData = ::SPI.transfer(0x00);  //dummy
+        // wRData = ::SPI.transfer(0x00);  //dummy
 
         LCDWaitForReady();
 
-        wRData = ::SPI.transfer(0x00) << 8;
-        wRData |= ::SPI.transfer(0x00);
+        temp = m_SPIController->Read(2);
+
+        wRData = temp[0] << 8;
+        wRData |= temp[1];
+
+        // wRData = ::SPI.transfer(0x00) << 8;
+        // wRData |= ::SPI.transfer(0x00);
 
         MCU::GPIO::Write(EPDL::Pin::CS, 0);
 

@@ -2,7 +2,7 @@
 #ifndef MCU_ESP32SPI_H
 #define MCU_ESP32SPI_H
 
-#include "SPI.h"
+#include "mySPI.h"
 #include "driver/spi_master.h"
 
 namespace MCU

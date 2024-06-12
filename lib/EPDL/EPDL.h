@@ -6,7 +6,7 @@
 #include <memory>
 #include <cstdint>
 #include "ImageData.h"
-#include "SPI.h"
+#include "mySPI.h"
 
 namespace EPDL
 {
