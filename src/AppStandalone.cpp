@@ -5,6 +5,7 @@
 #include "Config.h"
 #include "EPDL.h"
 #include "Filesystem.h"
+#include "MCU.h"
 
 bool AppStandalone::Init() {
     Log::Debug("Initializing standalone application");
@@ -73,6 +74,9 @@ void AppStandalone::Run() {
         EPDL::SwapBuffers();
         EPDL::EndFrame();
         Log::Debug("Ready for next image");
+        Log::Debug("Going to sleep");
+        MCU::Sleep(1000);
+        MCU::DeepSleep();
     }
 }
 

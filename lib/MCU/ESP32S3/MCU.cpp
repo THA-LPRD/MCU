@@ -3,8 +3,10 @@
 #include "MCU.h"
 #include <Log.h>
 #include "esp_system.h"
+#include "esp_sleep.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+
 
 namespace MCU
 {
@@ -12,6 +14,11 @@ namespace MCU
         Log::Trace("[MCU] Sleep start. Length: %d ms", ms);
         vTaskDelay(ms / portTICK_PERIOD_MS);
         Log::Trace("[MCU] Sleep end");
+    }
+
+    void DeepSleep() {
+        Log::Info("[MCU] Deep sleep");
+        esp_deep_sleep_start();
     }
 
     void Restart() {
