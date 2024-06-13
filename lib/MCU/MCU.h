@@ -6,6 +6,7 @@
 namespace MCU
 {
     void Sleep(uint32_t ms);
+    void DeepSleep();
     void Restart();
 } // namespace MCU
 

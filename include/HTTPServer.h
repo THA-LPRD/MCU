@@ -16,6 +16,11 @@ public:
     void AddAPISetOpMode();
     void AddAPISetWiFiCred();
     void AddAPIUploadImg(std::function<void(std::string_view filePath)> callback = nullptr);
+    void AddAPIGetDisplayModule();
+    void AddAPISetDisplayModule();
+    void AddAPIGetOpMode();
+    void AddAPIGetDisplayWidth();
+    void AddAPIGetDisplayHeight();
     void AddAPIls();
     void AddAPIrm();
     void AddAPImkdir();

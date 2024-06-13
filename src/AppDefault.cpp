@@ -13,12 +13,18 @@ bool AppDefault::Init() {
 
     m_Server.Init();
     std::map<std::string, std::string> filesToServe = {
-            {"/index.html", "/www/Configuration.html"},
-            {"/utils.js",   "/www/utils.js"}
+            {"/index.html",               "/www/settings.html"},
+            {"/style.css",                "/www/style.css"},
+            {"/LPRD-Logo.webp",           "/www/LPRD-Logo.webp"},
+            {"/icons8-settings-25-w.png", "/www/icons8-settings-25-w.png"},
+            {"/utils.js",                 "/www/utils.js"},
     };
     m_Server.SetFilesToServe(filesToServe);
     m_Server.AddAPISetOpMode();
     m_Server.AddAPISetWiFiCred();
+    m_Server.AddAPIGetDisplayModule();
+    m_Server.AddAPISetDisplayModule();
+    m_Server.AddAPIGetOpMode();
 
     return true;
 }

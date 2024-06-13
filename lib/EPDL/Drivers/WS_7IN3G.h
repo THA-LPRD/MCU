@@ -37,6 +37,7 @@ namespace EPDL
         uint16_t m_Height = 480;
         uint8_t m_PixelSize = 2;
         FrameBuffer m_FrameBuffer;
+        ColorPalette m_ColorPalette;
     };
 } // namespace EPDL
 
