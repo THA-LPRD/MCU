@@ -1,7 +1,12 @@
 <style>
-    @import url ('./TWKEverett-Bold-web.ttf');
-    @import url ('./TWKEverett-Black-web.ttf');
-    @import url ('./TWKEverett-Regular-web.ttf');
+  @font-face {
+    font-family: 'TWKEverett-Bold';
+    src: url('./fonts/TWKEverett-Bold-web.ttf') format('truetype');
+}
+@font-face {
+    font-family: 'TWKEverett-Regular';
+    src: url('./fonts/TWKEverett-Regular-web.ttf') format('truetype');
+}
         .header-container {
             width: 100%;
             height: 20%;
@@ -15,7 +20,7 @@
             color: #ffffff;
     width:33%;
             padding: 5%;
-            font-family: TWKEverett-Bold, Arial;
+            font-family: 'TWKEverett-Bold', sans-serif;
             font-size: 60px;
         }
         .body-wrapper {
@@ -43,7 +48,7 @@
     padding-left: 2px;
             text-align: left;
             flex-direction: column;
-            font-family: TWKEverett-Bold;
+            font-family: 'TWKEverett-Bold' , sans-serif;
             font-size: 14px;
             justify-content: space-between;
             align-items: left;
@@ -86,7 +91,7 @@
             height: 51px;
             text-align: left;
             color: #FFFFFF;
-            font-family: TWKEverett-Bold, Arial;
+            font-family: 'TWKEverett-Bold', sans-serif;
             font-size: 12px;
     flex-direction: column;
     display:flex;
@@ -98,7 +103,7 @@
             color: #000000;
             padding-left: 5%;
             padding-bottom: 1%;
-            font-family: TWKEverett-Bold, Arial;
+            font-family: 'TWKEverett-Bold', sans-serif;
             font-weight: bold;
             text-align: left;
         }
@@ -135,7 +140,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            font-family: TWKEverett-Bold, Arial;
+            font-family: 'TWKEverett-Bold', sans-serif;
             font-size: 25px;
             font-weight: bold;
         }
