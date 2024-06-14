@@ -4,7 +4,7 @@
 #include "Drivers/WS_7IN3G.h"
 #include "Drivers/WS_9IN7.h"
 #include <Log.h>
-#include <mySPI.h>
+#include <SPI.h>
 #include <GPIO.h>
 
 namespace EPDL

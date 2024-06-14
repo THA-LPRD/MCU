@@ -7,7 +7,7 @@
 #include <unordered_map>
 #include <memory>
 #include "EPDL.h"
-#include <mySPI.h>
+#include <SPI.h>
 
 namespace EPDL
 {

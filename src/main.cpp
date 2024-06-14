@@ -16,18 +16,20 @@ void FuncLog(char* msg) {
     char time_str[18];
     strftime(time_str, 18, "%y-%m-%d %H:%M:%S", timeinfo);
     std::string log_msg = "[" + std::string(time_str) + "] - " + std::string(msg);
-    Serial.println(log_msg.c_str());
+    printf("%s\n", log_msg.c_str());
 }
 Application* app = nullptr;
 
 void setup() {
-    MCU::Sleep(1000);
-    Serial.begin(115200);
-     MCU::Sleep(1000);
     MCU::Clock::SetTime(2024, 1, 1, 0, 0, 0, -1);
     Log::SetLogFunction(FuncLog);
     Log::SetLogLevel(Log::Level::DEBUG);
-    Log::Debug("Starting Serial");
+
+    //Wait for serial connect
+    for (int i = 0; i < 5; i++) {
+        delay(1000);
+        Log::Debug("Waiting for serial connection");
+    }
     
     // MCU::GPIO::SetMode(Config::Pin::RST, MCU::GPIO::Mode::InputPullup);
     MCU::GPIO::SetMode(MCU::GPIO::BTN1, MCU::GPIO::Mode::InputPullup);
@@ -55,7 +57,7 @@ void setup() {
     // EPD Part
     EPDL::Init("WS_9IN7"/*Config::Get(Config::Key::DisplayDriver)*/);
     EPDL::LoadDriver("WS_9IN7"/*'Config::Get(Config::Key::DisplayDriver)*/);
-    // EPDL::DrawImage(0, 0, 0);
+    EPDL::DrawImage(0, 0, 0);
 /*
     MCU::Sleep(100000);
 

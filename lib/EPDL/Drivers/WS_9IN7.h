@@ -33,9 +33,9 @@ namespace EPDL
             SysRegBase = 0x0000,
             Cpcr = (SysRegBase + 0x04),
             //I80 User defined command code
-            UsdefCmdDpy_Area = 0x0034, 
-            UsdefCmdGet_Dev_Info = 0x0302, 
-            UsdefCmdDPY_Buf_Area = 0x0037, 
+            UsdefCmdDpy_Area = 0x0034,
+            UsdefCmdGet_Dev_Info = 0x0302,
+            UsdefCmdDPY_Buf_Area = 0x0037,
         };
 
         enum IT8951 {
@@ -83,14 +83,13 @@ namespace EPDL
             LUT0IMXY = (DisplayRegBase + 0x180),   //LUT0 Image buffer X/Y offset Reg
             LUTAFSR = (DisplayRegBase + 0x224),    //LUT Status Reg (status of All LUT Engines)
 
-//-------Memory Converter Registers----------------
-Mcsr_Base_Addr = 0x0200,
-Mcsr = (Mcsr_Base_Addr + 0x0000),
-Lisar = (Mcsr_Base_Addr + 0x0008),
+            //-------Memory Converter Registers----------------
+            Mcsr_Base_Addr = 0x0200,
+            Mcsr = (Mcsr_Base_Addr + 0x0000),
+            Lisar = (Mcsr_Base_Addr + 0x0008),
         };
 
-        struct IT8951DevInfo
-        {
+        struct IT8951DevInfo {
             uint16_t usPanelW;
             uint16_t usPanelH;
             uint16_t usImgBufAddrL;

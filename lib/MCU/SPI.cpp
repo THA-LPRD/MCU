@@ -1,4 +1,4 @@
-#include "mySPI.h"
+#include "SPI.h"
 #include "GPIO.h"
 #include <Log.h>
 #include <cstring>
@@ -50,8 +50,8 @@ namespace MCU
             Log::Error("[MCU] Invalid SPI configuration. MOSI and MISO cannot both be -1");
             return nullptr;
         }
-        if (sck == -1 || cs == -1) {
-            Log::Error("[MCU] Invalid SPI configuration. SCK and CS must be configured");
+        if (sck == -1) {
+            Log::Error("[MCU] Invalid SPI configuration. SCK cannot be -1");
             return nullptr;
         }
 
