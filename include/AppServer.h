@@ -13,6 +13,7 @@ public:
     void Run() override;
 private:
     bool SetupWiFi();
+    bool DisconnectWiFi();
 private:
     DNSServer m_DNSServer;
     std::string m_ImagePath;

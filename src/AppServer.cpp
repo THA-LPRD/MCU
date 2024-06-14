@@ -13,17 +13,8 @@ bool AppServer::Init() {
 
     SetupWiFi();
 
-    m_Server.Init();
-    std::map<std::string, std::string> filesToServe = {
-            {"/index.html",         "/www/indexClient.html"},
-            {"/style.css",          "/www/style.css"},
-            {"/LPRD-Logo.webp",     "/www/LPRD-Logo.webp"},
-            {"/html2canvas.min.js", "/www/html2canvas.min.js"},
-            {"/utils.js",           "/www/utils.js"}
-    };
-    m_Server.SetFilesToServe(filesToServe);
-    m_Server.AddAPISetOpMode();
-    m_Server.AddAPISetWiFiCred();
+    
+    
     m_Server.AddAPIUploadImg([this](std::string_view filePath) {
         Log::Debug("Current image path: %s", m_ImagePath.c_str());
         if (m_ImagePath != "") {
@@ -46,28 +37,32 @@ bool AppServer::Init() {
         m_ProcessImage = true;
     });
 
+    DisconnectWiFi();
     return true;
 }
 
 void AppServer::Run() {
-    m_DNSServer.processNextRequest();
-    if (m_ProcessImage) {
-        m_ProcessImage = false;
-        EPDL::BeginFrame();
-        EPDL::DrawImage(m_ImageHandle, 0, 0);
-        EPDL::SwapBuffers();
-        EPDL::EndFrame();
-    }
 }
 
 bool AppServer::SetupWiFi() {
     Log::Debug("Setting up WiFi");
 
-    WiFi.softAP(Config::Get(Config::Key::WiFiSSID).c_str(), Config::Get(Config::Key::WiFiPassword).c_str());
-    Log::Info("WiFi AP started: %s", Config::Get(Config::Key::WiFiSSID).c_str());
-    Log::Info("IP address: %s", WiFi.softAPIP().toString().c_str());
+    WiFi.begin(Config::Get(Config::Key::WiFiSSID).c_str(), Config::Get(Config::Key::WiFiPassword).c_str());
+    while (WiFi.status() != WL_CONNECTED) {
+        delay(500);
+        Log::Debug("Connecting to WiFi...");
+    }
 
-    Log::Debug("Setting up DNS server");
-    m_DNSServer.start(53, "*", WiFi.softAPIP());
+    Log::Info("WiFi connected to: %s", Config::Get(Config::Key::WiFiSSID).c_str());
+    Log::Info("IP address: %s", WiFi.localIP().toString().c_str());
+
+    /* Log::Debug("Setting up DNS server");
+    m_DNSServer.start(53, "*", WiFi.softAPIP()); */
+    return true;
+}
+
+bool AppServer::DisconnectWiFi() {
+    Log::Debug("Closing WiFi");
+    WiFi.disconnect();
     return true;
 }
