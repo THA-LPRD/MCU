@@ -52,7 +52,11 @@ void setup() {
     }
 
     app = Application::Create(Config::Get(Config::Key::OperatingMode));
-    if (app->Init()) { return; }
+    if (app->Init()) { 
+        // All work done, getting to sleep. 
+        
+        return; 
+    }
 
     Log::Fatal("Failed to initialize application. Starting default app");
     delete app;

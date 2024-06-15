@@ -2,6 +2,7 @@
 #include "Application.h"
 #include "AppStandalone.h"
 #include "AppNetwork.h"
+#include "AppServer.h"
 #include "AppDefault.h"
 #include "Log.h"
 #include "MCU.h"
@@ -19,8 +20,7 @@ Application* Application::Create(std::string_view mode) {
         app = new AppNetwork();
     }
     else if (mode == "Server") {
-        // TODO Implement AppServer
-        // app = new AppServer();
+        app = new AppServer();
     }
     else {
         app = new AppDefault();
