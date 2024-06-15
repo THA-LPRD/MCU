@@ -34,7 +34,6 @@ namespace EPDL
         // Set SPI Devices inactive
         MCU::GPIO::Write(EPDL::Pin::CS, 1);
         MCU::GPIO::Write(EPDL::Pin::SCK, 0);
-//        DEV_Module_Init();
         return 0;
     }
 

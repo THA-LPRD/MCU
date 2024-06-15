@@ -57,8 +57,11 @@ void setup() {
     // EPD Part
     EPDL::Init("WS_9IN7"/*Config::Get(Config::Key::DisplayDriver)*/);
     EPDL::LoadDriver("WS_9IN7"/*'Config::Get(Config::Key::DisplayDriver)*/);
+    EPDL::BeginFrame();
     EPDL::DrawImage(0, 0, 0);
-/*
+    EPDL::SwapBuffers();
+    EPDL::EndFrame();
+    /*
     MCU::Sleep(100000);
 
     app = Application::Create(Config::Get(Config::Key::OperatingMode));

@@ -18,28 +18,28 @@ namespace MCU
 
     ESP32S3SPI::ESP32S3SPI(SPIDevice spiDevice, int8_t mosi, int8_t miso, int8_t sck, int8_t cs) :
             ESP32S3SPI(spiDevice, mosi, miso, sck, cs,
-                     spi_bus_config_t{
-                             .mosi_io_num = mosi,
-                             .miso_io_num = miso,
-                             .sclk_io_num = sck,
-                             .quadwp_io_num = -1,
-                             .quadhd_io_num = -1,
-                             .max_transfer_sz = 4094,
-                     },
-                     spi_device_interface_config_t{
-                             .mode = 0,                          // SPI mode 0
-                             .clock_speed_hz = 4 * 1000 * 1000,  // Clock out at 4 MHz
-                             .spics_io_num = cs,                 // CS pin
-                             .queue_size = 7,                    // We want to be able to queue 7 transactions at a time
-                     }
+                       spi_bus_config_t{
+                               .mosi_io_num = mosi,
+                               .miso_io_num = miso,
+                               .sclk_io_num = sck,
+                               .quadwp_io_num = -1,
+                               .quadhd_io_num = -1,
+                               .max_transfer_sz = 4094,
+                       },
+                       spi_device_interface_config_t{
+                               .mode = 0,                             // SPI mode 0
+                               .clock_speed_hz = SPI_MASTER_FREQ_10M, // Clock out at 10 MHz
+                               .spics_io_num = cs,                    // CS pin
+                               .queue_size = 7,                       // We want to be able to queue 7 transactions at a time
+                       }
             ) {}
     ESP32S3SPI::ESP32S3SPI(SPIDevice spiDevice,
-                       int8_t mosi,
-                       int8_t miso,
-                       int8_t sck,
-                       int8_t cs,
-                       spi_bus_config_t buscfg,
-                       spi_device_interface_config_t devcfg) : SPI(spiDevice, mosi, miso, sck, cs) {
+                           int8_t mosi,
+                           int8_t miso,
+                           int8_t sck,
+                           int8_t cs,
+                           spi_bus_config_t buscfg,
+                           spi_device_interface_config_t devcfg) : SPI(spiDevice, mosi, miso, sck, cs) {
         esp_err_t ret;
         switch (spiDevice) {
             case SPI0:
@@ -178,7 +178,7 @@ namespace MCU
             return {};
         }
         Log::Trace("[MCU] SPI Read.");
-        std::vector <u_int8_t> rx_data;
+        std::vector<u_int8_t> rx_data;
         rx_data.reserve(length);
 
         spi_transaction_t t;

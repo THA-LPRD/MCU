@@ -93,6 +93,8 @@ namespace EPDL
         BeginFrame();
         SwapBuffers();
         EndFrame();
+        delete m_SPIController;
+        m_SPIController = nullptr;
         Log::Debug("[EPDL] WS_7IN3G display driver deinitialized");
     }
 
