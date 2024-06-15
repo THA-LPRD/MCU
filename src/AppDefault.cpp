@@ -22,6 +22,7 @@ bool AppDefault::Init() {
     m_Server.SetFilesToServe(filesToServe);
     m_Server.AddAPISetOpMode();
     m_Server.AddAPISetWiFiCred();
+    m_Server.AddAPISetServerURL();
     m_Server.AddAPIGetDisplayModule();
     m_Server.AddAPISetDisplayModule();
     m_Server.AddAPIGetOpMode();

@@ -94,6 +94,33 @@ void HTTPServer::AddAPISetWiFiCred() {
     m_Server.on("/api/v1/SetWiFiCred", HTTP_POST, SetWiFiCredHandler);
 }
 
+void HTTPServer::AddAPISetServerURL() {
+    Log::Debug("[HTTPServer] Adding API endpoint /api/v1/SetServerURL");
+    PsychicWebHandler* SetServerURLHandler = new PsychicWebHandler();
+    SetServerURLHandler->onRequest([](PsychicRequest* request) {
+        Log::Debug("[HTTPServer] Received SetServerURL request from client %s",
+            request->client()->remoteIP().toString().c_str());
+        Log::Trace("[HTTPServer] Body: %s", request->body().c_str());
+
+        if (!request->hasParam("url")) {
+            Log::Debug("[HTTPServer] Invalid request, missing parameters");
+            return request->reply(400, "text/plain", "Missing URL");
+        }
+
+        PsychicWebParameter* pURL = request->getParam("url");
+
+        if (!Config::Set(Config::Key::ServerURL, pURL->value().c_str())) {
+            Log::Error("[HTTPServer] Invalid Server URL");
+            return request->reply(400, "text/plain", "Invalid Server URL");
+        }
+
+        Log::Debug("[HTTPServer] Server URL set to %s", pURL->value().c_str());
+        Config::Save();
+        return request->reply(200, "text/plain", "Server URL set. Please restart the device.");
+        });
+    m_Server.on("/api/v1/SetServerURL", HTTP_POST, SetServerURLHandler);
+}
+
 void HTTPServer::AddAPIUploadImg(std::function<void(std::string_view filePath)> onUpload) {
     Log::Debug("[HTTPServer] Adding API endpoint /api/v1/UploadImg");
     if (!MCU::Filesystem::exists("/upload")) { MCU::Filesystem::mkdir("/upload"); }

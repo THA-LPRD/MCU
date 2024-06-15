@@ -10,6 +10,7 @@
     <script type="text/javascript">
         window.onload = function () {
             SetupSetWiFiCredForm();
+            SetupSetServerURLForm();
             GetOpMode();
             GetDisplayModule();
         };
@@ -62,6 +63,15 @@
             });
         }
 
+        function SetupSetServerURLForm() {
+            const form = document.getElementById('SetServerURL-form');
+            form.querySelector('#url').addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') {
+                    SetServerURL();
+                }
+            });
+        }
+
         async function SetOpMode() {
             const form = document.getElementById('SetOpMode-form');
             const opmode = form.querySelector('#opmode').value;
@@ -100,6 +110,19 @@
             }
         }
 
+        async function SetServerURL() {
+            const form = document.getElementById('SetServerURL-form');
+            const url = form.querySelector('#url').value;
+            const response = await SubmitFormData('/api/v1/SetServerURL', {url});
+            const responseElement = document.getElementById('SetServerURL-response');
+            if (responseElement) {
+                responseElement.innerText = response;
+            }
+            else {
+                console.error('Response element for SetServerURL not found.');
+            }
+        }
+
         async function restart() {
              try {
              const response = await fetch('/api/v1/restart', {
@@ -131,7 +154,7 @@
         }
 
 
-        #responseModule, #responseMode, #responseWiFi {
+        #responseModule, #responseMode, #responseWiFi, #responseURL {
                 color:#FF0350;
                 font-style: bold;
                 font-style: italic;
@@ -218,6 +241,16 @@
                 </form>
                     <button onclick="SetWiFiCred()">Speichern</button>
                 <p id="SetWiFiCred-response"></p>
+            </div>
+            <h3>4. Server URL:</h3>
+            <div id="responseURL"></div>
+            <div id="SetServerURL-form">
+                <form>
+                    <label for="url">URL:</label><br>
+                    <input type="text" id="url" name="url" required><br><br>
+                </form>
+                    <button onclick="SetServerURL()">Speichern</button>
+                <p id="SetServerURL-response"></p>
             </div>
         </main>
     </div>
