@@ -35,7 +35,7 @@ void setup() {
     MCU::GPIO::SetMode(MCU::GPIO::BTN1, MCU::GPIO::Mode::InputPullup);
 
     Log::Debug("Starting File System");
-    /*
+    
     MCU::Filesystem::Init();
 
     Config::Load();
@@ -49,19 +49,19 @@ void setup() {
     else {
         Log::Debug("Reset button not pressed. Continuing Setup.");
     }
-    */
+    
     // Power Peripherie on
-    MCU::GPIO::SetMode(MCU::GPIO::VCC, MCU::GPIO::Mode::Output);
-    MCU::GPIO::Write(MCU::GPIO::VCC, 1);
+    // MCU::GPIO::SetMode(MCU::GPIO::VCC, MCU::GPIO::Mode::Output);
+    // MCU::GPIO::Write(MCU::GPIO::VCC, 1);
 
     // EPD Part
-    EPDL::Init("WS_9IN7"/*Config::Get(Config::Key::DisplayDriver)*/);
-    EPDL::LoadDriver("WS_9IN7"/*'Config::Get(Config::Key::DisplayDriver)*/);
-    EPDL::DrawImage(0, 0, 0);
-/*
-    MCU::Sleep(100000);
+    EPDL::Init("WS_7IN3G"/*Config::Get(Config::Key::DisplayDriver)*/);
+    EPDL::LoadDriver("WS_7IN3G"/*'Config::Get(Config::Key::DisplayDriver)*/);
+    // EPDL::DrawImage(0, 0, 0);
 
-    app = Application::Create(Config::Get(Config::Key::OperatingMode));
+    // MCU::Sleep(100000);
+
+    app = Application::Create("Server");//Config::Get(Config::Key::OperatingMode));
 
     if (app->Init()) { return; }
 
@@ -70,9 +70,9 @@ void setup() {
     Config::LoadDefault();
     app = Application::Create("Default");
     if (app->Init()) { exit(1); }
-*/
+
 }
 
 void loop() {
-    //app->Run();
+    app->Run();
 }
