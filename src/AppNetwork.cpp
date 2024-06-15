@@ -17,11 +17,14 @@ bool AppNetwork::Init() {
 
     m_Server.Init();
     std::map<std::string, std::string> filesToServe = {
-            {"/index.html",         "/www/indexClient.html"},
-            {"/style.css",          "/www/style.css"},
-            {"/LPRD-Logo.webp",     "/www/LPRD-Logo.webp"},
-            {"/html2canvas.min.js", "/www/html2canvas.min.js"},
-            {"/utils.js",           "/www/utils.js"}
+            {"/index.html",               "/www/index.html"},
+            {"/settings.html",            "/www/settings.html"},
+            {"/style.css",                "/www/style.css"},
+            {"/LPRD-Logo.webp",           "/www/LPRD-Logo.webp"},
+            {"/icons8-settings-25-w.png", "/www/icons8-settings-25-w.png"},
+            {"/html2canvas.min.js",       "/www/html2canvas.min.js"},
+            {"/utils.js",                 "/www/utils.js"},
+            {"/script.js",                "/www/script.js"}
     };
     m_Server.SetFilesToServe(filesToServe);
     m_Server.AddAPISetOpMode();
@@ -41,12 +44,14 @@ bool AppNetwork::Init() {
             return;
         }
         m_ImagePath = filePath;
-        m_ImageHandle = EPDL::CreateImage(std::make_unique<EPDL::ImageData>(MCU::Filesystem::GetPath(filePath),
-                                                                            EPDL::GetWidth(),
-                                                                            EPDL::GetHeight(),
-                                                                            3));
+        m_ImageHandle = EPDL::CreateImage(std::make_unique<EPDL::ImageData>(MCU::Filesystem::GetPath(filePath)));
         m_ProcessImage = true;
     });
+    m_Server.AddAPIGetDisplayModule();
+    m_Server.AddAPISetDisplayModule();
+    m_Server.AddAPIGetOpMode();
+    m_Server.AddAPIGetDisplayWidth();
+    m_Server.AddAPIGetDisplayHeight();
 
     return true;
 }

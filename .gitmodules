@@ -1,0 +1,6 @@
+[submodule "lib/PNGdec"]
+	path = lib/PNGdec
+	url = git@github.com:THA-LPRD/PNGdec.git
+[submodule "lib/PsychicHttp"]
+	path = lib/PsychicHttp
+	url = git@github.com:THA-LPRD/PsychicHttp.git

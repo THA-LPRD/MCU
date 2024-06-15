@@ -3,9 +3,9 @@
 #include "MCU.h"
 #include <Log.h>
 #include "esp_system.h"
+#include "esp_sleep.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-#include <esp_sleep.h>
 
 namespace MCU
 {
@@ -24,6 +24,11 @@ namespace MCU
         Log::Trace("[MCU] Light sleep start");
         esp_light_sleep_start();
         Log::Trace("[MCU] Light sleep end");
+    }
+
+    void DeepSleep() {
+        Log::Info("[MCU] Deep sleep");
+        esp_deep_sleep_start();
     }
 
     void Restart() {

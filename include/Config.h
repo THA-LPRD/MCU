@@ -11,7 +11,7 @@ namespace Config
 {
     namespace Pin
     {
-        constexpr uint8_t RST = 44;
+        constexpr uint8_t RST = 2;
     } // namespace Pin
 
     enum class Key {
@@ -34,7 +34,7 @@ namespace Config
         const std::unordered_map<Key, Item> m_Items = {
                 {
                         Key::OperatingMode, {
-                        Key::OperatingMode, "OperatingMode", "Standalone", [](std::string_view value) {
+                        Key::OperatingMode, "OperatingMode", "Default", [](std::string_view value) {
                             return value == "Standalone" ||
                                    value == "Network" ||
                                    value == "Server" ||

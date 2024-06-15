@@ -30,13 +30,13 @@ namespace EPDL
 
 #ifdef MCU_ESP32S3
     enum Pin : uint8_t {
-            BUSY = 1,
-            RST = 2,
-            DC = 3,
-            CS = 4,
-            SCK = 7,
-            MOSI = 9
-        };
+        BUSY = 1,
+        RST = 2,
+        DC = 3,
+        CS = 4,
+        SCK = 7,
+        MOSI = 9
+    };
 #endif
 
     int Init(std::string_view type);
