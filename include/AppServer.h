@@ -3,6 +3,7 @@
 
 #include "Application.h"
 #include <DNSServer.h>
+#include <HTTPClient.h>
 #include <EPDL.h>
 
 class AppServer : public Application {
@@ -14,6 +15,12 @@ public:
 private:
     bool SetupWiFi();
     bool DisconnectWiFi();
+    bool CheckRegistered(uint8_t *mac);
+    bool RegisterDisplay(uint8_t *mac);
+    String GetNewConfig(uint8_t *mac);
+    std::string GetNewImage(String imageURLPath);
+    void DisplayImage(std::string path);
+
 private:
     DNSServer m_DNSServer;
     std::string m_ImagePath;
