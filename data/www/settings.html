@@ -135,6 +135,8 @@
                 color:#FF0350;
                 font-style: bold;
                 font-style: italic;
+                margin-left: 20px;
+                margin-right: 20px;
             }
 
         #home {
@@ -176,50 +178,55 @@
 
         <main>
             <h2><u>Einstellungen</u></h2>
-
-            <h3>1. Modus:</h3>
-            <div id="responseMode"></div>
-            <p class="text">Sie befinden sich im: <span id="operatingMode"></span>-Modus</p>
-            <div id="SetOpMode-form">
-                <select id="opmode" name="opmode" required>
-                    <option value="Standalone">Standalone-Modus</option>
-                    <option value="Network">Netzwerk-Modus</option>
-                    <option value="Server">Server</option>
-                </select>
-                <button onclick="SetOpMode()">Speichern</button>
-                <p id="SetOpMode-response"></p>
-            </div>
-
-            <br><br>
-
-           
-            <h3>2. Display-Modul:</h3>
-            <div id="responseModule"></div>
-            <p class="text">Sie sind verbunden mit dem Display-Modul: <span id="displayModule"></span></p>
-            <div id="SetDisplayModule-form">
-                <select id="displayModule" name="displayModule" required>
-                    <option value="WS_7IN3G">Waveshare 7.3" 4 color</option>
-                    <option value="WS_9IN7">Waveshare 9.7" 2 color</option>
-                </select>
-                <button onclick="SetDisplayModule()">Speichern</button>
-                <p id="SetDisplayModule-response"></p>
-            </div>
-
-            <br><br>
-
-            <h3>3. WiFi Konfiguration:</h3>
-            <div id="responseWiFi"></div>
-            <div id="SetWiFiCred-form">
-                <form>
-                    <label for="ssid">SSID:</label><br>
-                    <input type="text" id="ssid" name="ssid" required><br><br>
-                    <label for="password">Passwort:</label><br>
-                    <input type="password" id="password" name="password" required><br><br>
-                </form>
-                    <button onclick="SetWiFiCred()">Speichern</button>
-                <p id="SetWiFiCred-response"></p>
-            </div>
+            <table>
+                <tr>
+                    <td>
+                        <h3>1. Modus:</h3>
+                        <div id="responseMode"></div>
+                        <p class="text">Sie befinden sich im: <span id="operatingMode"></span>-Modus</p>
+                        <div id="SetOpMode-form">
+                            <select id="opmode" name="opmode" required>
+                                <option value="Standalone">Standalone-Modus</option>
+                                <option value="Network">Netzwerk-Modus</option>
+                                <option value="Server">Server</option>
+                            </select>
+                            <button onclick="SetOpMode()">Speichern</button>
+                            <p id="SetOpMode-response"></p>
+                        </div>
+                    </td>
+                    <td>
+                        <h3>2. Display-Modul:</h3>
+                        <div id="responseModule"></div>
+                        <p class="text">Sie sind verbunden mit dem Display-Modul: <span id="displayModule"></span></p>
+                        <div id="SetDisplayModule-form">
+                            <select id="displayModule" name="displayModule" required>
+                                <option value="WS_7IN3G">Waveshare 7.3" 4 color</option>
+                                <option value="WS_9IN7">Waveshare 9.7" 2 color</option>
+                            </select>
+                            <button onclick="SetDisplayModule()">Speichern</button>
+                            <p id="SetDisplayModule-response"></p>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <h3>3. WiFi Konfiguration:</h3>
+                        <div id="responseWiFi"></div>
+                        <div id="SetWiFiCred-form">
+                            <form>
+                                <label for="ssid">SSID:</label><br>
+                                <input type="text" id="ssid" name="ssid" required><br><br>
+                                <label for="password">Passwort:</label><br>
+                                <input type="password" id="password" name="password" required><br><br>
+                            </form>
+                            <button onclick="SetWiFiCred()">Speichern</button>
+                            <p id="SetWiFiCred-response"></p>
+                        </div>
+                    </td>
+                </tr>
+            </table>
         </main>
+        
     </div>
 
     <footer>

@@ -1,7 +1,12 @@
 <style>
-    @import url ('./TWKEverett-Bold-web.ttf');
-    @import url ('./TWKEverett-Black-web.ttf');
-    @import url ('./TWKEverett-Regular-web.ttf');
+@font-face {
+    font-family: 'TWKEverett-Bold';
+    src: url('./fonts/TWKEverett-Bold-web.ttf') format('truetype');
+}
+@font-face {
+    font-family: 'TWKEverett-Regular';
+    src: url('./fonts/TWKEverett-Regular-web.ttf') format('truetype');
+}
         .header-container {
             width: 100%;
             height: 20%;
@@ -15,7 +20,7 @@
             color: #ffffff;
             width:33%;
             padding: 5%;
-            font-family: TWKEverett-Bold,sans-serif;
+            font-family: 'TWKEverett-Bold',sans-serif;
             font-size: 60px;
         }
         .body-wrapper {
@@ -27,9 +32,8 @@
     
         .body-item {
             color: #000000;
-
             padding-bottom: 1%;
-            font-family: TWKEverett-Bold, sans-serif;
+            font-family: 'TWKEverett-Bold', sans-serif;
             font-weight: bold;
 
         }
