@@ -8,7 +8,7 @@ namespace EPDL
     class IT8951E : public EPDL::Driver {
     public:
         IT8951E();
-        ~IT8951E();
+        ~IT8951E() override;
         void DrawImage(ImageHandle handle, int x, int y) override = 0;
         void BeginFrame() override = 0;
         void EndFrame() override = 0;

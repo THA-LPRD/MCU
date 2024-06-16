@@ -10,7 +10,7 @@ namespace MCU
     class ESP32S3SPI : public SPI {
     public:
         ESP32S3SPI(SPIDevice spiDevice, int8_t mosi, int8_t miso, int8_t sck, int8_t cs);
-        ~ESP32S3SPI();
+        virtual ~ESP32S3SPI();
         void Write(uint8_t data) override;
         void Write(uint8_t* data, size_t length) override;
         uint8_t Read() override;

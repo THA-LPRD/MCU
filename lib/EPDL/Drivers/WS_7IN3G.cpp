@@ -88,10 +88,6 @@ namespace EPDL
         SendCommand(0x84);
         SendData(0x01);
 
-        BeginFrame();
-        SwapBuffers();
-        EndFrame();
-
         Log::Debug("[EPDL] WS_7IN3G display driver initialized");
     }
 

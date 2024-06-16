@@ -15,7 +15,7 @@ namespace EPDL
             Red = 0x3
         };
         WS_7IN3G();
-        ~WS_7IN3G();
+        ~WS_7IN3G() override;
         void DrawImage(ImageHandle handle, int x, int y) override;
         void BeginFrame() override;
         void EndFrame() override;

@@ -14,18 +14,9 @@ namespace EPDL
         static std::unique_ptr<Driver> m_Driver = nullptr;
     } // namespace
 
-    int Init(std::string_view type) {
+    int Init() {
         MCU::GPIO::SetMode(EPDL::Pin::BUSY, MCU::GPIO::Mode::Input); // Also HRDY Pin
         MCU::GPIO::SetMode(EPDL::Pin::RST, MCU::GPIO::Mode::Output);
-
-        if (type == "WS_7IN3G") {
-            MCU::GPIO::SetMode(EPDL::Pin::DC, MCU::GPIO::Mode::Output);
-        } else if (type == "WS_9IN7") {
-            // No DC Pin, instead we have a MISO Pin
-            MCU::GPIO::SetMode(EPDL::Pin::DC, MCU::GPIO::Mode::Input);
-        } else {
-            Log::Warning("[EPDL] Unknown display driver: %s", type.data());
-        }
 
         MCU::GPIO::SetMode(EPDL::Pin::SCK, MCU::GPIO::Mode::Output);
         MCU::GPIO::SetMode(EPDL::Pin::MOSI, MCU::GPIO::Mode::Output);
@@ -45,9 +36,11 @@ namespace EPDL
 
     void LoadDriver(std::string_view type) {
         if (type == "WS_7IN3G") {
+            MCU::GPIO::SetMode(EPDL::Pin::DC, MCU::GPIO::Mode::Output);
             m_Driver = std::make_unique<WS_7IN3G>();
         }
         else if (type == "WS_9IN7") {
+            MCU::GPIO::SetMode(EPDL::Pin::DC, MCU::GPIO::Mode::Input);
             m_Driver = std::make_unique<WS_9IN7>();
         } else {
             Log::Warning("[EPDL] Unknown display driver: %s", type.data());

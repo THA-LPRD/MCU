@@ -9,10 +9,20 @@
 
 namespace Config
 {
-    namespace Pin
-    {
-        constexpr uint8_t RST = 2;
-    } // namespace Pin
+#ifdef MCU_ESP32
+    // ESP32 Devmodule
+    enum Pin : uint8_t {
+        BTN1 = 2,
+        VCC = 43,
+    };
+#endif
+
+#ifdef MCU_ESP32S3
+    enum Pin : uint8_t {
+        BTN1 = 44,
+        VCC = 43,
+    };
+#endif
 
     enum class Key {
         OperatingMode,
@@ -34,44 +44,48 @@ namespace Config
         const std::unordered_map<Key, Item> m_Items = {
                 {
                         Key::OperatingMode, {
-                        Key::OperatingMode, "OperatingMode", "Default", [](std::string_view value) {
+                                                    Key::OperatingMode, "OperatingMode", "Default",      [](
+                                std::string_view value) {
                             return value == "Standalone" ||
                                    value == "Network" ||
                                    value == "Server" ||
                                    value == "Default";
                         }}},
                 {
-                        Key::WiFiSSID, {
-                        Key::WiFiSSID, "WiFiSSID", "THA-LPRD-001", [](std::string_view value) {
+                        Key::WiFiSSID,      {
+                                                    Key::WiFiSSID,      "WiFiSSID",      "THA-LPRD-001", [](
+                                std::string_view value) {
                             return value.length() > 0;
                         }}},
                 {
-                        Key::WiFiPassword, {
-                        Key::WiFiPassword, "WiFiPassword", "password", [](std::string_view value) {
+                        Key::WiFiPassword,  {
+                                                    Key::WiFiPassword,  "WiFiPassword",  "password",     [](
+                                std::string_view value) {
                             return value.length() >= 8;
                         }}},
                 {
                         Key::DisplayDriver, {
-                        Key::DisplayDriver, "DisplayDriver", "WS_7IN3G", [](std::string_view value) {
-                            return value == "WS_7IN3G" || 
+                                                    Key::DisplayDriver, "DisplayDriver", "WS_7IN3G",     [](
+                                std::string_view value) {
+                            return value == "WS_7IN3G" ||
                                    value == "WS_9IN7";
                         }}}
-                };
-                const std::unordered_map<std::string, Key> m_ReverseItems =[]() {
-                    std::unordered_map<std::string, Key> reverse;
-                    for (const auto &item: m_Items) {
-                        reverse[item.second.name] = item.first;
-                    }
-                    return reverse;
-                }();
-        } // namespace
+        };
+        const std::unordered_map<std::string, Key> m_ReverseItems = []() {
+            std::unordered_map<std::string, Key> reverse;
+            for (const auto &item: m_Items) {
+                reverse[item.second.name] = item.first;
+            }
+            return reverse;
+        }();
+    } // namespace
 
-        std::string GetDefault(Key key);
-        void LoadDefault();
-        void Load();
-        void Save();
-        bool Set(Key key, std::string_view value);
-        std::string Get(Key key);
-    } // namespace Config
+    std::string GetDefault(Key key);
+    void LoadDefault();
+    void Load();
+    void Save();
+    bool Set(Key key, std::string_view value);
+    std::string Get(Key key);
+} // namespace Config
 
 #endif /*CONFIG_H_*/

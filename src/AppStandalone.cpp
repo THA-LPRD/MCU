@@ -4,7 +4,7 @@
 #include "Log.h"
 #include "Config.h"
 #include "EPDL.h"
-#include "Filesystem.h"
+#include <Filesystem.h>
 #include "MCU.h"
 
 bool AppStandalone::Init() {
@@ -41,15 +41,6 @@ bool AppStandalone::Init() {
             return;
         }
         m_ImagePath = filePath;
-        // Does not fit in Stack hence crashes
-//        m_ImageHandle = EPDL::CreateImage(std::make_unique<EPDL::ImageData>(MCU::Filesystem::GetPath(filePath),
-//                                                                            EPDL::GetWidth(),
-//                                                                            EPDL::GetHeight(),
-//                                                                            3));
-//        m_ImageHandle = EPDL::CreateImage(std::make_unique<EPDL::ImageData>(filePath,
-//                                                                            EPDL::GetWidth(),
-//                                                                            EPDL::GetHeight(),
-//                                                                            3));
         m_ProcessImage = true;
     });
     m_Server.AddAPIGetDisplayModule();
@@ -65,7 +56,8 @@ void AppStandalone::Run() {
     if (m_ProcessImage) {
         m_ProcessImage = false;
         Log::Debug("Current image path: %s", m_ImagePath.c_str());
-        std::unique_ptr<EPDL::ImageData> imageData = std::make_unique<EPDL::ImageData>(MCU::Filesystem::GetPath(m_ImagePath));
+        std::unique_ptr<EPDL::ImageData> imageData = std::make_unique<EPDL::ImageData>(MCU::Filesystem::GetPath(
+                m_ImagePath));
         Log::Debug("Created Image");
         m_ImageHandle = EPDL::CreateImage(std::move(imageData));
         Log::Debug("Got handle: %d", m_ImageHandle);
@@ -76,13 +68,14 @@ void AppStandalone::Run() {
         Log::Debug("Ready for next image");
         Log::Debug("Going to sleep");
         MCU::Sleep(1000);
-        MCU::DeepSleep();
+//        MCU::DeepSleep();
     }
 }
 
 bool AppStandalone::SetupWiFi() {
     Log::Debug("Setting up WiFi");
 
+    WiFi.mode(WIFI_AP);
     WiFi.softAP(Config::Get(Config::Key::WiFiSSID).c_str(), Config::Get(Config::Key::WiFiPassword).c_str());
     Log::Info("WiFi AP started: %s", Config::Get(Config::Key::WiFiSSID).c_str());
     Log::Info("IP address: %s", WiFi.softAPIP().toString().c_str());

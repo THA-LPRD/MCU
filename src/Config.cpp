@@ -49,6 +49,7 @@ namespace Config
 
         for (JsonObject::iterator it = doc.as<JsonObject>().begin(); it != doc.as<JsonObject>().end(); ++it) {
             m_Config[m_ReverseItems.at(it->key().c_str())] = it->value().as<std::string>();
+            Log::Trace("[Config] Loaded %s: %s", it->key().c_str(), it->value().as<std::string>().c_str());
         }
 
         file.close();

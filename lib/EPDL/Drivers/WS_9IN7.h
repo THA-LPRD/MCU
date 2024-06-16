@@ -28,7 +28,7 @@ namespace EPDL
         };
 
         WS_9IN7();
-        ~WS_9IN7() = default;
+        ~WS_9IN7() override = default;
         void DrawImage(ImageHandle handle, int x, int y) override;
         void BeginFrame() override;
         void EndFrame() override;
@@ -36,7 +36,9 @@ namespace EPDL
     private:
         uint16_t m_Width = 1200;
         uint16_t m_Height = 825;
+        uint8_t m_PixelSize = 4;
         FrameBuffer m_FrameBuffer;
+        ColorPalette m_ColorPalette;
     };
 } // EPDL
 

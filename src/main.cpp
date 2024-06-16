@@ -30,50 +30,39 @@ void setup() {
         delay(1000);
         Log::Debug("Waiting for serial connection");
     }
-    //Wait for serial connect
-    for (int i = 0; i < 5; i++) {
-        delay(1000);
-        Log::Debug("Waiting for serial connection");
-    }
-
-    // MCU::GPIO::SetMode(Config::Pin::RST, MCU::GPIO::Mode::InputPullup);
-    MCU::GPIO::SetMode(MCU::GPIO::BTN1, MCU::GPIO::Mode::InputPullup);
 
     Log::Debug("Starting File System");
     MCU::Filesystem::Init();
 
-//    Config::Load();
-//    EPDL::Init();
-//    EPDL::LoadDriver(Config::Get(Config::Key::DisplayDriver));
-//
-//    if (MCU::GPIO::Read(MCU::GPIO::BTN1) == 1) {
-//        Log::Info("Reset button pressed. Loading default configuration.");
-//        Config::Set(Config::Key::OperatingMode, "Default");
-//        Config::Save();
-//    }
-//    else {
-//        Log::Debug("Reset button not pressed. Continuing Setup.");
-//    }
-//
-//    app = Application::Create(Config::Get(Config::Key::OperatingMode));
-//    if (app->Init()) { return; }
-//
-//    Log::Fatal("Failed to initialize application. Starting default app");
-//    delete app;
-//    Config::LoadDefault();
-//    app = Application::Create("Default");
-//    if (app->Init()) { exit(1); }
-    MCU::GPIO::SetMode(MCU::GPIO::VCC, MCU::GPIO::Mode::Output);
-    MCU::GPIO::Write(MCU::GPIO::VCC, 1);
+    Config::Load();
 
-    EPDL::Init(Config::Get(Config::Key::DisplayDriver));
-    EPDL::LoadDriver(Config::Get(Config::Key::DisplayDriver));
-    EPDL::BeginFrame();
-    EPDL::DrawImage(0, 0, 0);
-    EPDL::SwapBuffers();
-    EPDL::EndFrame();
+    MCU::GPIO::SetMode(Config::Pin::BTN1, MCU::GPIO::Mode::InputPullup);
+
+    if (MCU::GPIO::Read(Config::Pin::BTN1) == 0) {
+        Log::Info("Reset button pressed. Loading default configuration.");
+        Config::Set(Config::Key::OperatingMode, "Default");
+        Config::Save();
+    }
+    else {
+        Log::Debug("Reset button not pressed. Continuing Setup.");
+    }
+
+    app = Application::Create(Config::Get(Config::Key::OperatingMode));
+    if (app->Init() && Config::Get(Config::Key::OperatingMode) != "Default") {
+        MCU::GPIO::SetMode(Config::Pin::VCC, MCU::GPIO::Mode::Output);
+        MCU::GPIO::Write(Config::Pin::VCC, 1);
+        EPDL::Init();
+        EPDL::LoadDriver(Config::Get(Config::Key::DisplayDriver));
+        return;
+    }
+
+    Log::Fatal("Failed to initialize application. Starting default app");
+    delete app;
+    Config::LoadDefault();
+    app = Application::Create("Default");
+    if (app->Init()) { exit(1); }
 }
 
 void loop() {
-    //app->Run();
+    app->Run();
 }

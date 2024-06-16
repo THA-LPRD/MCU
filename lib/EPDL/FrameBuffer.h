@@ -8,15 +8,16 @@ namespace EPDL
 {
     class FrameBuffer {
     public:
-        FrameBuffer(uint16_t width, uint16_t height, uint8_t pixelSize);
+        FrameBuffer(uint16_t width, uint16_t height, uint8_t pixelSize, bool psram = true);
         ~FrameBuffer() = default;
         bool SetPixel(int x, int y, uint8_t color);
         uint8_t GetPixel(int x, int y) const;
         void ClearColor(const uint8_t color);
         inline uint8_t GetPixelSize() const { return m_PixelSize; }
-        inline const std::vector<std::vector<uint8_t>> &GetData() const { return m_Data; }
+        inline const uint8_t* GetData() const { return m_Data; }
     private:
-        std::vector<std::vector<uint8_t>> m_Data;
+        uint8_t* m_Data;
+        bool m_Allocated = false;
         uint16_t m_Width;
         uint16_t m_WidthBuffer;
         uint16_t m_Height;

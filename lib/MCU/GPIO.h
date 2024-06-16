@@ -11,22 +11,6 @@ namespace MCU { namespace GPIO
         InputPulldown = 2,
         Output = 3
     };
-
-    #ifdef MCU_ESP32
-    // ESP32 Devmodule
-    enum Pin : uint8_t {
-        BTN1 = 2,
-        VCC = 43,
-    };
-    #endif
-
-    #ifdef MCU_ESP32S3
-    enum Pin : uint8_t {
-        BTN1 = 44,
-        VCC = 43,
-        };
-    #endif
-
     void SetMode(uint8_t pin, uint8_t mode);
     void Write(uint8_t pin, uint8_t value);
     uint8_t Read(uint8_t pin);
