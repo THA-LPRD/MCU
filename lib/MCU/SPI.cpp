@@ -50,8 +50,8 @@ namespace MCU
             Log::Error("[MCU] Invalid SPI configuration. MOSI and MISO cannot both be -1");
             return nullptr;
         }
-        if (sck == -1 || cs == -1) {
-            Log::Error("[MCU] Invalid SPI configuration. SCK and CS must be configured");
+        if (sck == -1) {
+            Log::Error("[MCU] Invalid SPI configuration. SCK cannot be -1");
             return nullptr;
         }
 
@@ -106,6 +106,19 @@ namespace MCU
         Log::Trace("[MCU] SPI Write complete");
     }
 
+    void SWSPI::Write(uint8_t* data, size_t length) {
+        if (!m_Initialized) {
+            Log::Error("[MCU] SPI not initialized");
+            return;
+        }
+        if (m_MOSI == -1) {
+            Log::Error("[MCU] Write operation attempted without MOSI line configured");
+        }
+        for (size_t i = 0; i < length; i++) {
+            Write(data[i]);
+        }
+    }
+
     uint8_t SWSPI::Read() {
         if (!m_Initialized) {
             Log::Error("[MCU] SPI not initialized");
@@ -126,6 +139,23 @@ namespace MCU
         }
         GPIO::Write(m_CS, 1);
         Log::Trace("[MCU] SPI Read complete. Data: 0x%02X", data);
+        return data;
+    }
+
+    std::vector<u_int8_t> SWSPI::Read(size_t length) {
+        if (!m_Initialized) {
+            Log::Error("[MCU] SPI not initialized");
+            return {};
+        }
+        if (m_MISO != -1) {
+            Log::Error("[MCU] Read operation attempted without MISO line configured");
+            return {};
+        }
+        std::vector<u_int8_t> data;
+        data.reserve(length);
+        for (size_t i = 0; i < length; i++) {
+            data.push_back(Read());
+        }
         return data;
     }
 }

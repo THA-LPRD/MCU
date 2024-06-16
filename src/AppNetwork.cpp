@@ -69,6 +69,7 @@ void AppNetwork::Run() {
 bool AppNetwork::SetupWiFi() {
     Log::Debug("Setting up WiFi");
 
+    WiFi.mode(WIFI_AP_STA);
     WiFi.begin(Config::Get(Config::Key::WiFiSSID).c_str(), Config::Get(Config::Key::WiFiPassword).c_str());
     Log::Info("Connecting to WiFi: %s", Config::Get(Config::Key::WiFiSSID).c_str());
     Log::Debug("With password: %s", Config::Get(Config::Key::WiFiPassword).c_str());

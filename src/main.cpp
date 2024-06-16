@@ -21,12 +21,7 @@ void FuncLog(char* msg) {
 Application* app = nullptr;
 
 void setup() {
-    MCU::GPIO::SetMode(Config::Pin::RST, MCU::GPIO::Mode::InputPullup);
-    MCU::GPIO::SetMode(43, MCU::GPIO::Mode::Output);
-    MCU::GPIO::Write(43, 1);
-
     MCU::Clock::SetTime(2024, 1, 1, 0, 0, 0, -1);
-
     Log::SetLogFunction(FuncLog);
     Log::SetLogLevel(Log::Level::DEBUG);
 
@@ -35,14 +30,15 @@ void setup() {
         delay(1000);
         Log::Debug("Waiting for serial connection");
     }
+
     Log::Debug("Starting File System");
     MCU::Filesystem::Init();
 
     Config::Load();
-    EPDL::Init();
-    EPDL::LoadDriver(Config::Get(Config::Key::DisplayDriver));
 
-    if (MCU::GPIO::Read(Config::Pin::RST) == 1) {
+    MCU::GPIO::SetMode(Config::Pin::BTN1, MCU::GPIO::Mode::InputPullup);
+
+    if (MCU::GPIO::Read(Config::Pin::BTN1) == 0) {
         Log::Info("Reset button pressed. Loading default configuration.");
         Config::Set(Config::Key::OperatingMode, "Default");
         Config::Save();
@@ -52,7 +48,13 @@ void setup() {
     }
 
     app = Application::Create(Config::Get(Config::Key::OperatingMode));
-    if (app->Init()) { return; }
+    if (app->Init() && Config::Get(Config::Key::OperatingMode) != "Default") {
+        MCU::GPIO::SetMode(Config::Pin::VCC, MCU::GPIO::Mode::Output);
+        MCU::GPIO::Write(Config::Pin::VCC, 1);
+        EPDL::Init();
+        EPDL::LoadDriver(Config::Get(Config::Key::DisplayDriver));
+        return;
+    }
 
     Log::Fatal("Failed to initialize application. Starting default app");
     delete app;

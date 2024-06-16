@@ -1,6 +1,9 @@
 #ifndef MCU_SPI_H
 #define MCU_SPI_H
 
+#include <vector>
+#include <string>
+#include <string_view>
 #include <cstdint>
 
 namespace MCU
@@ -18,10 +21,12 @@ namespace MCU
     public:
         SPI(SPIDevice spiDevice, uint8_t mosi, uint8_t miso, uint8_t sck, uint8_t cs) :
                 m_SPIDevice(spiDevice), m_MOSI(mosi), m_MISO(miso), m_SCK(sck), m_CS(cs) {}
-        ~SPI() = default;
+        virtual ~SPI() = default;
         static SPI* Create(SPIDevice spiDevice, int8_t mosi, int8_t miso, int8_t sck, int8_t cs, bool swspi = false);
         virtual void Write(uint8_t data) = 0;
+        virtual void Write(uint8_t* data, size_t length) = 0;
         virtual uint8_t Read() = 0;
+        virtual std::vector<u_int8_t> Read(size_t length) = 0;
     protected:
         bool m_Initialized = false;
         SPIDevice m_SPIDevice;
@@ -36,9 +41,11 @@ namespace MCU
     class SWSPI : public SPI {
     public:
         SWSPI(SPIDevice spiDevice, int8_t mosi, int8_t miso, int8_t sck, int8_t cs);
-        ~SWSPI() = default;
+        ~SWSPI() override = default;
         void Write(uint8_t data) override;
+        void Write(uint8_t* data, size_t length) override;
         uint8_t Read() override;
+        std::vector<u_int8_t> Read(size_t length) override;
     };
 } // namespace MCU
 
