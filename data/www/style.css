@@ -155,7 +155,12 @@ a {
     max-width: 90%;
 }
 
-#scaledImageContainer img {
+#scaledImageContainer {
+    margin: auto;
+    max-width: 90%; /* Beschränkt die Breite des Bildes */
+}
+
+#scaledImageContainer2 {
     margin: auto;
     max-width: 90%; /* Beschränkt die Breite des Bildes */
 }

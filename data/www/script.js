@@ -122,11 +122,9 @@ let displayWidth, displayHeight;
         reader.onload = function(event) {
             var img = new Image();
             img.onload = function() {
-                const displayWidth = 800;
-                const displayHeight = 480;
 
-                // Überprüfen, ob die Breite und Höhe des Bildes 800x480px sind
-                if (img.width !== displayWidth || img.height !== displayHeight) {
+                // Überprüfen, ob die Breite und Höhe des Bildes displayWidth x displayHeight sind
+                if (img.width !== Number(displayWidth) || img.height !== Number(displayHeight)) {
                     alert('Das PNG ist nicht im richtigen Pixelformat für das angeschlossene Display');
                     return;
                 }
@@ -149,8 +147,6 @@ let displayWidth, displayHeight;
         
    }
 
-
-
    
    function displayImage(event) {
     var file = event.target.files[0];
@@ -164,17 +160,17 @@ let displayWidth, displayHeight;
         imageContainer.appendChild(img);
     }
     reader.readAsDataURL(file);
-}
+   }
 
-function convertToHTML() {
+   function convertToHTML() {
     var inputText = document.getElementById("inputText").value;
     var preview = document.getElementById("preview");
 
     // Set the preview content
     preview.innerHTML = inputText;
-}
+   }
 
-function scaleImage() {
+   function scaleImage() {
     var preview = document.getElementById('preview');
     var scaledImageContainer = document.getElementById('scaledImageContainer');
 
@@ -194,7 +190,7 @@ function scaleImage() {
     html2canvas(preview, { scale: 1 }).then(canvas => {
         var img = document.createElement('img');
         img.src = canvas.toDataURL('image/png');
-        //img.style.maxWidth = '100%'; // Beschränke die Breite des Bildes
+        img.style.maxWidth = '100%'; // Beschränke die Breite des Bildes
         
         // Set the scaled content to the scaledImageContainer
         scaledImageContainer.innerHTML = ''; // Entferne vorherige Inhalte
@@ -204,7 +200,7 @@ function scaleImage() {
         preview.style.width = originalWidth;
         preview.style.height = originalHeight;
     });
-}
+   }
 
    function convertToHTML2() {
     var inputText = document.getElementById("inputText2").value;
@@ -216,9 +212,40 @@ function scaleImage() {
         document.getElementById("customTextfield1").innerHTML = document.getElementById("customInput1").value 
     } catch (error) {}
 
-    }
+   }
 
-   
+   function scaleImage2() {
+    var preview = document.getElementById('preview2');
+    var scaledImageContainer = document.getElementById('scaledImageContainer2');
+
+    // Temporarily adjust preview dimensions to fit all content
+    var originalWidth = preview.style.width;
+    var originalHeight = preview.style.height;
+
+    // Get the scroll width and height to ensure entire content is captured
+    var scrollWidth = preview.scrollWidth;
+    var scrollHeight = preview.scrollHeight;
+
+    // Adjust the preview container to fit the content
+    preview.style.width = scrollWidth + 'px';
+    preview.style.height = scrollHeight + 'px';
+
+    // Use html2canvas to capture the entire content of the preview
+    html2canvas(preview, { scale: 1 }).then(canvas => {
+        var img = document.createElement('img');
+        img.src = canvas.toDataURL('image/png');
+        img.style.maxWidth = '100%'; // Beschränke die Breite des Bildes
+        
+        // Set the scaled content to the scaledImageContainer
+        scaledImageContainer.innerHTML = ''; // Entferne vorherige Inhalte
+        scaledImageContainer.appendChild(img);
+
+        // Restore original dimensions
+        preview.style.width = originalWidth;
+        preview.style.height = originalHeight;
+    });
+   }
+
    function loadTemplate() {
     var selectElement = document.getElementById("template");
     var selectedTemplate = selectElement.value;
@@ -260,11 +287,26 @@ function scaleImage() {
         preview.innerHTML = inputText;
    });
 
+
+
    function convertAndUploadHtml(previewId, inputTextId) {
     var inputText = document.getElementById(inputTextId).value;
     var preview = document.getElementById(previewId);
 
+    // Temporarily adjust preview dimensions to fit all content
+    var originalWidth = preview.style.width;
+    var originalHeight = preview.style.height;
+
+    // Get the scroll width and height to ensure entire content is captured
+    var scrollWidth = preview.scrollWidth;
+    var scrollHeight = preview.scrollHeight;
+
+    // Adjust the preview container to fit the content
+    preview.style.width = scrollWidth + 'px';
+    preview.style.height = scrollHeight + 'px';
+
     html2canvas(preview, { scale: 1 }).then(canvas => {
+
         if (canvas.width !== Number(displayWidth) || canvas.height !== Number(displayHeight)) {
             alert('Ihr Design ist nicht im richtigen Pixelformat für das angeschlossene Display');
             return;
@@ -277,10 +319,13 @@ function scaleImage() {
                 console.error('Fehler beim Hochladen der Datei:', error);
             });
         }, 'image/png');
-    });
-   }
 
-   async function uploadFile(fileName, fileBlob) {
+        // Restore original dimensions
+        preview.style.width = originalWidth;
+        preview.style.height = originalHeight;
+    });
+}
+    async function uploadFile(fileName, fileBlob) {
     try {
         let formData = new FormData();
         formData.append('file', fileBlob, fileName);
@@ -299,5 +344,5 @@ function scaleImage() {
     } catch (error) {
         console.error('Fehler beim Hochladen der Datei:', error);
     }
-   }
+    }
 
