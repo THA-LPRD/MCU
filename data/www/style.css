@@ -155,13 +155,9 @@ a {
     max-width: 90%;
 }
 
-#ditheringCheckbox {
-    float: left;
-    margin-top: 2%;
-    margin-left: 7.5%;
-    padding-right: 50px;
-    text-align: left;
-
+#scaledImageContainer img {
+    margin: auto;
+    max-width: 90%; /* Beschränkt die Breite des Bildes */
 }
 
 #designByHtml {
@@ -194,22 +190,13 @@ ol li {
     font-weight: bold;
 }
 
-#inputText {
+#inputText, #inputText2 {
     padding: 5px;
     max-width: 90%;
     width: calc(100% - 40px);
     margin: auto;
     box-sizing: border-box;
 }
-
-#inputText2 {
-    padding: 5px;
-    max-width: 90%;
-    width: calc(100% - 40px);
-    margin: auto;
-    box-sizing: border-box;
-}
-
 
 button {
     margin-top: 2%;
@@ -217,7 +204,7 @@ button {
     font-family: 'TWKEverett-Regular', sans-serif;
 }
 
-#previewContainer {
+#previewContainer, #previewContainer2 {
     width: 800px;
     height: 480px;
     overflow: auto;
@@ -226,21 +213,7 @@ button {
     margin: auto;
 }
 
-#preview {
-    width: 100%; /* Ensures the content takes its natural width*/
-    height: 100%;
-}
-
-#previewContainer2 {
-    width: 800px;
-    height: 480px;
-    overflow: auto;
-    position: relative;
-    border: 1px solid #ccc;
-    margin: auto;
-}
-
-#preview2 {
+#preview, #preview2 {
     width: 100%; /* Ensures the content takes its natural width*/
     height: 100%;
 }

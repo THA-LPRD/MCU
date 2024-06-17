@@ -91,8 +91,11 @@ let displayWidth, displayHeight;
         var imageContainer = document.getElementById('imageContainer');
         imageContainer.innerHTML = ''; // Entferne vorherige Inhalte
         imageContainer.appendChild(img);
+
     }
     reader.readAsDataURL(file);
+    
+    
    }
 
 
@@ -143,8 +146,65 @@ let displayWidth, displayHeight;
 
         // Set the preview content
         preview.innerHTML = inputText;
+        
    }
 
+
+
+   
+   function displayImage(event) {
+    var file = event.target.files[0];
+    var reader = new FileReader();
+    reader.onload = function(e) {
+        var img = document.createElement('img');
+        img.src = e.target.result;
+        img.style.maxWidth = '100%'; // Optional: Beschränke die Breite des Bildes
+        var imageContainer = document.getElementById('imageContainer');
+        imageContainer.innerHTML = ''; // Entferne vorherige Inhalte
+        imageContainer.appendChild(img);
+    }
+    reader.readAsDataURL(file);
+}
+
+function convertToHTML() {
+    var inputText = document.getElementById("inputText").value;
+    var preview = document.getElementById("preview");
+
+    // Set the preview content
+    preview.innerHTML = inputText;
+}
+
+function scaleImage() {
+    var preview = document.getElementById('preview');
+    var scaledImageContainer = document.getElementById('scaledImageContainer');
+
+    // Temporarily adjust preview dimensions to fit all content
+    var originalWidth = preview.style.width;
+    var originalHeight = preview.style.height;
+
+    // Get the scroll width and height to ensure entire content is captured
+    var scrollWidth = preview.scrollWidth;
+    var scrollHeight = preview.scrollHeight;
+
+    // Adjust the preview container to fit the content
+    preview.style.width = scrollWidth + 'px';
+    preview.style.height = scrollHeight + 'px';
+
+    // Use html2canvas to capture the entire content of the preview
+    html2canvas(preview, { scale: 1 }).then(canvas => {
+        var img = document.createElement('img');
+        img.src = canvas.toDataURL('image/png');
+        //img.style.maxWidth = '100%'; // Beschränke die Breite des Bildes
+        
+        // Set the scaled content to the scaledImageContainer
+        scaledImageContainer.innerHTML = ''; // Entferne vorherige Inhalte
+        scaledImageContainer.appendChild(img);
+
+        // Restore original dimensions
+        preview.style.width = originalWidth;
+        preview.style.height = originalHeight;
+    });
+}
 
    function convertToHTML2() {
     var inputText = document.getElementById("inputText2").value;
@@ -212,7 +272,6 @@ let displayWidth, displayHeight;
 
         // Erstellen eines Blob-Objekts aus dem Canvas-Bild
         canvas.toBlob(function(blob) {
-            sendFlag();
             // Datei hochladen
             uploadFile('html_conversion.png', blob).catch(error => {
                 console.error('Fehler beim Hochladen der Datei:', error);
@@ -240,30 +299,5 @@ let displayWidth, displayHeight;
     } catch (error) {
         console.error('Fehler beim Hochladen der Datei:', error);
     }
-   }
-
-   function sendFlag() {
-    var ditheringCheckbox = document.getElementById('ditheringCheckbox');
-    var flag = ditheringCheckbox.checked ? 'on' : 'off';
-
-    var xhr = new XMLHttpRequest();
-    xhr.open('POST', '/api/v1/UploadFlag', true);
-    xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
-
-    xhr.onreadystatechange = function() {
-        if (xhr.readyState === XMLHttpRequest.DONE) {
-            if (xhr.status === 200) {
-                alert('Flag erfolgreich gesendet: ' + xhr.responseText);
-            } else {
-                alert('Fehler beim Senden des Flags. Statuscode: ' + xhr.status);
-            }
-        }
-    };
-
-    var data = {
-        flag: flag
-    };
-
-    xhr.send(JSON.stringify(data));
    }
 

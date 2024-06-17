@@ -72,11 +72,6 @@
             <div id="warning"><b>Achtung: Das PNG muss <u>genau</u> dem angegebenen Pixelformat entsprechen, sonst kann es nicht auf dem Display angezeigt werden!</b></div>
             
             <input type="file" id="fileInput" accept="image/png" onchange="displayImage(event)">
-            <div id="pngText">
-                <label>
-                    <input type="checkbox"> Dithering aktiv (empfohlen bei grafisch komplexeren Bildern)
-                </label>
-            </div>
 
             <div id="imageContainer"></div>
 
@@ -117,12 +112,12 @@
                 <div id="preview"></div>
             </div>
 
-            <div id="ditheringCheckbox">
-                <label>
-                    <input type="checkbox"> Dithering aktiv (empfohlen bei grafisch komplexeren Bildern)
-                </label>
-            </div>
+            <br>
 
+            <button onclick="scaleImage()">Skalierte Vorschau</button>
+            <div id="scaledImageContainer"></div>
+
+           
 
             <button onclick="convertAndUploadHtml('preview', 'inputText')">Upload an Display</button>
 
@@ -139,8 +134,8 @@
             <h3><label for="template">Vorlage: </label>
             <select name="template" id="template" onclick="loadTemplate()">
                 <option value="Timetable_1.html">Stundenplan</option>
-                <option value="coffee_break.html">Türschild Kaffeepause</option>
-                <option value="THA_Announcement.html">THA Ankündigung (personalisierbar)</option>
+                <option value="coffee_break_10inch.html">Türschild Kaffeepause</option>
+                <option value="tha_picture.html">THA Foto</option>
                
             </select>
             </h3>
@@ -165,12 +160,6 @@
 
             <div id="previewContainer2">
                 <div id="preview2"></div>
-            </div>
-
-            <div id="ditheringCheckbox">
-                <label>
-                    <input type="checkbox"> Dithering aktiv (empfohlen bei grafisch komplexeren Bildern)
-                </label>
             </div>
 
             <button onclick="convertAndUploadHtml('preview2', 'inputText2')">Upload an Display</button>
