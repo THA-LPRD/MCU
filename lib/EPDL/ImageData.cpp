@@ -2,10 +2,7 @@
 #include <fstream>
 #include <RLEData.h>
 #include "Log.h"
-#include <LittleFS.h>
-#include <cstdio>
 #include "FrameBuffer.h"
-#include <cmath>
 #include <cstdint>
 #include "png.inl"
 
@@ -145,7 +142,6 @@ namespace EPDL
         uint16_t width = pDraw->iWidth;
         uint16_t usPixels[width];
         PNGRGB565(pDraw, usPixels, PNG_RGB565_LITTLE_ENDIAN, 0xffffffff, pDraw->iHasAlpha);
-        Log::Debug("[ImageData] Get Line: %d", pDraw->y);
         for (int i = 0; i < width; i++) {
             uint8_t color = pColorPalette->GetClosestColor(usPixels[i]);
             pFramebuffer->SetPixel(i + offset_x, pDraw->y + offset_y, color);

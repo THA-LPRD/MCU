@@ -8,15 +8,16 @@
 class AppStandalone : public Application {
 public:
     AppStandalone() = default;
-    ~AppStandalone() = default;
+    ~AppStandalone() override;
     bool Init() override;
     void Run() override;
 private:
     bool SetupWiFi();
+    void DestroyWiFi();
 private:
     DNSServer m_DNSServer;
     std::string m_ImagePath;
-    EPDL::ImageHandle m_ImageHandle;
+    EPDL::ImageHandle m_ImageHandle = -1;
     bool m_ProcessImage = false;
 };
 

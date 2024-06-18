@@ -3,7 +3,7 @@ window.onload = function() {
     getDisplayDimensions()
 }
 
-  
+
 let displayWidth, displayHeight;
 
    async function getDisplayDimensions() {
@@ -94,8 +94,8 @@ let displayWidth, displayHeight;
 
     }
     reader.readAsDataURL(file);
-    
-    
+
+
    }
 
 
@@ -130,7 +130,18 @@ let displayWidth, displayHeight;
                 }
 
                 // Datei hochladen, wenn das Bild die richtigen Abmessungen hat
-                uploadFile(file.name, file);
+                uploadFile(file, file.name, '/api/v1/UploadImg')
+                    .then(result => {
+                        if (result.success) {
+                            alert(result.message);
+                        } else {
+                            alert(result.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error handling file upload:', error);
+                    });
+
             };
             img.src = event.target.result;
         };
@@ -144,10 +155,10 @@ let displayWidth, displayHeight;
 
         // Set the preview content
         preview.innerHTML = inputText;
-        
+
    }
 
-   
+
    function displayImage(event) {
     var file = event.target.files[0];
     var reader = new FileReader();
@@ -170,37 +181,6 @@ let displayWidth, displayHeight;
     preview.innerHTML = inputText;
    }
 
-   function scaleImage() {
-    var preview = document.getElementById('preview');
-    var scaledImageContainer = document.getElementById('scaledImageContainer');
-
-    // Temporarily adjust preview dimensions to fit all content
-    var originalWidth = preview.style.width;
-    var originalHeight = preview.style.height;
-
-    // Get the scroll width and height to ensure entire content is captured
-    var scrollWidth = preview.scrollWidth;
-    var scrollHeight = preview.scrollHeight;
-
-    // Adjust the preview container to fit the content
-    preview.style.width = scrollWidth + 'px';
-    preview.style.height = scrollHeight + 'px';
-
-    // Use html2canvas to capture the entire content of the preview
-    html2canvas(preview, { scale: 1 }).then(canvas => {
-        var img = document.createElement('img');
-        img.src = canvas.toDataURL('image/png');
-        img.style.maxWidth = '100%'; // Beschränke die Breite des Bildes
-        
-        // Set the scaled content to the scaledImageContainer
-        scaledImageContainer.innerHTML = ''; // Entferne vorherige Inhalte
-        scaledImageContainer.appendChild(img);
-
-        // Restore original dimensions
-        preview.style.width = originalWidth;
-        preview.style.height = originalHeight;
-    });
-   }
 
    function convertToHTML2() {
     var inputText = document.getElementById("inputText2").value;
@@ -235,7 +215,7 @@ let displayWidth, displayHeight;
         var img = document.createElement('img');
         img.src = canvas.toDataURL('image/png');
         img.style.maxWidth = '100%'; // Beschränke die Breite des Bildes
-        
+
         // Set the scaled content to the scaledImageContainer
         scaledImageContainer.innerHTML = ''; // Entferne vorherige Inhalte
         scaledImageContainer.appendChild(img);
@@ -315,34 +295,23 @@ let displayWidth, displayHeight;
         // Erstellen eines Blob-Objekts aus dem Canvas-Bild
         canvas.toBlob(function(blob) {
             // Datei hochladen
-            uploadFile('html_conversion.png', blob).catch(error => {
-                console.error('Fehler beim Hochladen der Datei:', error);
-            });
+            uploadFile(blob, "html_conversion.png", '/api/v1/UploadImg')
+                .then(result => {
+                    if (result.success) {
+                        alert(result.message);
+                    } else {
+                        alert(result.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error handling file upload:', error);
+                });
         }, 'image/png');
 
         // Restore original dimensions
         preview.style.width = originalWidth;
         preview.style.height = originalHeight;
     });
-}
-    async function uploadFile(fileName, fileBlob) {
-    try {
-        let formData = new FormData();
-        formData.append('file', fileBlob, fileName);
+   }
 
-        let response = await fetch('/api/v1/UploadImg', {
-            method: 'POST',
-            body: formData
-        });
-
-        if (response.ok) {
-            let responseText = await response.text();
-            alert('Datei erfolgreich hochgeladen: ' + responseText);
-        } else {
-            alert('Fehler beim Hochladen der Datei. Statuscode: ' + response.status);
-        }
-    } catch (error) {
-        console.error('Fehler beim Hochladen der Datei:', error);
-    }
-    }
 

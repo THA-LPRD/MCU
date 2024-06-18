@@ -7,7 +7,6 @@
 
 bool AppDefault::Init() {
     Log::Debug("Initializing default application");
-    Config::LoadDefault();
 
     SetupWiFi();
 
@@ -25,6 +24,16 @@ bool AppDefault::Init() {
     m_Server.AddAPIGetDisplayModule();
     m_Server.AddAPISetDisplayModule();
     m_Server.AddAPIGetOpMode();
+    m_Server.AddAPIRestart();
+    m_Server.AddAPISetLogLevel();
+    m_Server.AddAPIGetLogLevel();
+    m_Server.AddAPISetHTTPAuth();
+    m_Server.AddAPISetHTTPS();
+    m_Server.AddAPIGetHTTPS();
+    m_Server.AddAPIUploadHTTPSKey();
+    m_Server.AddAPIUploadHTTPSCert();
+    m_Server.EnableHTTPAuth(Config::GetDefault(Config::Key::HTTPUsername),
+                            Config::GetDefault(Config::Key::HTTPPassword));
 
     return true;
 }
@@ -32,6 +41,7 @@ bool AppDefault::Init() {
 bool AppDefault::SetupWiFi() {
     Log::Debug("Setting up Default WiFi Access Point");
 
+    WiFi.disconnect(true, true);
     WiFi.softAP(Config::GetDefault(Config::Key::WiFiSSID).c_str(),
                 Config::GetDefault(Config::Key::WiFiPassword).c_str());
     Log::Info("WiFi AP started: %s", Config::GetDefault(Config::Key::WiFiSSID).c_str());

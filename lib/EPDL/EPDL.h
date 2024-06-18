@@ -39,7 +39,6 @@ namespace EPDL
     };
 #endif
 
-
     int Init();
     void Terminate();
     void LoadDriver(std::string_view type);

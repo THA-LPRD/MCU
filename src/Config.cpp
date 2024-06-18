@@ -4,6 +4,7 @@
 #include "Config.h"
 #include "Log.h"
 #include <Filesystem.h>
+#include <WiFi.h>
 
 namespace Config
 {
@@ -17,6 +18,13 @@ namespace Config
         if (m_Items.find(key) == m_Items.end()) {
             Log::Error("[Config] Key not found in Config");
             return "";
+        }
+        if(key == Key::WiFiSSID) {
+            std::string mac = WiFi.macAddress().c_str();
+            std::string ssid = m_Items.at(key).default_value;
+            ssid += mac.substr(12, 2);
+            ssid += mac.substr(15, 2);
+            return ssid;
         }
         return m_Items.at(key).default_value;
     }
@@ -49,6 +57,7 @@ namespace Config
 
         for (JsonObject::iterator it = doc.as<JsonObject>().begin(); it != doc.as<JsonObject>().end(); ++it) {
             m_Config[m_ReverseItems.at(it->key().c_str())] = it->value().as<std::string>();
+            Log::Trace("[Config] Loaded %s: %s", it->key().c_str(), it->value().as<std::string>().c_str());
         }
 
         file.close();
@@ -76,6 +85,7 @@ namespace Config
             Log::Error("[Config] Key not found in Config");
             return false;
         }
+        Log::Trace("[Config] Setting %s to %s", m_Items.at(key).name, value.data());
         if (!m_Items.at(key).validator(value)) {
             Log::Error("[Config] Value for key %s is invalid", m_Items.at(key).name);
             return false;
@@ -89,6 +99,7 @@ namespace Config
             Log::Error("[Config] Key not found in Config");
             return "";
         }
+        Log::Trace("[Config] Getting %s: %s", m_Items.at(key).name, m_Config.at(key).c_str());
         return m_Config.at(key);
     }
 } // namespace Config
