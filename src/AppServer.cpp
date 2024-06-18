@@ -65,7 +65,7 @@ bool AppServer::Init() {
     esp_sleep_enable_timer_wakeup(secondsToSleep * 1000000);
 
     // TODO: Change to <= 21 for ESP32-S3
-    gpio_num_t ext_wakeup_pin_0 = GPIO_NUM_1;
+    gpio_num_t ext_wakeup_pin_0 = GPIO_NUM_44;
     Log::Debug("Enabling GPIO wakeup on Pin %d", ext_wakeup_pin_0);
 
     esp_sleep_enable_ext0_wakeup(ext_wakeup_pin_0, 1);
@@ -142,7 +142,9 @@ bool AppServer::RegisterDisplay(uint8_t *mac) {
 
     // Create payload from JSON
     DynamicJsonDocument newDisplayPayload(1024);
-    newDisplayPayload["friendly_name"] = "Display1";
+    char friendlyName[100];
+    sprintf(friendlyName, "Display %02X%02X%02X%02X%02X%02X", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+    newDisplayPayload["friendly_name"] = friendlyName;
     newDisplayPayload["width"] = EPDL::GetWidth();
     newDisplayPayload["height"] = EPDL::GetHeight();
 
