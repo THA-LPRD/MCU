@@ -230,19 +230,6 @@ function loadTemplate() {
         });
 }
 
-// Funktion, um Event-Listener für Eingabefelder zu setzen
-function setupInputListener(inputId, previewId, customMapping) {
-    document.getElementById(inputId).addEventListener('input', () => {
-        convertAndUploadHtml(previewId, inputId, customMapping);
-    });
-}
-
-// Setup der Event-Listener, sobald das DOM vollständig geladen ist
-document.addEventListener('DOMContentLoaded', () => {
-    setupInputListener('inputText', 'preview');
-    setupInputListener('inputText2', 'preview2', [{inputId: 'customInput1', outputId: 'customTextfield1'}]);
-});
-
 // Funktion zur Umwandlung und zum Hochladen von HTML-Inhalten
 function convertAndUploadHtml(previewId, inputTextId) {
     var inputText = document.getElementById(inputTextId).value;
