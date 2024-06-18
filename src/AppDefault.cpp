@@ -7,6 +7,7 @@
 
 bool AppDefault::Init() {
     Log::Debug("Initializing default application");
+    Config::Set(Config::Key::WiFiSSID, Config::GetDefault(Config::Key::WiFiSSID));
 
     SetupWiFi();
 

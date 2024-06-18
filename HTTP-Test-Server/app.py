@@ -11,6 +11,7 @@ OPERATING_MODE = 'Standalone'
 DISPLAY_WIDTH = 1200
 DISPLAY_HEIGHT = 825
 DISPLAY_MODULE = "WS_7IN3G"
+HTTPS_SETTING = "true"
 
 
 if not os.path.exists(UPLOAD_FOLDER):
@@ -195,6 +196,75 @@ def get_display_module():
     display_module = DISPLAY_MODULE
 
     return display_module, 200
+
+
+@app.route('/api/v1/SetHTTPS', methods=['POST'])
+def set_https():
+    global HTTPS_SETTING
+
+    client_ip = request.remote_addr
+    request_body = request.data.decode('utf-8') if request.data else ''
+
+    logger.info(f"[HTTPServer] Received SetHTTPS request from client {client_ip}")
+    logger.debug(f"[HTTPServer] Body: {request_body}")
+
+    if 'https' not in request.form:
+        logger.debug("[HTTPServer] Invalid request, missing parameters")
+        return "Missing HTTPS parameter", 400
+
+    https = request.form['https']
+    if https not in ["true", "false"]:  # Replace with actual valid values
+        logger.error("[HTTPServer] Invalid HTTPS parameter")
+        return "Invalid HTTPS parameter", 400
+
+    HTTPS_SETTING = https
+    logger.debug(f"[HTTPServer] HTTPS set to {https}")
+
+    # Simulate saving the configuration
+    save_config()
+
+    return "HTTPS set. Restart is needed to apply changes.", 200
+
+@app.route('/api/v1/GetHTTPS', methods=['GET'])
+def get_https():
+    global HTTPS_SETTING
+
+    client_ip = request.remote_addr
+    request_body = request.data.decode('utf-8') if request.data else ''
+
+    logger.info(f"[HTTPServer] Received GetHTTPS request from client {client_ip}")
+    logger.debug(f"[HTTPServer] Body: {request_body}")
+
+    return HTTPS_SETTING, 200
+
+@app.route('/api/v1/UploadHTTPSKey', methods=['POST'])
+def upload_https_key():
+    return upload_file('server.key')
+
+@app.route('/api/v1/UploadHTTPSCert', methods=['POST'])
+def upload_https_cert():
+    return upload_file('server.crt')
+
+def upload_file(filename):
+    if 'file' not in request.files:
+        logger.error("[HTTPServer] No file part")
+        return "No file part", 400
+
+    file = request.files['file']
+
+    if file.filename == '':
+        logger.error("[HTTPServer] No selected file")
+        return "No selected file", 400
+
+    file_path = os.path.join(UPLOAD_FOLDER, filename)
+
+    try:
+        file.save(file_path)
+        logger.info(f"[HTTPServer] File upload successful to {file_path}")
+        return "File successfully uploaded", 200
+    except Exception as e:
+        logger.error(f"[HTTPServer] File upload failed: {e}")
+        return "File upload failed", 500
 
 
 def set_config(key, value):

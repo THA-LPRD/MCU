@@ -19,7 +19,7 @@ namespace Config
 
 #ifdef MCU_ESP32S3
     enum Pin : uint8_t {
-        BTN1 = 44,
+        BTN1 = 2,
         VCC = 43,
     };
 #endif

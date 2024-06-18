@@ -13,7 +13,7 @@
             GetOpMode();
             GetDisplayModule();
             GetLogLevel();
-            SetupSetLoginForm();
+            SetupSetHTTPAuthForm();
             GetHTTPS();
         };
 
@@ -61,7 +61,7 @@
                 document.getElementById('logLevel').textContent = data;
             } catch (error) {
                 console.error('Error fetching log level:', error);
-                document.getElementById('responseLogLevel').textContent = 'Fehler beim Abrufen des verwendeten Log Levels: ' + error.message;
+                document.getElementById('SetLogLevel-response').textContent = 'Fehler beim Abrufen des verwendeten Log Levels: ' + error.message;
             }
         }
 
@@ -73,11 +73,13 @@
                 }
                 let data = await response.text();
                 document.getElementById('httpsStatus').textContent = data;
-                document.getElementById('https').checked = data === 'true';
+                let isHttpsEnabled = data.trim() === 'true'; // Trim any extra whitespace
+
+                document.getElementById('https').checked = isHttpsEnabled;
                 toggleHTTPSFields();
             } catch (error) {
                 console.error('Error fetching HTTPS status:', error);
-                document.getElementById('responseHTTPS').textContent = 'Fehler beim Abrufen des HTTPS Status: ' + error.message;
+                document.getElementById('responseHTTPS').textContent = 'Error fetching HTTPS status: ' + error.message;
             }
         }
 
@@ -95,8 +97,8 @@
             });
         }
 
-        function SetupSetLoginForm() {
-            const form = document.getElementById('SetLogin-form');
+        function SetupSetHTTPAuthForm() {
+            const form = document.getElementById('SetHTTPAuth-form');
             form.querySelector('#username').addEventListener('keypress', function (e) {
                 if (e.key === 'Enter') {
                     form.querySelector('#password').focus();
@@ -104,10 +106,11 @@
             });
             form.querySelector('#password').addEventListener('keypress', function (e) {
                 if (e.key === 'Enter') {
-                    SetLogin();
+                    SetHTTPAuth();
                 }
             });
         }
+
 
         async function SetOpMode() {
             const form = document.getElementById('SetOpMode-form');
@@ -186,7 +189,7 @@
                 responseElement.innerText = response;
             }
             else {
-                console.error('Response element for SetLogin not found.');
+                console.error('Response element for SetHTTPAuth not found.');
             }
         }
 
@@ -195,10 +198,12 @@
             const responseElement = document.getElementById('SetHTTPS-response');
 
             try {
-                let response = await SubmitFormData('/api/v1/SetHTTPS', {https: https.toString()});
+                let responseText = await SubmitFormData('/api/v1/SetHTTPS', { https: https.toString() });
 
-                if (!response.ok) throw new Error('Network response was not ok');
+                // Since SubmitFormData returns text, there's no need to check response.ok here
+                console.log('SetHTTPS response:', responseText);
 
+                // Handle the file uploads if HTTPS is enabled
                 if (https) {
                     const certFile = document.getElementById('certFile').files[0];
                     const keyFile = document.getElementById('keyFile').files[0];
@@ -206,9 +211,16 @@
                     if (!certFile || !keyFile) {
                         throw new Error('Both certificate and key files must be selected.');
                     }
-                    // defined as: uploadFile(fileData,     fileName,     url)
-                    await uploadFile(certFile, 'server.crt', '/api/v1/UploadHTTPSCert');
-                    await uploadFile(keyFile, 'server.key', '/api/v1/UploadHTTPSKey');
+
+                    let certUploadResponse = await uploadFile(certFile, 'server.crt', '/api/v1/UploadHTTPSCert');
+                    if (!certUploadResponse.success) {
+                        throw new Error(certUploadResponse.message);
+                    }
+
+                    let keyUploadResponse = await uploadFile(keyFile, 'server.key', '/api/v1/UploadHTTPSKey');
+                    if (!keyUploadResponse.success) {
+                        throw new Error(keyUploadResponse.message);
+                    }
                 }
 
                 responseElement.innerText = 'HTTPS settings updated successfully.';
@@ -220,8 +232,11 @@
 
         function toggleHTTPSFields() {
             const fileFields = document.getElementById('fileFields');
-            fileFields.style.display = document.getElementById('https').checked ? 'block' : 'none';
+            const isHttpsChecked = document.getElementById('https').checked;
+            console.log('toggleHTTPSFields: HTTPS checkbox is', isHttpsChecked ? 'checked' : 'not checked'); // Log the checkbox state
+            fileFields.style.display = isHttpsChecked ? 'block' : 'none';
         }
+
     </script>
 
     <style>
@@ -229,69 +244,66 @@
             padding-bottom: 50px;
         }
 
-        /*Zurück zu Homepage-Button*/
+        h2 {
+            margin-bottom: 50px;
+        }
+
+
         #home {
             text-align: left;
             margin-left: 20px;
         }
 
-        /*Restart-Button*/
         #restart {
             float: right;
             margin-right: 20px;
 
-        }  
+        }     
+                       
+        /* Stil für die Tabelle */
+table {
+    margin: auto;
+    margin-left: 20%;
+    margin-right: 20%;
+    text-align: center;
+}
 
-        h2 {
-            margin-bottom: 50px;
-        }
+/* Stil für die Zellen */
+td {
+    padding: 5%;
+    vertical-align: top;
+}
 
-        h3 {
-            margin-top: 0;
-        }
+/* Stil für die Nachrichten */
+div[id^="response"], p[id^="SetWiFiCred-response"] {
+    max-width: 100%;
+    word-wrap: break-word;
+    margin-top: 10px;
+}
 
-        /* Aktuelle Einstellungen */
-        p.text {
-            margin-bottom: 20px;
-            color:#FF0350;
-        }
+/* Stil für die Formular-Elemente */
+form {
+    display: flex;
+    margin: auto;
+    flex-direction: column;
+}
 
-        /*Einstellungs-Tabelle*/
-        table {
-            margin: 0 auto; /* Zentriert die Tabelle horizontal */
-            width: 80%; /* Beispiel für die Breite der Tabelle, anpassen nach Bedarf */
-            border-collapse: collapse; /* Fügt Zellenränder zusammen */
-        }
+label, input, select, button {
+    margin-bottom: 10px;
+}
 
+h3 {
+    margin-top: 0;
+}
 
-        th, td {
-            padding: 10px; /* Zellenabstand*/
-            vertical-align: top;
-            border: 1px solid black; 
-            width: 50%; /* Jede Spalte nimmt 50% der Tabelle ein */
-        }
-
-
-        /* Stil für die Server-Antworten*/
-        div[id^="response"], p[id^="SetWiFiCred-response"] {
-            max-width: 100%;
-            word-wrap: break-word;
-            margin-top: 10px;
-        }
-
-         
-        /* Formular-Elemente */
-        form {
-            display: flex;
-            max-width: 50%;
-            margin: auto;
-            flex-direction: column;
-        }
+/* Stil für Absätze */
+p.text {
+    margin-bottom: 20px;
+    color:#FF0350;
+}
+        
 
 
-        label, input, select, button {
-            margin-bottom: 10px;
-        }
     </style>
 </head>
 
@@ -366,8 +378,8 @@
                         </div>
                     </td>
                     <td>
-                        <h3>Serielles Console Log Level:</h3>
-                        <p class="text">Sie befinden sich im: <span id="logLevel"></span>-Modus</p>
+                        <h3>Seriellen Console Log Level:</h3>
+                        <p class="text">Sie befinden sich im: <span id="logLevel"></span>-Level</p>
                         <div id="SetLogLevel-form">
                             <select id="level" name="level" required>
                                 <option value="Fatal">Fatal</option>

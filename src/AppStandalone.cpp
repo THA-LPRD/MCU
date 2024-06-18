@@ -6,7 +6,8 @@
 #include "EPDL.h"
 #include <Filesystem.h>
 #include "MCU.h"
-
+#include <esp_sleep.h>
+#include <driver/rtc_io.h>
 AppStandalone::~AppStandalone() {
     DestroyWiFi();
 }
@@ -78,7 +79,6 @@ void AppStandalone::Run() {
     m_DNSServer.processNextRequest();
     if (m_ProcessImage) {
         m_ProcessImage = false;
-        DestroyWiFi();
         Log::Debug("Current image path: %s", m_ImagePath.c_str());
         std::unique_ptr<EPDL::ImageData> imageData = std::make_unique<EPDL::ImageData>(MCU::Filesystem::GetPath(
                 m_ImagePath));
@@ -92,7 +92,12 @@ void AppStandalone::Run() {
         Log::Debug("Ready for next image");
         Log::Debug("Going to sleep");
         MCU::Sleep(1000);
-//        MCU::DeepSleep();
+        DestroyWiFi();
+        rtc_gpio_pulldown_dis((gpio_num_t) 2);
+        rtc_gpio_pullup_en((gpio_num_t) 2);
+        esp_sleep_enable_ext1_wakeup(1ULL << 2, ESP_EXT1_WAKEUP_ANY_LOW);
+
+        MCU::DeepSleep();
     }
 }
 
