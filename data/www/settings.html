@@ -234,14 +234,6 @@
         }
 
 
-        #responseModule, #responseMode, #responseWiFi {
-                color:#FF0350;
-                font-style: bold;
-                font-style: italic;
-                margin-left: 20px;
-                margin-right: 20px;
-            }
-
         #home {
             text-align: left;
             margin-left: 20px;
@@ -251,7 +243,51 @@
             float: right;
             margin-right: 20px;
 
-        }
+        }     
+                       
+        /* Stil für die Tabelle */
+table {
+    margin: auto;
+    margin-left: 20%;
+    margin-right: 20%;
+    text-align: center;
+}
+
+/* Stil für die Zellen */
+td {
+    padding: 5%;
+    vertical-align: top;
+}
+
+/* Stil für die Nachrichten */
+div[id^="response"], p[id^="SetWiFiCred-response"] {
+    max-width: 100%;
+    word-wrap: break-word;
+    margin-top: 10px;
+}
+
+/* Stil für die Formular-Elemente */
+form {
+    display: flex;
+    margin: auto;
+    flex-direction: column;
+}
+
+label, input, select, button {
+    margin-bottom: 10px;
+}
+
+h3 {
+    margin-top: 0;
+}
+
+/* Stil für Absätze */
+p.text {
+    margin-bottom: 20px;
+    color:#FF0350;
+}
+        
+
 
     </style>
 </head>

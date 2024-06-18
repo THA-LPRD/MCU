@@ -1,43 +1,20 @@
 @font-face {
     font-family: 'TWKEverett-Bold';
-    /*src: url('./layouts/fonts/TWKEverett-Bold-web.ttf') format('truetype');*/
-/*    we dont have the above font so siletly do standart*/
+    src: url('./layouts/fonts/TWKEverett-Bold-web.ttf') format('truetype');
+
 
 }
 @font-face {
     font-family: 'TWKEverett-Regular';
-    /*src: url('./layouts/fonts/TWKEverett-Regular-web.ttf') format('truetype');*/
+    src: url('./layouts/fonts/TWKEverett-Regular-web.ttf') format('truetype');
 
 }
 @font-face {
     font-family: 'TWKEverett-RegularItalic';
-    /*src: url('./layouts/fonts/TWKEverett-RegularItalic-web.ttf') format('truetype');*/
+    src: url('./layouts/fonts/TWKEverett-RegularItalic-web.ttf') format('truetype');
 
 }
 
-body {
-    font-family: 'TWKEverett-Bold', Arial, sans-serif; /* Fallback to Arial and then generic sans-serif */
-}
-
-p {
-    font-family: 'TWKEverett-Regular', Helvetica, sans-serif; /* Fallback to Helvetica and then generic sans-serif */
-}
-
-em {
-    font-family: 'TWKEverett-RegularItalic', Georgia, serif; /* Fallback to Georgia and then generic serif */
-}
-
-body {
-    font-family: 'TWKEverett-Bold', Arial, sans-serif; /* Fallback to Arial and then generic sans-serif */
-}
-
-p {
-    font-family: 'TWKEverett-Regular', Helvetica, sans-serif; /* Fallback to Helvetica and then generic sans-serif */
-}
-
-em {
-    font-family: 'TWKEverett-RegularItalic', Georgia, serif; /* Fallback to Georgia and then generic serif */
-}
 
 
 body {
