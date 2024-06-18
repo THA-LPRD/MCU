@@ -16,6 +16,7 @@ public:
     void SetFilesToServe(const std::map<std::string, std::string> &files);
     void AddAPISetOpMode();
     void AddAPISetWiFiCred();
+    void AddAPISetServerURL();
     void AddAPIUploadImg(const std::function<void(std::string_view filePath)>& callback = nullptr);
     void AddAPIGetDisplayModule();
     void AddAPISetDisplayModule();

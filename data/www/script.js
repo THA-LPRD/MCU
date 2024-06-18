@@ -168,6 +168,12 @@ function convertToHTML2() {
     try { 
         document.getElementById("customTextfield1").innerHTML = document.getElementById("customInput1").value 
     } catch (error) {}
+    try { 
+        document.getElementById("customTextfield2").innerHTML = document.getElementById("customInput2").value 
+    } catch (error) {}
+    try { 
+        document.getElementById("customTextfield3").innerHTML = document.getElementById("customInput3").value 
+    } catch (error) {}
 }
 
 // Funktion zur Skalierung des Bildes in der Vorschau

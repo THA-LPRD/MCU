@@ -7,6 +7,7 @@
 #include "EPDL.h"
 #include "Filesystem.h"
 #include "MCU.h"
+#include <driver/rtc_io.h>
 
 AppNetwork::~AppNetwork() {
     DestroyWiFi();

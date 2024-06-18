@@ -56,7 +56,7 @@ void setup() {
 
     Config::Load();
 
-    Log::SetLogLevel(Config::Get(Config::Key::LogLevel));
+    // Log::SetLogLevel(Config::Get(Config::Key::LogLevel));
 
     MCU::GPIO::SetMode(Config::Pin::BTN1, MCU::GPIO::Mode::InputPullup);
 

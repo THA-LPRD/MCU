@@ -33,6 +33,7 @@ namespace Config
         HTTPUsername,
         HTTPPassword,
         HTTPS,
+        ServerURL,
         MAX
     };
 
@@ -82,6 +83,11 @@ namespace Config
                                                         return value == "WS_7IN3G" || value == "WS_9IN7";
                                                     }}},
                 {
+                        Key::ServerURL, {
+                        Key::ServerURL, "ServerURL", "", [](std::string_view value) {
+                            return value.length() >= 0;
+                        }}},
+                {
                         Key::LogLevel,      {
                                                     Key::LogLevel,
                                                     "LogLevel",
@@ -115,22 +121,22 @@ namespace Config
                                                     [](std::string_view value) {
                                                         return value == "true" || value == "false";
                                                     }}}
-    };
-    const std::unordered_map<std::string, Key> m_ReverseItems = []() {
-        std::unordered_map<std::string, Key> reverse;
-        for (const auto &item: m_Items) {
-            reverse[item.second.name] = item.first;
-        }
-        return reverse;
-    }();
-} // namespace
+        };
+        const std::unordered_map<std::string, Key> m_ReverseItems = []() {
+            std::unordered_map<std::string, Key> reverse;
+            for (const auto& item : m_Items) {
+                reverse[item.second.name] = item.first;
+            }
+            return reverse;
+            }();
+    } // namespace
 
-std::string GetDefault(Key key);
-void LoadDefault();
-void Load();
-void Save();
-bool Set(Key key, std::string_view value);
-std::string Get(Key key);
+    std::string GetDefault(Key key);
+    void LoadDefault();
+    void Load();
+    void Save();
+    bool Set(Key key, std::string_view value);
+    std::string Get(Key key);
 } // namespace Config
 
 #endif /*CONFIG_H_*/

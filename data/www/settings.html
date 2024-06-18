@@ -10,6 +10,7 @@
     <script type="text/javascript">
         window.onload = function () {
             SetupSetWiFiCredForm();
+            SetupSetServerURLForm();
             GetOpMode();
             GetDisplayModule();
             GetLogLevel();
@@ -97,6 +98,15 @@
             });
         }
 
+        function SetupSetServerURLForm() {
+            const form = document.getElementById('SetServerURL-form');
+            form.querySelector('#url').addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') {
+                    SetServerURL();
+                }
+            });
+        }
+
         function SetupSetHTTPAuthForm() {
             const form = document.getElementById('SetHTTPAuth-form');
             form.querySelector('#username').addEventListener('keypress', function (e) {
@@ -115,7 +125,7 @@
         async function SetOpMode() {
             const form = document.getElementById('SetOpMode-form');
             const opmode = form.querySelector('#opmode').value;
-            const response = await SubmitFormData('/api/v1/SetOpMode', {opmode});
+            const response = await SubmitFormData('/api/v1/SetOpMode', { opmode });
             const responseElement = document.getElementById('SetOpMode-response');
             if (responseElement) {
                 responseElement.innerText = response;
@@ -127,7 +137,7 @@
         async function SetDisplayModule() {
             const form = document.getElementById('SetDisplayModule-form');
             const displayModule = form.querySelector('#displayModule').value;
-            const response = await SubmitFormData('/api/v1/SetDisplayModule', {displayModule});
+            const response = await SubmitFormData('/api/v1/SetDisplayModule', { displayModule });
             const responseElement = document.getElementById('SetDisplayModule-response');
             if (responseElement) {
                 responseElement.innerText = response;
@@ -140,7 +150,7 @@
             const form = document.getElementById('SetWiFiCred-form');
             const ssid = form.querySelector('#ssid').value;
             const password = form.querySelector('#password').value;
-            const response = await SubmitFormData('/api/v1/SetWiFiCred', {ssid, password});
+            const response = await SubmitFormData('/api/v1/SetWiFiCred', { ssid, password });
             const responseElement = document.getElementById('SetWiFiCred-response');
             if (responseElement) {
                 responseElement.innerText = response;
@@ -150,10 +160,23 @@
             }
         }
 
+        async function SetServerURL() {
+            const form = document.getElementById('SetServerURL-form');
+            const url = form.querySelector('#url').value;
+            const response = await SubmitFormData('/api/v1/SetServerURL', {url});
+            const responseElement = document.getElementById('SetServerURL-response');
+            if (responseElement) {
+                responseElement.innerText = response;
+            }
+            else {
+                console.error('Response element for SetServerURL not found.');
+            }
+        }
+
         async function SetLogLevel() {
             const form = document.getElementById('SetLogLevel-form');
             const level = form.querySelector('#level').value;
-            const response = await SubmitFormData('/api/v1/SetLogLevel', {level});
+            const response = await SubmitFormData('/api/v1/SetLogLevel', { level });
             const responseElement = document.getElementById('SetLogLevel-response');
             if (responseElement) {
                 responseElement.innerText = response;
@@ -163,27 +186,27 @@
         }
 
         async function restart() {
-             try {
-             const response = await fetch('/api/v1/restart', {
-             method: 'POST'
-             });
+            try {
+                const response = await fetch('/api/v1/restart', {
+                    method: 'POST'
+                });
 
-             if (!response.ok) {
-             throw new Error('Network response was not ok');
-             }
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
 
-             return 'Neustart erfolgreich!';
-             } catch (error) {
-             console.error('Error during restart:', error);
-             return 'Neustart fehlgeschlagen.';
-             }
-         }
+                return 'Neustart erfolgreich!';
+            } catch (error) {
+                console.error('Error during restart:', error);
+                return 'Neustart fehlgeschlagen.';
+            }
+        }
 
         async function SetHTTPAuth() {
             const form = document.getElementById('SetHTTPAuth-form');
             const username = form.querySelector('#username').value;
             const password = form.querySelector('#password').value;
-            const response = await SubmitFormData('/api/v1/SetHTTPAuth', {username, password});
+            const response = await SubmitFormData('/api/v1/SetHTTPAuth', { username, password });
             const responseElement = document.getElementById('SetHTTPAuth-response');
             if (responseElement) {
                 responseElement.innerText = response;
@@ -258,52 +281,53 @@
             float: right;
             margin-right: 20px;
 
-        }     
-                       
+        }
+
         /* Stil für die Tabelle */
-table {
-    margin: auto;
-    margin-left: 20%;
-    margin-right: 20%;
-    text-align: center;
-}
+        table {
+            margin: auto;
+            margin-left: 20%;
+            margin-right: 20%;
+            text-align: center;
+        }
 
-/* Stil für die Zellen */
-td {
-    padding: 5%;
-    vertical-align: top;
-}
+        /* Stil für die Zellen */
+        td {
+            padding: 5%;
+            vertical-align: top;
+        }
 
-/* Stil für die Nachrichten */
-div[id^="response"], p[id^="SetWiFiCred-response"] {
-    max-width: 100%;
-    word-wrap: break-word;
-    margin-top: 10px;
-}
+        /* Stil für die Nachrichten */
+        div[id^="response"],
+        p[id^="SetWiFiCred-response"] {
+            max-width: 100%;
+            word-wrap: break-word;
+            margin-top: 10px;
+        }
 
-/* Stil für die Formular-Elemente */
-form {
-    display: flex;
-    margin: auto;
-    flex-direction: column;
-}
+        /* Stil für die Formular-Elemente */
+        form {
+            display: flex;
+            margin: auto;
+            flex-direction: column;
+        }
 
-label, input, select, button {
-    margin-bottom: 10px;
-}
+        label,
+        input,
+        select,
+        button {
+            margin-bottom: 10px;
+        }
 
-h3 {
-    margin-top: 0;
-}
+        h3 {
+            margin-top: 0;
+        }
 
-/* Stil für Absätze */
-p.text {
-    margin-bottom: 20px;
-    color:#FF0350;
-}
-        
-
-
+        /* Stil für Absätze */
+        p.text {
+            margin-bottom: 20px;
+            color: #FF0350;
+        }
     </style>
 </head>
 
@@ -324,11 +348,11 @@ p.text {
         <div id="restart">
             <button onclick="restart()">Restart</button>
         </div>
-        
+
         <a id="home" href="./index.html">Zurück</a>
 
         <br>
-        
+
 
         <main>
             <h2><u>Einstellungen</u></h2>
@@ -427,9 +451,21 @@ p.text {
                             <p id="SetHTTPS-response"></p>
                         </div>
                     </td>
+                    <td>
+                        <h3>Server URL:</h3>
+                        <div id="responseURL"></div>
+                        <div id="SetServerURL-form">
+                            <form>
+                                <label for="url">URL:</label><br>
+                                <input type="text" id="url" name="url" required><br><br>
+                            </form>
+                            <button onclick="SetServerURL()">Speichern</button>
+                            <p id="SetServerURL-response"></p>
+                        </div>
+                    </td>
             </table>
         </main>
-        
+
     </div>
 
     <footer>
