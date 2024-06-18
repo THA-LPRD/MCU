@@ -36,6 +36,8 @@ void setup() {
 
     Config::Load();
 
+    Log::SetLogLevel(Config::Get(Config::Key::LogLevel));
+
     MCU::GPIO::SetMode(Config::Pin::BTN1, MCU::GPIO::Mode::InputPullup);
 
     if (MCU::GPIO::Read(Config::Pin::BTN1) == 0) {
@@ -48,7 +50,8 @@ void setup() {
     }
 
     app = Application::Create(Config::Get(Config::Key::OperatingMode));
-    if (app->Init() && Config::Get(Config::Key::OperatingMode) != "Default") {
+    if (app->Init()) {
+        if (Config::Get(Config::Key::OperatingMode) == "Default") return;
         MCU::GPIO::SetMode(Config::Pin::VCC, MCU::GPIO::Mode::Output);
         MCU::GPIO::Write(Config::Pin::VCC, 1);
         EPDL::Init();
@@ -60,7 +63,7 @@ void setup() {
     delete app;
     Config::LoadDefault();
     app = Application::Create("Default");
-    if (app->Init()) { exit(1); }
+    if (!app->Init()) { exit(1); }
 }
 
 void loop() {

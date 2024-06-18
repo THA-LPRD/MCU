@@ -26,6 +26,30 @@ namespace Log
     void SetLogLevel(Level level) {
         m_LogLevel = level;
     }
+    bool SetLogLevel(std::string_view level) {
+        if (level == "Trace") {
+            m_LogLevel = Level::TRACE;
+        }
+        else if (level == "Debug") {
+            m_LogLevel = Level::DEBUG;
+        }
+        else if (level == "Info") {
+            m_LogLevel = Level::INFO;
+        }
+        else if (level == "Warning") {
+            m_LogLevel = Level::WARNING;
+        }
+        else if (level == "Error") {
+            m_LogLevel = Level::ERROR;
+        }
+        else if (level == "Fatal") {
+            m_LogLevel = Level::FATAL;
+        }
+        else {
+            return false;
+        }
+        return true;
+    }
     void SetLogFunction(std::function<void(char* msg)> logFunction) {
         m_LogFunction = logFunction;
     }

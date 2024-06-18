@@ -3,7 +3,7 @@ window.onload = function() {
     getDisplayDimensions()
 }
 
-  
+
 let displayWidth, displayHeight;
 
    async function getDisplayDimensions() {
@@ -119,17 +119,25 @@ let displayWidth, displayHeight;
         reader.onload = function(event) {
             var img = new Image();
             img.onload = function() {
-                const displayWidth = 800;
-                const displayHeight = 480;
-
                 // Überprüfen, ob die Breite und Höhe des Bildes 800x480px sind
-                if (img.width !== displayWidth || img.height !== displayHeight) {
+                if (img.width !== Number(displayWidth) || img.height !== Number(displayHeight)) {
                     alert('Das PNG ist nicht im richtigen Pixelformat für das angeschlossene Display');
                     return;
                 }
 
                 // Datei hochladen, wenn das Bild die richtigen Abmessungen hat
-                uploadFile(file.name, file);
+                uploadFile(file, file.name, '/api/v1/UploadImg')
+                    .then(result => {
+                        if (result.success) {
+                            alert(result.message);
+                        } else {
+                            alert(result.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error handling file upload:', error);
+                    });
+
             };
             img.src = event.target.result;
         };
@@ -214,32 +222,19 @@ let displayWidth, displayHeight;
         canvas.toBlob(function(blob) {
             sendFlag();
             // Datei hochladen
-            uploadFile('html_conversion.png', blob).catch(error => {
-                console.error('Fehler beim Hochladen der Datei:', error);
-            });
+            uploadFile(blob, "html_conversion.png", '/api/v1/UploadImg')
+                .then(result => {
+                if (result.success) {
+                    alert(result.message);
+                } else {
+                    alert(result.message);
+                }
+            })
+                .catch(error => {
+                    console.error('Error handling file upload:', error);
+                });
         }, 'image/png');
     });
-   }
-
-   async function uploadFile(fileName, fileBlob) {
-    try {
-        let formData = new FormData();
-        formData.append('file', fileBlob, fileName);
-
-        let response = await fetch('/api/v1/UploadImg', {
-            method: 'POST',
-            body: formData
-        });
-
-        if (response.ok) {
-            let responseText = await response.text();
-            alert('Datei erfolgreich hochgeladen: ' + responseText);
-        } else {
-            alert('Fehler beim Hochladen der Datei. Statuscode: ' + response.status);
-        }
-    } catch (error) {
-        console.error('Fehler beim Hochladen der Datei:', error);
-    }
    }
 
    function sendFlag() {

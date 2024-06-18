@@ -29,6 +29,10 @@ namespace Config
         WiFiSSID,
         WiFiPassword,
         DisplayDriver,
+        LogLevel,
+        HTTPUsername,
+        HTTPPassword,
+        HTTPS,
         MAX
     };
 
@@ -44,48 +48,89 @@ namespace Config
         const std::unordered_map<Key, Item> m_Items = {
                 {
                         Key::OperatingMode, {
-                                                    Key::OperatingMode, "OperatingMode", "Default",      [](
-                                std::string_view value) {
-                            return value == "Standalone" ||
-                                   value == "Network" ||
-                                   value == "Server" ||
-                                   value == "Default";
-                        }}},
+                                                    Key::OperatingMode,
+                                                    "OperatingMode",
+                                                    "Default",
+                                                    [](std::string_view value) {
+                                                        return value == "Standalone" ||
+                                                               value == "Network" ||
+                                                               value == "Server" ||
+                                                               value == "Default";
+                                                    }}},
                 {
                         Key::WiFiSSID,      {
-                                                    Key::WiFiSSID,      "WiFiSSID",      "THA-LPRD-001", [](
-                                std::string_view value) {
-                            return value.length() > 0;
-                        }}},
+                                                    Key::WiFiSSID,
+                                                    "WiFiSSID",
+                                                    "THA-LPRD-",
+                                                    [](std::string_view value) {
+                                                        return value.length() > 0;
+                                                    }}},
                 {
                         Key::WiFiPassword,  {
-                                                    Key::WiFiPassword,  "WiFiPassword",  "password",     [](
-                                std::string_view value) {
-                            return value.length() >= 8;
-                        }}},
+                                                    Key::WiFiPassword,
+                                                    "WiFiPassword",
+                                                    "password",
+                                                    [](std::string_view value) {
+                                                        return value.length() >= 8;
+                                                    }}},
                 {
                         Key::DisplayDriver, {
-                                                    Key::DisplayDriver, "DisplayDriver", "WS_7IN3G",     [](
-                                std::string_view value) {
-                            return value == "WS_7IN3G" ||
-                                   value == "WS_9IN7";
-                        }}}
-        };
-        const std::unordered_map<std::string, Key> m_ReverseItems = []() {
-            std::unordered_map<std::string, Key> reverse;
-            for (const auto &item: m_Items) {
-                reverse[item.second.name] = item.first;
-            }
-            return reverse;
-        }();
-    } // namespace
+                                                    Key::DisplayDriver,
+                                                    "DisplayDriver",
+                                                    "WS_7IN3G",
+                                                    [](std::string_view value) {
+                                                        return value == "WS_7IN3G" || value == "WS_9IN7";
+                                                    }}},
+                {
+                        Key::LogLevel,      {
+                                                    Key::LogLevel,
+                                                    "LogLevel",
+                                                    "Info",
+                                                    [](std::string_view value) {
+                                                        return value == "Trace" || value == "Debug" ||
+                                                               value == "Info" || value == "Warn" ||
+                                                               value == "Error" || value == "Fatal";
+                                                    }}},
+                {
+                        Key::HTTPUsername,  {
+                                                    Key::HTTPUsername,
+                                                    "HTTPUsername",
+                                                    "admin",
+                                                    [](std::string_view value) {
+                                                        return value.length() > 0;
+                                                    }}},
+                {
+                        Key::HTTPPassword,  {
+                                                    Key::HTTPPassword,
+                                                    "HTTPPassword",
+                                                    "admin",
+                                                    [](std::string_view value) {
+                                                        return value.length() > 0;
+                                                    }}},
+                {
+                        Key::HTTPS,         {
+                                                    Key::HTTPS,
+                                                    "HTTPS",
+                                                    "false",
+                                                    [](std::string_view value) {
+                                                        return value == "true" || value == "false";
+                                                    }}}
+    };
+    const std::unordered_map<std::string, Key> m_ReverseItems = []() {
+        std::unordered_map<std::string, Key> reverse;
+        for (const auto &item: m_Items) {
+            reverse[item.second.name] = item.first;
+        }
+        return reverse;
+    }();
+} // namespace
 
-    std::string GetDefault(Key key);
-    void LoadDefault();
-    void Load();
-    void Save();
-    bool Set(Key key, std::string_view value);
-    std::string Get(Key key);
+std::string GetDefault(Key key);
+void LoadDefault();
+void Load();
+void Save();
+bool Set(Key key, std::string_view value);
+std::string Get(Key key);
 } // namespace Config
 
 #endif /*CONFIG_H_*/
