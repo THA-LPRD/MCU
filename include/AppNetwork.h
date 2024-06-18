@@ -7,11 +7,12 @@ class AppNetwork : public Application
 {
 public:
     AppNetwork() = default;
-    ~AppNetwork() = default;
+    ~AppNetwork() override;
     bool Init() override;
     void Run() override;
 private:
     bool SetupWiFi();
+    void DestroyWiFi();
 private:
     std::string m_ImagePath;
     EPDL::ImageHandle m_ImageHandle;

@@ -20,6 +20,7 @@ namespace Log
     };
 
     void SetLogLevel(Level level);
+    bool SetLogLevel(std::string_view level);
     void SetLogFunction(std::function<void(char* msg)> logFunction);
     void Trace(const char* format, ...);
     void Debug(const char* format, ...);

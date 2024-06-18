@@ -1,26 +1,30 @@
 @font-face {
     font-family: 'TWKEverett-Bold';
     src: url('./layouts/fonts/TWKEverett-Bold-web.ttf') format('truetype');
+
+
 }
 @font-face {
     font-family: 'TWKEverett-Regular';
     src: url('./layouts/fonts/TWKEverett-Regular-web.ttf') format('truetype');
+
 }
 @font-face {
     font-family: 'TWKEverett-RegularItalic';
     src: url('./layouts/fonts/TWKEverett-RegularItalic-web.ttf') format('truetype');
+
 }
 
 
+/* Website-Hintergrund */
 body {
     font-family: 'TWKEverett-Regular', sans-serif;
     background-color: #333;
 }
 
 
-
-header {
-    
+/*Roter Header-Balken*/
+header { 
     max-width: 940px;
     margin: auto;
     margin-top: 10px;
@@ -42,15 +46,15 @@ header img {
     margin-left: 10px;
 }
 
+/* Hintergrundfarbe für den Hauptinhalt */
 .container {
     max-width: 940px;
     margin: auto;
     height: fit-content;
-    background-color: #fff; /* Hintergrundfarbe für den Hauptinhalt */
+    background-color: #fff; 
 }
 
 /* Navigationsbalken */
-
 nav ul {
     list-style: none;
     margin: 0;
@@ -76,23 +80,26 @@ nav a:hover {
     text-decoration: underline;
 }
 
+/*Settings-Icon*/
 #settings {
     float: right;
     margin-right: 10px;
     margin-left: -35px;
 }
 
+/*Restart-Button*/
 #restart {
     float: right;
     margin-right: 40px;
 
 }
-
+/*Fehlermeldung, falls kein Display angeschlossen*/
 #displayError {
     color:#FF0350;
     font-style: italic;
 }
 
+/*Textinhalt unter rotem Header-Balken*/
 main {
     text-align: center;
     min-height: 50vh;
@@ -117,6 +124,7 @@ a {
     box-sizing: border-box;
 }
 
+/*Unterseite PNG-Upload*/
 #pngHeading {
     text-align: left;
     margin-left: 7.5%;
@@ -155,15 +163,14 @@ a {
     max-width: 90%;
 }
 
-#ditheringCheckbox {
-    float: left;
-    margin-top: 2%;
-    margin-left: 7.5%;
-    padding-right: 50px;
-    text-align: left;
-
+/* Beschränkt die Breite des Bildes */
+#scaledImageContainer {
+    margin: auto;
+    max-width: 90%; 
 }
 
+
+/*HTML-Design*/
 #designByHtml {
     border-top: 2px dashed black;
     max-width: 90%;
@@ -194,22 +201,14 @@ ol li {
     font-weight: bold;
 }
 
-#inputText {
+/*HTML-Textfeld/-Eingabe*/
+#inputText, #inputText2 {
     padding: 5px;
     max-width: 90%;
     width: calc(100% - 40px);
     margin: auto;
     box-sizing: border-box;
 }
-
-#inputText2 {
-    padding: 5px;
-    max-width: 90%;
-    width: calc(100% - 40px);
-    margin: auto;
-    box-sizing: border-box;
-}
-
 
 button {
     margin-top: 2%;
@@ -217,7 +216,8 @@ button {
     font-family: 'TWKEverett-Regular', sans-serif;
 }
 
-#previewContainer {
+/*Container für HTML-Vorschau, fixes Pixelformat --> scrollbar*/
+#previewContainer, #previewContainer2 {
     width: 800px;
     height: 480px;
     overflow: auto;
@@ -226,29 +226,19 @@ button {
     margin: auto;
 }
 
-#preview {
-    width: 100%; /* Ensures the content takes its natural width*/
+/*Original-Vorschau des HTMLs, wird in previewContainer eingefügt*/
+#preview, #preview2 {
+    width: 100%; 
     height: 100%;
 }
 
-#previewContainer2 {
-    width: 800px;
-    height: 480px;
-    overflow: auto;
-    position: relative;
-    border: 1px solid #ccc;
+/* Beschränkt die Breite des Bildes */
+#scaledImageContainer2 {
     margin: auto;
-}
-
-#preview2 {
-    width: 100%; /* Ensures the content takes its natural width*/
-    height: 100%;
+    max-width: 90%; 
 }
 
 
-#htmlOption{
-    margin-top:2%;
-}
 
 
 

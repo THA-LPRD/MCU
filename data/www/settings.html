@@ -12,6 +12,9 @@
             SetupSetWiFiCredForm();
             GetOpMode();
             GetDisplayModule();
+            GetLogLevel();
+            SetupSetHTTPAuthForm();
+            GetHTTPS();
         };
 
         async function GetOpMode() {
@@ -48,6 +51,38 @@
             }
         }
 
+        async function GetLogLevel() {
+            try {
+                let response = await fetch('/api/v1/GetLogLevel');
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                let data = await response.text();
+                document.getElementById('logLevel').textContent = data;
+            } catch (error) {
+                console.error('Error fetching log level:', error);
+                document.getElementById('SetLogLevel-response').textContent = 'Fehler beim Abrufen des verwendeten Log Levels: ' + error.message;
+            }
+        }
+
+        async function GetHTTPS() {
+            try {
+                let response = await fetch('/api/v1/GetHTTPS');
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                let data = await response.text();
+                document.getElementById('httpsStatus').textContent = data;
+                let isHttpsEnabled = data.trim() === 'true'; // Trim any extra whitespace
+
+                document.getElementById('https').checked = isHttpsEnabled;
+                toggleHTTPSFields();
+            } catch (error) {
+                console.error('Error fetching HTTPS status:', error);
+                document.getElementById('responseHTTPS').textContent = 'Error fetching HTTPS status: ' + error.message;
+            }
+        }
+
         function SetupSetWiFiCredForm() {
             const form = document.getElementById('SetWiFiCred-form');
             form.querySelector('#ssid').addEventListener('keypress', function (e) {
@@ -61,6 +96,21 @@
                 }
             });
         }
+
+        function SetupSetHTTPAuthForm() {
+            const form = document.getElementById('SetHTTPAuth-form');
+            form.querySelector('#username').addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') {
+                    form.querySelector('#password').focus();
+                }
+            });
+            form.querySelector('#password').addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') {
+                    SetHTTPAuth();
+                }
+            });
+        }
+
 
         async function SetOpMode() {
             const form = document.getElementById('SetOpMode-form');
@@ -100,6 +150,18 @@
             }
         }
 
+        async function SetLogLevel() {
+            const form = document.getElementById('SetLogLevel-form');
+            const level = form.querySelector('#level').value;
+            const response = await SubmitFormData('/api/v1/SetLogLevel', {level});
+            const responseElement = document.getElementById('SetLogLevel-response');
+            if (responseElement) {
+                responseElement.innerText = response;
+            } else {
+                console.error('Response element for SetLogLevel not found.');
+            }
+        }
+
         async function restart() {
              try {
              const response = await fetch('/api/v1/restart', {
@@ -117,7 +179,63 @@
              }
          }
 
+        async function SetHTTPAuth() {
+            const form = document.getElementById('SetHTTPAuth-form');
+            const username = form.querySelector('#username').value;
+            const password = form.querySelector('#password').value;
+            const response = await SubmitFormData('/api/v1/SetHTTPAuth', {username, password});
+            const responseElement = document.getElementById('SetHTTPAuth-response');
+            if (responseElement) {
+                responseElement.innerText = response;
+            }
+            else {
+                console.error('Response element for SetHTTPAuth not found.');
+            }
+        }
 
+        async function SetHTTPS() {
+            const https = document.getElementById('https').checked;
+            const responseElement = document.getElementById('SetHTTPS-response');
+
+            try {
+                let responseText = await SubmitFormData('/api/v1/SetHTTPS', { https: https.toString() });
+
+                // Since SubmitFormData returns text, there's no need to check response.ok here
+                console.log('SetHTTPS response:', responseText);
+
+                // Handle the file uploads if HTTPS is enabled
+                if (https) {
+                    const certFile = document.getElementById('certFile').files[0];
+                    const keyFile = document.getElementById('keyFile').files[0];
+
+                    if (!certFile || !keyFile) {
+                        throw new Error('Both certificate and key files must be selected.');
+                    }
+
+                    let certUploadResponse = await uploadFile(certFile, 'server.crt', '/api/v1/UploadHTTPSCert');
+                    if (!certUploadResponse.success) {
+                        throw new Error(certUploadResponse.message);
+                    }
+
+                    let keyUploadResponse = await uploadFile(keyFile, 'server.key', '/api/v1/UploadHTTPSKey');
+                    if (!keyUploadResponse.success) {
+                        throw new Error(keyUploadResponse.message);
+                    }
+                }
+
+                responseElement.innerText = 'HTTPS settings updated successfully.';
+            } catch (error) {
+                console.error('Error setting HTTPS:', error);
+                responseElement.innerText = 'Error: ' + error.message;
+            }
+        }
+
+        function toggleHTTPSFields() {
+            const fileFields = document.getElementById('fileFields');
+            const isHttpsChecked = document.getElementById('https').checked;
+            console.log('toggleHTTPSFields: HTTPS checkbox is', isHttpsChecked ? 'checked' : 'not checked'); // Log the checkbox state
+            fileFields.style.display = isHttpsChecked ? 'block' : 'none';
+        }
 
     </script>
 
@@ -131,14 +249,6 @@
         }
 
 
-        #responseModule, #responseMode, #responseWiFi {
-                color:#FF0350;
-                font-style: bold;
-                font-style: italic;
-                margin-left: 20px;
-                margin-right: 20px;
-            }
-
         #home {
             text-align: left;
             margin-left: 20px;
@@ -148,7 +258,51 @@
             float: right;
             margin-right: 20px;
 
-        }
+        }     
+                       
+        /* Stil für die Tabelle */
+table {
+    margin: auto;
+    margin-left: 20%;
+    margin-right: 20%;
+    text-align: center;
+}
+
+/* Stil für die Zellen */
+td {
+    padding: 5%;
+    vertical-align: top;
+}
+
+/* Stil für die Nachrichten */
+div[id^="response"], p[id^="SetWiFiCred-response"] {
+    max-width: 100%;
+    word-wrap: break-word;
+    margin-top: 10px;
+}
+
+/* Stil für die Formular-Elemente */
+form {
+    display: flex;
+    margin: auto;
+    flex-direction: column;
+}
+
+label, input, select, button {
+    margin-bottom: 10px;
+}
+
+h3 {
+    margin-top: 0;
+}
+
+/* Stil für Absätze */
+p.text {
+    margin-bottom: 20px;
+    color:#FF0350;
+}
+        
+
 
     </style>
 </head>
@@ -181,7 +335,7 @@
             <table>
                 <tr>
                     <td>
-                        <h3>1. Modus:</h3>
+                        <h3>Modus:</h3>
                         <div id="responseMode"></div>
                         <p class="text">Sie befinden sich im: <span id="operatingMode"></span>-Modus</p>
                         <div id="SetOpMode-form">
@@ -191,11 +345,11 @@
                                 <option value="Server">Server</option>
                             </select>
                             <button onclick="SetOpMode()">Speichern</button>
-                            <p id="SetOpMode-response"></p>
+                            <div id="SetOpMode-response"></div>
                         </div>
                     </td>
                     <td>
-                        <h3>2. Display-Modul:</h3>
+                        <h3>Display-Modul:</h3>
                         <div id="responseModule"></div>
                         <p class="text">Sie sind verbunden mit dem Display-Modul: <span id="displayModule"></span></p>
                         <div id="SetDisplayModule-form">
@@ -204,13 +358,13 @@
                                 <option value="WS_9IN7">Waveshare 9.7" 2 color</option>
                             </select>
                             <button onclick="SetDisplayModule()">Speichern</button>
-                            <p id="SetDisplayModule-response"></p>
+                            <div id="SetDisplayModule-response"></div>
                         </div>
                     </td>
                 </tr>
                 <tr>
                     <td>
-                        <h3>3. WiFi Konfiguration:</h3>
+                        <h3>WiFi Konfiguration:</h3>
                         <div id="responseWiFi"></div>
                         <div id="SetWiFiCred-form">
                             <form>
@@ -223,7 +377,56 @@
                             <p id="SetWiFiCred-response"></p>
                         </div>
                     </td>
+                    <td>
+                        <h3>Seriellen Console Log Level:</h3>
+                        <p class="text">Sie befinden sich im: <span id="logLevel"></span>-Level</p>
+                        <div id="SetLogLevel-form">
+                            <select id="level" name="level" required>
+                                <option value="Fatal">Fatal</option>
+                                <option value="Error">Error</option>
+                                <option value="Warning">Warning</option>
+                                <option value="Info">Info</option>
+                                <option value="Debug">Debug</option>
+                                <option value="Trace">Trace</option>
+                            </select>
+                            <button onclick="SetLogLevel()">Speichern</button>
+                            <p id="SetLogLevel-response"></p>
+                        </div>
+                    </td>
                 </tr>
+                <tr>
+                    <td>
+                        <h3>HTTP Auth:</h3>
+                        <div id="responseHTTPAuth"></div>
+                        <div id="SetHTTPAuth-form">
+                            <form>
+                                <label for="username">Benutzername:</label><br>
+                                <input type="text" id="username" name="username" required><br><br>
+                                <label for="password">Passwort:</label><br>
+                                <input type="password" id=password name="password" required><br><br>
+                            </form>
+                            <button onclick="SetHTTPAuth()">Speichern</button>
+                            <p id="SetHTTPAuth-response"></p>
+                        </div>
+                    </td>
+                    <td>
+                        <h3>HTTPS Setting:</h3>
+                        <p class="text">HTTPS is currently: <span id="httpsStatus"></span></p>
+                        <div id="SetHTTPS-form">
+                            <label>
+                                <input type="checkbox" id="https" onchange="toggleHTTPSFields()"> Enable HTTPS
+                            </label>
+                            <div id="fileFields" style="display: none;">
+                                <label for="certFile">Certificate File:</label>
+                                <input type="file" id="certFile" name="certFile" accept=".pem, .crt, .cert">
+                                <br>
+                                <label for="keyFile">Key File:</label>
+                                <input type="file" id="keyFile" name="keyFile" accept=".pem, .key">
+                            </div>
+                            <button onclick="SetHTTPS()">Save</button>
+                            <p id="SetHTTPS-response"></p>
+                        </div>
+                    </td>
             </table>
         </main>
         

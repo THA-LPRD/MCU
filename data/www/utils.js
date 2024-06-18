@@ -36,3 +36,25 @@ async function SubmitFormData(endpoint, data) {
         return error.message || 'An error occurred while processing your request. Please try again later.';
     }
 }
+
+async function uploadFile(fileData, fileName, url) {
+    try {
+        const formData = new FormData();
+        formData.append('file', fileData, fileName);
+
+        const response = await fetch(url, {
+            method: 'POST',
+            body: formData
+        });
+
+        if (response.ok) {
+            const responseText = await response.text();
+            return { success: true, message: 'Datei erfolgreich hochgeladen: ' + responseText };
+        } else {
+            return { success: false, message: 'Fehler beim Hochladen der Datei. Statuscode: ' + response.status };
+        }
+    } catch (error) {
+        console.error('Fehler beim Hochladen der Datei:', error);
+        return { success: false, message: 'Fehler beim Hochladen der Datei: ' + error.message };
+    }
+}

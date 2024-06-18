@@ -6,16 +6,17 @@
 #include <string>
 #include <vector>
 #include <functional>
+#include <PsychicHttpsServer.h>
 
 class HTTPServer {
 public:
     HTTPServer() = default;
-    ~HTTPServer() = default;
-    void Init();
-    void SetFilesToServe(const std::map<std::string, std::string>& files);
+    ~HTTPServer();
+    bool Init(bool https = false);
+    void SetFilesToServe(const std::map<std::string, std::string> &files);
     void AddAPISetOpMode();
     void AddAPISetWiFiCred();
-    void AddAPIUploadImg(std::function<void(std::string_view filePath)> callback = nullptr);
+    void AddAPIUploadImg(const std::function<void(std::string_view filePath)>& callback = nullptr);
     void AddAPIGetDisplayModule();
     void AddAPISetDisplayModule();
     void AddAPIGetOpMode();
@@ -24,9 +25,25 @@ public:
     void AddAPIls();
     void AddAPIrm();
     void AddAPImkdir();
+    void AddAPIRestart();
+    void AddAPISetLogLevel();
+    void AddAPIGetLogLevel();
+    void EnableHTTPAuth(std::string_view username, std::string_view password);
+    void AddAPISetHTTPAuth();
+    void AddAPISetHTTPS();
+    void AddAPIGetHTTPS();
+    void AddAPIUploadHTTPSKey();
+    void AddAPIUploadHTTPSCert();
 private:
-    PsychicHttpServer m_Server;
+    bool InitHTTPS();
+    bool InitHTTP();
+private:
+    PsychicHttpServer m_HTTPServer;
+    PsychicHttpsServer m_HTPPSServer;
+    PsychicHttpServer* m_MainServer = nullptr;
     bool status_AddAPIUploadImg = false;
+    std::vector<PsychicHandler*> m_Handlers;
+    bool m_isHTTPS = false;
 };
 
 #endif /*HTTPSERVER_H_*/
