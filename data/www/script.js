@@ -256,10 +256,10 @@ function convertAndUploadHtml(previewId, inputTextId) {
     // Verwendung von html2canvas, um den gesamten Inhalt der Vorschau zu erfassen
     html2canvas(preview, { scale: 1 }).then(canvas => {
         // Überprüfen, ob das Bild die richtigen Abmessungen hat
-        if (canvas.width !== Number(displayWidth) || canvas.height !== Number(displayHeight)) {
-            alert('Ihr Design ist nicht im richtigen Pixelformat für das angeschlossene Display');
-            return;
-        }
+        // if (canvas.width !== Number(displayWidth) || canvas.height !== Number(displayHeight)) {
+        //     alert('Ihr Design ist nicht im richtigen Pixelformat für das angeschlossene Display');
+        //     return;
+        // }
 
         // Erstellen eines Blob-Objekts aus dem Canvas-Bild
         canvas.toBlob(function(blob) {
