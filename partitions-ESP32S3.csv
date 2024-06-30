@@ -1,0 +1,6 @@
+# Name,   Type, SubType,  Offset,  Size,  Flags
+nvs,      data, nvs,      36K,     20K,
+otadata,  data, ota,      56K,     8K,
+app,      app,  factory,  64k,     1984K,
+storage,  data, spiffs,   2048K,   6080K,
+coredump, data, coredump, 8128K,   64K,

@@ -1,0 +1,10 @@
+{
+    "OperatingMode": "Default",
+    "WiFiSSID": "",
+    "WiFiPassword": "",
+    "DisplayDriver": "",
+    "LogLevel": "Info",
+    "HTTPUsername": "",
+    "HTTPPassword": "",
+    "HTTPS": "false"
+}
