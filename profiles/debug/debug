@@ -1,0 +1,1 @@
+-B build/debug -DLPRD_DEBUG=ON
