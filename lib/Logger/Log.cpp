@@ -15,11 +15,32 @@ namespace Log
 
         // Note: This function is not thread safe
         void LogMessage(const char* level, const char* format, va_list args) {
-            int offset = snprintf(m_Buffer, LOG_BUFFER_SIZE, "%s", level);
+            const char* color_code = "";
+
+            // Determine color based on log level
+            if (strcmp(level, "TRACE - ") == 0) {
+                color_code = "\033[37m"; // White
+            } else if (strcmp(level, "DEBUG - ") == 0) {
+                color_code = "\033[36m"; // Cyan
+            } else if (strcmp(level, "INFO - ") == 0) {
+                color_code = "\033[32m"; // Green
+            } else if (strcmp(level, "WARNING - ") == 0) {
+                color_code = "\033[33m"; // Yellow
+            } else if (strcmp(level, "ERROR - ") == 0) {
+                color_code = "\033[31m"; // Red
+            } else if (strcmp(level, "FATAL - ") == 0) {
+                color_code = "\033[41m"; // Red background
+            }
+
+            int offset = snprintf(m_Buffer, LOG_BUFFER_SIZE, "%s%s", color_code, level);
             if (offset < 0) { return; }
             vsnprintf(m_Buffer + offset, LOG_BUFFER_SIZE - offset, format, args);
             m_Buffer[LOG_BUFFER_SIZE - 1] = '\0';
+
+            strncat(m_Buffer, "\033[0m", LOG_BUFFER_SIZE - strlen(m_Buffer) - 1);
+
             m_LogFunction(m_Buffer);
+
         }
     } // namespace
 
@@ -50,6 +71,7 @@ namespace Log
         }
         return true;
     }
+
     void SetLogFunction(std::function<void(char* msg)> logFunction) {
         m_LogFunction = logFunction;
     }
