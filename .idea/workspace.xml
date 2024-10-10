@@ -174,24 +174,7 @@
     <configurations />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="552f8f0e-c9f4-4dbf-a185-f974456386fe" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/components/ArduinoJson" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/components/arduino-esp32" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/components/esp_littlefs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/main/MCU_main.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitmodules" beforeDir="false" afterPath="$PROJECT_DIR$/.gitmodules" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/cmake.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/cmake.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CHANGELOG.md" beforeDir="false" afterPath="$PROJECT_DIR$/CHANGELOG.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/main/CMakeLists.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main/hello_world_main.cpp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/profiles/debug/sdkconfig.debug" beforeDir="false" afterPath="$PROJECT_DIR$/profiles/debug/sdkconfig.debug" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/profiles/release/sdkconfig.release" beforeDir="false" afterPath="$PROJECT_DIR$/profiles/release/sdkconfig.release" afterDir="false" />
-    </list>
+    <list default="true" id="552f8f0e-c9f4-4dbf-a185-f974456386fe" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -285,6 +268,11 @@
     </key>
   </component>
   <component name="RunManager" selected="CMake Application.app">
+    <configuration default="true" type="CLionExternalRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true">
+      <method v="2">
+        <option name="CLION.EXTERNAL.BUILD" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="LPRD-MCU.elf" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="LPRD-MCU" TARGET_NAME="LPRD-MCU.elf" CONFIG_NAME="Debug-ESP-IDF v5.1.4" RUN_TARGET_PROJECT_NAME="LPRD-MCU" RUN_TARGET_NAME="LPRD-MCU.elf">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
@@ -1242,7 +1230,7 @@
       <workItem from="1728481768913" duration="8228000" />
       <workItem from="1728509737735" duration="765000" />
       <workItem from="1728554628070" duration="1050000" />
-      <workItem from="1728561898628" duration="323000" />
+      <workItem from="1728561898628" duration="353000" />
     </task>
     <servers />
   </component>
