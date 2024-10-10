@@ -1,0 +1,18 @@
+[submodule "components/arduino-esp32"]
+	path = components/arduino-esp32
+	url = https://github.com/espressif/arduino-esp32.git
+[submodule "components/ArduinoJson"]
+	path = components/ArduinoJson
+	url = https://github.com/bblanchon/ArduinoJson.git
+[submodule "components/UrlEncode/urlencode"]
+	path = components/UrlEncode/urlencode
+	url = https://github.com/plageoj/urlencode.git
+[submodule "components/PsychicHttp"]
+	path = components/PsychicHttp
+	url = https://github.com/hoeken/PsychicHttp.git
+[submodule "components/PNGdec"]
+	path = components/PNGdec
+	url = https://github.com/THA-LPRD/PNGdec.git
+[submodule "components/esp_littlefs"]
+	path = components/esp_littlefs
+	url = https://github.com/joltwallet/esp_littlefs.git
