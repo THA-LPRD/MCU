@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Switched from Arduino to native ESP-IDF
+- Configuration is now per component
+- Logging is handled via spdlog
+- Using magic_enum for enum handling
 
 ## [1.0.0] - 2024-06-30
 

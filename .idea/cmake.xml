@@ -2,8 +2,8 @@
 <project version="4">
   <component name="CMakeSharedSettings">
     <configurations>
-      <configuration PROFILE_NAME="Debug" ENABLED="true" GENERATION_DIR="build/debug" CONFIG_NAME="Debug" TOOLCHAIN_NAME="ESP-IDF v5.3" GENERATION_OPTIONS="-DLPRD_DEBUG=ON" />
-      <configuration PROFILE_NAME="Release" ENABLED="true" GENERATION_DIR="build/release" CONFIG_NAME="Release" TOOLCHAIN_NAME="ESP-IDF v5.3" GENERATION_OPTIONS="-DLPRD_RELEASE=ON" />
+      <configuration PROFILE_NAME="Debug-ESP-IDF v5.1.4" ENABLED="true" GENERATION_DIR="build/debug" CONFIG_NAME="Debug" TOOLCHAIN_NAME="ESP-IDF v5.1.4" GENERATION_OPTIONS="-DLPRD_DEBUG=ON" />
+      <configuration PROFILE_NAME="Release-ESP-IDF v5.1.4" ENABLED="true" GENERATION_DIR="build/release" CONFIG_NAME="Release" TOOLCHAIN_NAME="ESP-IDF v5.1.4" GENERATION_OPTIONS="-DLPRD_RELEASE=ON" />
     </configurations>
   </component>
 </project>

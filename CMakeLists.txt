@@ -5,6 +5,7 @@ cmake_minimum_required(VERSION 3.16)
 set(SDKCONFIG "${CMAKE_BINARY_DIR}/sdkconfig")
 set(CONFIG_APP_PROJECT_VER "2.0.0-aplha")
 set(IDF_TARGET "esp32s3")
+set(CMAKE_CXX_STANDARD 23)
 
 if(LPRD_RELEASE)
     set(SDKCONFIG_DEFAULTS "profiles/release/sdkconfig.release")
