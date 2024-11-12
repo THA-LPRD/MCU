@@ -1,8 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="VcsDirectoryMappings">
-    <mapping directory="" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/lib/PNGdec" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/lib/PsychicHttp" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/components/ArduinoJson" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/components/PsychicHttp" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/components/PsychicHttp/examples/esp-idf/components/ArduinoJson" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/components/PsychicHttp/examples/esp-idf/components/UrlEncode" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/components/PsychicHttp/examples/esp-idf/components/arduino-esp32" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/components/PsychicHttp/examples/esp-idf/components/esp_littlefs" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/components/PsychicHttp/examples/esp-idf/components/esp_littlefs/src/littlefs" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/components/UrlEncode/urlencode" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/components/arduino-esp32" vcs="Git" />
   </component>
 </project>

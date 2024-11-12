@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CLionExternalBuildManager">
+    <target id="67f46a3b-efe1-48d1-b42d-004929b684b0" name="Unnamed" defaultType="TOOL">
+      <configuration id="d23b8ac2-bb1a-42c8-9b3a-b13395cea574" name="Unnamed" toolchainName="ESP-IDF v5.1.4">
+        <build type="TOOL">
+          <tool actionId="Tool_External Tools_ESP-IDF build" />
+        </build>
+      </configuration>
+    </target>
+  </component>
+</project>

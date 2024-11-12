@@ -1,0 +1,66 @@
+{
+  "application": {
+    "OperatingMode": "Standalone",
+    "LogLevel": "info",
+    "AppStandalone": {
+      "WiFi": {}
+    },
+    "AppNetwork": {
+      "WiFi": {
+        "SSID": "SSID",
+        "Password": "Password"
+      }
+    },
+    "AppServer": {
+      "WiFi": {
+        "SSID": "SSID",
+        "Password": "Password"
+      },
+      "ServerURL": "http://example.com"
+    }
+  },
+  "httpserver": {
+    "Port": 80,
+    "Auth": {
+      "Enabled": false,
+      "Username": "admin",
+      "Password": "admin"
+    },
+    "SSL": {
+      "Enabled": false,
+      "Port": 443,
+      "Cert": "cert.pem",
+      "Key": "key.pem"
+    }
+  },
+  "peripherals": {
+    "PowerEnable": 26,
+    "Button0": 2,
+    "Button1": -1,
+    "Button2": -1,
+    "Button3": -1,
+    "Display": {
+      "Driver": "WS_7IN3G",
+      "Pins": {
+        "Busy": 1,
+        "Reset": 44,
+        "DC": 3,
+        "CS": 4,
+        "CLK": 7,
+        "MOSI": 9
+      }
+    },
+    "SD": {
+      "Mode": 1,
+      "Pins": {
+        "D2": 44,
+        "D3": 9,
+        "CMD": 15,
+        "CLK": 7,
+        "D0": 2,
+        "D1": 8,
+        "CD": 4
+      }
+    }
+  }
+}
