@@ -22,7 +22,7 @@
   "httpserver": {
     "Port": 80,
     "Auth": {
-      "Enabled": false,
+      "Enabled": true,
       "Username": "admin",
       "Password": "admin"
     },

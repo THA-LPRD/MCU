@@ -39,7 +39,7 @@ WS_9IN7::WS_9IN7(int busyPin, int resetPin, int dcPin, int csPin, int sckPin, in
 void WS_9IN7::Initialize() {
     spdlog::debug("{} Initializing WS_9IN7 display driver", LOG_TAG);
     IT8951E::Initialize();
-    if (m_DeviceInfo.PanelWidth != HEIGHT || m_DeviceInfo.PanelHeight != WIDTH) {
+    if (m_DeviceInfo.PanelHeight != HEIGHT || m_DeviceInfo.PanelWidth != WIDTH) {
         spdlog::error("Panel size mismatch:", LOG_TAG);
         spdlog::error("{} Expected: {} x {}", LOG_TAG, WIDTH, HEIGHT);
         spdlog::error("{} Actual: {} x {}", LOG_TAG, m_DeviceInfo.PanelWidth, m_DeviceInfo.PanelHeight);

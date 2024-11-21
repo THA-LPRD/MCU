@@ -22,6 +22,15 @@ bool WiFi::Connect(Mode mode, std::string_view ssid, std::string_view password, 
         return false;
     }
 
+    if (ssid.empty()) {
+        spdlog::error("{} SSID is empty", LOG_TAG);
+        return false;
+    }
+    if (mode == Mode::Station && password.empty()) {
+        spdlog::error("{} Password is empty", LOG_TAG);
+        return false;
+    }
+
     switch (mode) {
         case Mode::Station:
             if (!m_Station) {

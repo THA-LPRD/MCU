@@ -100,9 +100,8 @@ public:
         }
 
         auto src = tempDoc.as<JsonObjectConst>();
-        auto dst = m_Document.as<JsonObject>();
         for (JsonPairConst kvp: src) {
-            dst[kvp.key()] = kvp.value();
+            m_Document[kvp.key()] = kvp.value();
         }
 
         spdlog::debug("{} Configuration loaded from NVS", LOG_TAG);
@@ -141,136 +140,177 @@ public:
     }
 
     template<typename T>
-    T Get(const char* key, const T &defaultValue = T()) const {
+    T Get(std::string_view key, const T &defaultValue = T()) const {
         if (!m_Document[key].is<T>()) {
             return defaultValue;
         }
         return m_Document[key].as<T>();
     }
 
-    std::string Get(const char* key, const char* defaultValue = "") const {
+    std::string Get(std::string_view key, std::string_view defaultValue = "") const {
         auto variant = m_Document[key];
         if (!variant.is<const char*>()) {
-            return defaultValue;
+            return {defaultValue.data()};
         }
-        return std::string(variant.as<const char*>());
+        return {variant.as<const char*>()};
     }
 
-
-    std::string Get(std::string_view key, std::string_view defaultValue = "") const {
-        return Get(std::string(key).c_str(), std::string(defaultValue).c_str());
+    std::string Get(std::string_view key, const char* defaultValue = "") const {
+        return Get(key, std::string_view(defaultValue));
     }
 
+    std::string Get(std::string_view key, const std::string &defaultValue) const {
+        return Get(key, std::string_view(defaultValue));
+    }
+
+    std::string Get(std::string_view key, std::string &&defaultValue) const {
+        return Get(key, std::string_view(defaultValue));
+    }
 
     template<typename T>
-    bool Set(const char* key, const T &value) {
+    bool Set(std::string_view key, const T &value) {
         spdlog::info("{} Setting {} to {}", LOG_TAG, key, value);
         m_Document[key] = value;
         SaveToNVS();
         return true;
     }
 
-    bool Set(const char* key, const std::string &value) {
+    bool Set(std::string_view key, std::string_view value) {
         spdlog::info("{} Setting {} to {}", LOG_TAG, key, value);
-        m_Document[key] = value.c_str();
+        m_Document[key] = value;
         SaveToNVS();
         return true;
     }
 
-    bool Set(std::string_view key, std::string_view value) {
-        spdlog::info("{} Setting {} to {}", LOG_TAG, key, value);
-        m_Document[std::string(key).c_str()] = std::string(value).c_str();
-        SaveToNVS();
-        return true;
+    bool Set(std::string_view key, const char* value) {
+        return Set(key, std::string_view(value));
+    }
+
+    bool Set(std::string_view key, const std::string &value) {
+        return Set(key, std::string_view(value));
+    }
+
+    bool Set(std::string_view key, std::string &&value) {
+        return Set(key, std::string_view(value));
     }
 
     template<typename T>
-    T GetNested(const char* path, const T &defaultValue = T()) const {
+    T GetNested(std::string_view path, const T &defaultValue = T()) const {
         JsonVariantConst current = m_Document;
-        char* mutablePath = strdup(path);
-        char* token = strtok(mutablePath, ".");
-
-        while (token != nullptr && !current.isNull()) {
-            current = current[token];
-            token = strtok(nullptr, ".");
-        }
-
-        free(mutablePath);
-
-        if (current.isNull() || !current.is<T>()) {
-            return defaultValue;
-        }
-
-        return current.as<T>();
-    }
-
-    std::string GetNested(const char* path, const char* defaultValue = "") const {
-        JsonVariantConst current = m_Document;
-        std::string mutablePath(path);
+        std::string pathStr(path);
         size_t pos = 0;
         size_t delim;
 
-        while ((delim = mutablePath.find('.', pos)) != std::string::npos) {
-            std::string token = mutablePath.substr(pos, delim - pos);
-            current = current[token.c_str()];
+        while ((delim = pathStr.find('.', pos)) != std::string::npos) {
+            std::string_view token(pathStr.data() + pos, delim - pos);
+            current = current[std::string(token).c_str()];
             if (current.isNull()) {
                 return defaultValue;
             }
             pos = delim + 1;
         }
 
-        std::string lastToken = mutablePath.substr(pos);
-        current = current[lastToken.c_str()];
+        std::string_view lastToken(pathStr.data() + pos);
+        current = current[std::string(lastToken).c_str()];
 
-        if (current.isNull() || !current.is<const char*>()) {
+        if (current.isNull() || !current.is<T>()) {
             return defaultValue;
         }
-
-        return std::string(current.as<const char*>());
+        return current.as<T>();
     }
-
 
     std::string GetNested(std::string_view path, std::string_view defaultValue = "") const {
-        return GetNested(std::string(path).c_str(), std::string(defaultValue).c_str());
-    }
+        JsonVariantConst current = m_Document;
+        std::string pathStr(path);
+        size_t pos = 0;
+        size_t delim;
 
-
-    template<typename T>
-    bool SetNested(const char* path, const T &value) const {
-        spdlog::info("{} Setting {} to {}", LOG_TAG, path, value);
-        std::vector<std::string> parts;
-        char* mutablePath = strdup(path);
-        char* token = strtok(mutablePath, ".");
-
-        while (token != nullptr) {
-            parts.emplace_back(token);
-            token = strtok(nullptr, ".");
+        while ((delim = pathStr.find('.', pos)) != std::string::npos) {
+            std::string_view token(pathStr.data() + pos, delim - pos);
+            current = current[std::string(token).c_str()];
+            if (current.isNull()) {
+                return std::string(defaultValue);
+            }
+            pos = delim + 1;
         }
 
-        free(mutablePath);
+        std::string_view lastToken(pathStr.data() + pos);
+        current = current[std::string(lastToken).c_str()];
 
-        auto &nonConstDocument = const_cast<JsonDocument &>(m_Document);
-        JsonObject current = nonConstDocument.to<JsonObject>();
+        if (current.isNull() || !current.is<const char*>()) {
+            return std::string(defaultValue);
+        }
+        return current.as<const char*>();
+    }
+
+    std::string GetNested(std::string_view path, const char* defaultValue = "") const {
+        return GetNested(path, std::string_view(defaultValue));
+    }
+
+    std::string GetNested(std::string_view path, const std::string &defaultValue) const {
+        return GetNested(path, std::string_view(defaultValue));
+    }
+
+    template<typename T>
+    bool SetNested(std::string_view path, const T &value) {
+        spdlog::info("{} Setting {} to {}", LOG_TAG, path, value);
+        std::vector<std::string> parts;
+        std::string pathStr(path);
+        size_t start = 0, end;
+
+        while ((end = pathStr.find('.', start)) != std::string::npos) {
+            parts.push_back(pathStr.substr(start, end - start));
+            start = end + 1;
+        }
+        parts.push_back(pathStr.substr(start));
+
+        JsonObject current = m_Document.as<JsonObject>();
         for (size_t i = 0; i < parts.size() - 1; ++i) {
             if (!current[parts[i]].is<JsonObject>()) {
                 current[parts[i]] = JsonObject();
             }
-            current = current[parts[i]].to<JsonObject>();
+            current = current[parts[i]];
         }
+        current[parts.back()] = value;
 
+        SaveToNVS();
+        return true;
+    }
+
+    bool SetNested(std::string_view path, std::string_view value) {
+        spdlog::info("{} Setting {} to {}", LOG_TAG, path, value);
+        std::vector<std::string> parts;
+        std::string pathStr(path);
+        size_t start = 0, end;
+
+        while ((end = pathStr.find('.', start)) != std::string::npos) {
+            parts.push_back(pathStr.substr(start, end - start));
+            start = end + 1;
+        }
+        parts.push_back(pathStr.substr(start));
+
+        JsonObject current = m_Document.as<JsonObject>();
+        for (size_t i = 0; i < parts.size() - 1; ++i) {
+            if (!current[parts[i]].is<JsonObject>()) {
+                current[parts[i]] = JsonObject();
+            }
+            current = current[parts[i]];
+        }
         current[parts.back()] = value;
         SaveToNVS();
         return true;
     }
 
-    bool SetNested(const char* path, const std::string &value) const {
-        spdlog::info("{} Setting {} to {}", LOG_TAG, path, value);
-        return SetNested(path, value.c_str());
+    bool SetNested(std::string_view path, const char* value) {
+        return SetNested(path, std::string_view(value));
     }
 
-    bool SetNested(std::string_view path, std::string_view value) const {
-        spdlog::info("{} Setting {} to {}", LOG_TAG, path, value);
-        return SetNested(std::string(path).c_str(), std::string(value).c_str());
+    bool SetNested(std::string_view path, const std::string &value) {
+        return SetNested(path, std::string_view(value));
+    }
+
+    bool SetNested(std::string_view path, std::string &&value) {
+        return SetNested(path, std::string_view(value));
     }
 private:
     static constexpr const char* LOG_TAG = "[Config] -";

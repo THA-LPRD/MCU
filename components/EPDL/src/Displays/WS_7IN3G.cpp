@@ -112,7 +112,7 @@ void WS_7IN3G::DrawImage(int handle, int x_offset, int y_offset) {
         return;
     }
     auto filename = *PNGs[handle];
-    PNGDecoder::FileOps fileOps = PNGDecoder::SDFileOps();
+    PNGDecoder::FileOps fileOps = PNGDecoder::LittleFSFileOps();
     m_PNGDecoder.Decode(filename, [this, x_offset, y_offset](int x, int y, const RGB &color) {
         uint8_t _color = this->m_ColorPalette.GetClosestColor(color);
         this->m_FrameBuffer.SetPixel(x + x_offset, y + y_offset, _color);

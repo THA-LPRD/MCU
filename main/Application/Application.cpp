@@ -146,7 +146,7 @@ bool Application::Init() {
     if (!MountLittleFS()) return false;
 //    if (!MountSDMMC()) return false;
 
-    std::string displaystr = m_ConfigPeripherals.GetNested("Display.Driver");
+    std::string displaystr = m_ConfigPeripherals.GetNested<std::string>("Display.Driver");
     EPDL::Display display = magic_enum::enum_cast<EPDL::Display>(displaystr).value_or(EPDL::Display::WS_7IN3G);
     m_Display->Start(display);
 

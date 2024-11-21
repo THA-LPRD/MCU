@@ -55,7 +55,8 @@ static std::map<std::string, std::string> MapFilesRecursively(std::string_view b
                 std::string dirUri = relativePath + "/";
                 dirQueue.push(dirPath);
                 fileMap[dirUri] = dirPath;
-            } else {
+            }
+            else {
                 // Handle files
                 std::string uri;
                 if (fileName == "index.html") {
@@ -91,9 +92,6 @@ bool AppHost::InitServer() {
     m_Server.SetFilesToServe(filesToServe);
 
     InitServerCore();
-    InitServerStandalone();
-    InitServerNetwork();
-    InitServerServer();
     InitServerHTTP();
 
     m_Server.AddUploadEndpoint(
@@ -116,23 +114,7 @@ bool AppHost::InitServer() {
             }
     );
 
-    m_Server.AddUploadEndpoint(
-            "/api/v2/UploadHttpsCert",
-            [](std::string_view filename) {
-                return "/" + std::string("https.crt");
-            },
-            [](std::string_view filename) { return; }
-    );
-
-    m_Server.AddUploadEndpoint(
-            "/api/v2/UploadHttpsKey",
-            [](std::string_view filename) {
-                return "/" + std::string("https.key");
-            },
-            [](std::string_view filename) { return; }
-    );
-
-    m_Server.AddEndpoint(
+    m_Server.AddEndpointText(
             "/api/v2/Restart",
             http_method::HTTP_POST,
             [this](PsychicRequest* request) -> esp_err_t {
@@ -141,11 +123,11 @@ bool AppHost::InitServer() {
                 spdlog::trace("{} Body: {}", LOG_TAG, request->body().c_str());
                 this->m_SleepTime = 0;
                 this->m_Running = false;
-                return request->reply(200, "text/plain", "OK");
+                return request->reply(200);
             }
     );
 
-    m_Server.AddEndpoint(
+    m_Server.AddEndpointText(
             "/api/v2/DeviceInfo",
             http_method::HTTP_GET,
             [this](PsychicRequest* request) -> esp_err_t {
@@ -156,9 +138,9 @@ bool AppHost::InitServer() {
                 JsonDocument json;
 
                 json["DeviceID"] = m_DeviceID;
-                json["OperatingMode"] = m_ConfigApplication.Get("OperatingMode");
+                json["OperatingMode"] = m_ConfigApplication.Get<std::string_view>("OperatingMode");
                 json["IP"] = std::string(ip4addr_ntoa(&m_IP));
-                json["LogLevel"] = m_ConfigApplication.Get("LogLevel");
+                json["LogLevel"] = m_ConfigApplication.Get<std::string_view>("LogLevel");
 
                 DriverInfo driverInfo = m_Display->GetDriverInfo();
                 JsonObject display = json["Display"].to<JsonObject>();
@@ -205,24 +187,106 @@ bool AppHost::InitServer() {
 }
 
 void AppHost::InitServerCore() {
-    m_Server.CreateVariable(
-            [this]() { return m_ConfigApplication.Get("OperatingMode"); },
-            [this](std::string_view value) {
-                return m_ConfigApplication.Set("OperatingMode", value);
-            },
-            "OpMode"
+    m_Server.AddEndpointText(
+            "/api/v2/DeviceConfig",
+            http_method::HTTP_GET,
+            [this](PsychicRequest* request) -> esp_err_t {
+                spdlog::info("{} Received {} request from client {}", LOG_TAG, request->uri().c_str(),
+                             request->client()->remoteIP().toString().c_str());
+                auto value = m_ConfigApplication.Get<std::string>("OperatingMode");
+                esp_err_t ret = request->reply(200, "plain/text", value.c_str());
+                if (ret != ESP_OK) {
+                    spdlog::error("{} Get failed: could not reply: {}", LOG_TAG, esp_err_to_name(ret));
+                }
+                else {
+                    spdlog::debug("{} Get success: {} -> {}", LOG_TAG, "OperatingMode", value);
+                }
+
+                return ret;
+            }
+    );
+
+    m_Server.AddEndpointJson(
+            "/api/v2/DeviceConfig",
+            http_method::HTTP_POST,
+            [this](PsychicRequest* request, JsonVariant &json) -> esp_err_t {
+                spdlog::info("{} Received {} request from client {}", LOG_TAG, request->uri().c_str(),
+                             request->client()->remoteIP().toString().c_str());
+                spdlog::trace("{} Body: {}", LOG_TAG, request->body().c_str());
+                std::string response;
+
+                auto modestr = json["Mode"].as<std::string>();
+                auto wifiSSIDstr = json["WiFiSSID"].as<std::string>();
+                auto wifiPassstr = json["WiFiPassword"].as<std::string>();
+                auto serverURLstr = json["ServerURL"].as<std::string>();
+
+                if (modestr.empty()) {
+                    spdlog::error("{} Set failed: Missing Mode parameter", LOG_TAG);
+                    return request->reply(400, "text/plain", "Missing Mode parameter");
+                }
+                if (modestr != "Standalone" && modestr != "Network" && modestr != "Server") {
+                    spdlog::error("{} Set failed: Invalid Mode parameter", LOG_TAG);
+                    return request->reply(400, "text/plain", "Invalid Mode parameter");
+                }
+                if (wifiSSIDstr.empty()) {
+                    spdlog::error("{} Set failed: Missing WiFiSSID parameter", LOG_TAG);
+                    return request->reply(400, "text/plain", "Missing WiFiSSID parameter");
+                }
+                if (wifiPassstr.empty()) {
+                    spdlog::error("{} Set failed: Missing WiFiPass parameter", LOG_TAG);
+                    return request->reply(400, "text/plain", "Missing WiFiPass parameter");
+                }
+                if (wifiSSIDstr.length() > 32) {
+                    spdlog::error("{} Set failed: WiFiSSID parameter too long", LOG_TAG);
+                    return request->reply(400, "text/plain", "WiFi SSID parameter too long");
+                }
+                if (wifiPassstr.length() < 8 || wifiPassstr.length() > 63) {
+                    spdlog::error("{} Set failed: WiFiPass parameter invalid length", LOG_TAG);
+                    return request->reply(400,
+                                          "text/plain",
+                                          "WiFi Password parameter cannot be less than 8 or more than 63 characters");
+                }
+                if (modestr == "Server") {
+                    if (serverURLstr.empty()) {
+                        spdlog::error("{} Set failed: Missing ServerURL parameter", LOG_TAG);
+                        return request->reply(400, "text/plain", "Missing ServerURL parameter");
+                    }
+                    if (serverURLstr.length() > 255) {
+                        spdlog::error("{} Set failed: ServerURL parameter too long", LOG_TAG);
+                        return request->reply(400, "text/plain", "Server URL parameter too long");
+                    }
+                    m_ConfigApplication.SetNested("AppServer.WiFi.SSID", wifiSSIDstr);
+                    m_ConfigApplication.SetNested("AppServer.WiFi.Password", wifiPassstr);
+                    m_ConfigApplication.SetNested("Appserver.ServerURL", serverURLstr);
+                }
+                if (modestr == "Standalone") {
+                    m_ConfigApplication.SetNested("AppStandalone.WiFi.SSID", wifiSSIDstr);
+                    m_ConfigApplication.SetNested("AppStandalone.WiFi.Password", wifiPassstr);
+                }
+                else if (modestr == "Network") {
+                    m_ConfigApplication.SetNested("AppNetwork.WiFi.SSID", wifiSSIDstr);
+                    m_ConfigApplication.SetNested("AppNetwork.WiFi.Password", wifiPassstr);
+                }
+                m_ConfigApplication.Set("OperatingMode", modestr);
+
+                return request->reply(200);
+            }
     );
 
     m_Server.CreateVariable(
-            [this]() { return m_ConfigApplication.Get("DisplayDriver"); },
+            [this]() { return m_ConfigPeripherals.GetNested<std::string>("Display.Driver"); },
             [this](std::string_view value) {
-                return m_ConfigApplication.Set("DisplayDriver", value);
+                if (!m_ConfigPeripherals.SetNested("Display.Driver", value)) {
+                    return false;
+                }
+                this->m_Display->Start(magic_enum::enum_cast<EPDL::Display>(value).value());
+                return true;
             },
-            "displayModule"
+            "DisplayDriver"
     );
 
     m_Server.CreateVariable(
-            [this]() { return m_ConfigApplication.Get("LogLevel"); },
+            [this]() { return m_ConfigApplication.Get<std::string>("LogLevel"); },
             [this](std::string_view value) {
                 m_ConfigApplication.Set("LogLevel", value);
                 spdlog::set_level(spdlog::level::from_str(value.data()));
@@ -232,115 +296,155 @@ void AppHost::InitServerCore() {
     );
 }
 
-void AppHost::InitServerStandalone() {
-    m_Server.CreateVariable(
-            [this]() { return m_ConfigApplication.GetNested("AppStandalone.WiFi.SSID"); },
-            [this](std::string_view value) {
-                return m_ConfigApplication.SetNested("AppStandalone.WiFi.SSID", value);
-            },
-            "StandaloneSSID",
-            false, true
-    );
-
-    m_Server.CreateVariable(
-            [this]() { return m_ConfigApplication.GetNested("AppStandalone.WiFi.Password"); },
-            [this](std::string_view value) {
-                return m_ConfigApplication.SetNested("AppStandalone.WiFi.Password", value);
-            },
-            "StandalonePassword",
-            false, true
-    );
-}
-
-void AppHost::InitServerNetwork() {
-    m_Server.CreateVariable(
-            [this]() { return m_ConfigApplication.GetNested("AppNetwork.WiFi.SSID"); },
-            [this](std::string_view value) {
-                return m_ConfigApplication.SetNested("AppNetwork.WiFi.SSID", value);
-            },
-            "NetworkSSID",
-            false, true
-    );
-
-    m_Server.CreateVariable(
-            [this]() { return m_ConfigApplication.GetNested("AppNetwork.WiFi.Password"); },
-            [this](std::string_view value) {
-                return m_ConfigApplication.SetNested("AppNetwork.WiFi.Password", value);
-            },
-            "NetworkPassword",
-            false, true
-    );
-}
-
-void AppHost::InitServerServer() {
-    m_Server.CreateVariable(
-            [this]() { return m_ConfigApplication.GetNested("AppServer.WiFi.SSID"); },
-            [this](std::string_view value) {
-                return m_ConfigApplication.SetNested("AppServer.WiFi.SSID", value);
-            },
-            "ServerSSID",
-            false, true
-    );
-
-    m_Server.CreateVariable(
-            [this]() { return m_ConfigApplication.GetNested("AppServer.WiFi.Password"); },
-            [this](std::string_view value) {
-                return m_ConfigApplication.SetNested("AppServer.WiFi.Password", value);
-            },
-            "ServerPassword",
-            false, true
-    );
-
-    m_Server.CreateVariable(
-            [this]() { return m_ConfigApplication.GetNested("AppServer.ServerURL"); },
-            [this](std::string_view value) {
-                return m_ConfigApplication.SetNested("AppServer.ServerURL", value);
-            },
-            "ServerURL"
-    );
-}
-
 void AppHost::InitServerHTTP() {
     m_Server.CreateVariable(
-            [this]() { return this->m_Server.GetConfig()->GetNested("HTTP.Port"); },
-            [this](std::string_view value) { return this->m_Server.GetConfig()->SetNested("HTTP.Port", value); },
-            "HttpPort"
-    );
-
-    m_Server.CreateVariable(
-            [this]() { return this->m_Server.GetConfig()->GetNested("SSL.Port"); },
-            [this](std::string_view value) { return this->m_Server.GetConfig()->SetNested("SSL.Port", value); },
-            "HttpsPort"
-    );
-
-    m_Server.CreateVariable(
-            [this]() { return this->m_Server.GetConfig()->GetNested("SSL.Enabled"); },
-            [this](std::string_view value) { return this->m_Server.GetConfig()->SetNested("SSL.Enabled", value); },
-            "Https"
-    );
-
-    m_Server.CreateVariable(
-            [this]() { return this->m_Server.GetConfig()->GetNested("HTTP.Auth.Enabled"); },
+            [this]() { return std::to_string(this->m_Server.GetConfig()->Get("Port", 80)); },
             [this](std::string_view value) {
-                return this->m_Server.GetConfig()->SetNested("HTTP.Auth.Enabled",
-                                                             value);
+                int port = std::stoi(std::string(value));
+                if (port < 1 || port > 65535) {
+                    return false;
+                }
+                return this->m_Server.GetConfig()->Set("Port", port);
+            },
+            "Http"
+    );
+
+    m_Server.AddEndpointText(
+            "/api/v2/Https",
+            http_method::HTTP_GET,
+            [this](PsychicRequest* request) -> esp_err_t {
+                spdlog::info("{} Received {} request from client {}", LOG_TAG, request->uri().c_str(),
+                             request->client()->remoteIP().toString().c_str());
+                spdlog::trace("{} Body: {}", LOG_TAG, request->body().c_str());
+                std::string response;
+                JsonDocument json;
+
+                json["Enabled"] = this->m_Server.GetConfig()->GetNested<bool>("SSL.Enabled", false);
+                json["Port"] = this->m_Server.GetConfig()->GetNested<int>("SSL.Port", 443);
+                json["HasCert"] = LittleFS.exists("/https.crt");
+                json["HasKey"] = LittleFS.exists("/https.key");
+
+                serializeJson(json, response);
+
+                return request->reply(200, "application/json", response.c_str());
+            }
+    );
+
+    m_Server.AddEndpointJson(
+            "/api/v2/Https",
+            http_method::HTTP_POST,
+            [this](PsychicRequest* request, JsonVariant &json) -> esp_err_t {
+                spdlog::info("{} Received {} request from client {}", LOG_TAG, request->uri().c_str(),
+                             request->client()->remoteIP().toString().c_str());
+                spdlog::trace("{} Body: {}", LOG_TAG, request->body().c_str());
+                std::string response;
+
+                if (!json["Enabled"].as<bool>()) {
+                    this->m_Server.GetConfig()->SetNested("SSL.Enabled", false);
+                    LittleFS.remove("/https.crt");
+                    LittleFS.remove("/https.key");
+                    return request->reply(200);
+                }
+
+                auto writeFile = [](std::string_view filename, const uint8_t* data, size_t len) -> bool {
+                    File file = LittleFS.open(filename.data(), "w");
+                    if (!file) {
+                        spdlog::error("{} Failed to open file for writing: {}", LOG_TAG, filename);
+                        return false;
+                    }
+
+                    if (file.write(data, len) != len) {
+                        spdlog::error("{} Failed to write to file: {}", LOG_TAG, filename);
+                        return false;
+                    }
+
+                    file.close();
+                    spdlog::info("{} Wrote {} bytes to {}", LOG_TAG, len, filename);
+                    return true;
+                };
+
+                if (!this->m_Server.GetConfig()->GetNested<bool>("SSL.Enabled", false)) { // Activate
+                    if (!json["Cert"].is<std::string>() || !json["Key"].is<std::string>()) {
+                        return request->reply(400,
+                                              "text/plain",
+                                              "Certificate and key files are required when enabling HTTPS");
+                    }
+
+                    if (!writeFile("/https.crt",
+                                   reinterpret_cast<const uint8_t*>(json["Cert"].as<std::string>().c_str()),
+                                   json["Cert"].as<std::string>().length())) {
+                        return request->reply(500);
+                    }
+
+                    if (!writeFile("/https.key",
+                                   reinterpret_cast<const uint8_t*>(json["Key"].as<std::string>().c_str()),
+                                   json["Key"].as<std::string>().length())) {
+                        return request->reply(500);
+                    }
+
+                    if (json["Port"].is<int>()) {
+                        this->m_Server.GetConfig()->SetNested("SSL.Port", json["Port"].as<int>());
+                    }
+
+                    this->m_Server.GetConfig()->SetNested("SSL.Enabled", true);
+
+                    return request->reply(200);
+                }
+                else { // Update
+                    if (json["Cert"].is<std::string>()) {
+                        if (!writeFile("/https.crt",
+                                       reinterpret_cast<const uint8_t*>(json["Cert"].as<std::string>().c_str()),
+                                       json["Cert"].as<std::string>().length())) {
+                            return request->reply(500);
+                        }
+                    }
+
+                    if (json["Key"].is<std::string>()) {
+                        if (!writeFile("/https.key",
+                                       reinterpret_cast<const uint8_t*>(json["Key"].as<std::string>().c_str()),
+                                       json["Key"].as<std::string>().length())) {
+                            return request->reply(500);
+                        }
+                    }
+
+                    if (json["Port"].is<int>()) {
+                        this->m_Server.GetConfig()->SetNested("SSL.Port", std::to_string(json["Port"].as<int>()));
+                    }
+
+                    return request->reply(200);
+                }
+            }
+    );
+
+    m_Server.CreateVariable(
+            [this]() {
+                bool enabled = this->m_Server.GetConfig()->GetNested<bool>("Auth.Enabled");
+                return enabled ? "true" : "false";
+            },
+            [this](std::string_view value) {
+                if (value != "true" && value != "false") {
+                    return false;
+                }
+                bool enabled = value == "true";
+                return this->m_Server.GetConfig()->SetNested("Auth.Enabled",
+                                                             enabled);
             },
             "HttpAuth"
     );
 
     m_Server.CreateVariable(
-            [this]() { return this->m_Server.GetConfig()->GetNested("HTTP.Auth.Username"); },
+            [this]() { return this->m_Server.GetConfig()->GetNested<std::string>("Auth.Username"); },
             [this](std::string_view value) {
-                return this->m_Server.GetConfig()->SetNested("HTTP.Auth.Username",
+                return this->m_Server.GetConfig()->SetNested("Auth.Username",
                                                              value);
             },
             "HttpAuthUser"
     );
 
     m_Server.CreateVariable(
-            [this]() { return this->m_Server.GetConfig()->GetNested("HTTP.Auth.Password"); },
+            [this]() { return this->m_Server.GetConfig()->GetNested<std::string>("Auth.Password"); },
             [this](std::string_view value) {
-                return this->m_Server.GetConfig()->SetNested("HTTP.Auth.Password",
+                return this->m_Server.GetConfig()->SetNested("Auth.Password",
                                                              value);
             },
             "HttpAuthPass"

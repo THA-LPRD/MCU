@@ -16,14 +16,14 @@ HTTPServer::~HTTPServer() {
 }
 
 bool HTTPServer::Init() {
-    bool https = m_Config.Get("HTTPS", false);
+    bool https = m_Config.GetNested("SSL.Enabled", false);
 
     m_HTTPServer.config.max_uri_handlers = 100;
     m_HTTPServer.config.stack_size = 8192;
 
-    m_HTTPSServer.config.max_uri_handlers = 100;
-    m_HTTPSServer.config.stack_size = 8192;
-    m_MainServer = https ? (PsychicHttpServer*) &m_HTTPSServer : &m_HTTPServer;
+    m_HTTPSServer.ssl_config.httpd.max_uri_handlers = 100;
+    m_HTTPSServer.ssl_config.httpd.stack_size = 8192;
+    m_MainServer = https ? static_cast<PsychicHttpServer*>(&m_HTTPSServer) : &m_HTTPServer;
     bool status = https ? InitHTTPS() : InitHTTP();
     if (!status) {
         return false;
@@ -32,7 +32,7 @@ bool HTTPServer::Init() {
     return true;
 }
 static std::string CreateLastModifiedHeader(time_t timestamp) {
-    struct tm timeinfo;
+    struct tm timeinfo{};
     gmtime_r(&timestamp, &timeinfo);
 
     // Day names array
@@ -58,7 +58,7 @@ static std::string CreateLastModifiedHeader(time_t timestamp) {
              timeinfo.tm_min,
              timeinfo.tm_sec);
 
-    return std::string(buffer);
+    return {buffer};
 }
 
 static std::string GetFileLastModified(const char* path) {
@@ -92,15 +92,30 @@ void HTTPServer::SetFilesToServe(const std::map<std::string, std::string> &files
                 return request->redirect("/404");
             });
         }
-        m_MainServer->on(uri.c_str(), handler);
+        PsychicEndpoint* endpoint = m_MainServer->on(uri.c_str(), HTTP_GET, handler);
+        if (m_Config.GetNested("Auth.Enabled", false)) {
+            endpoint->setAuthentication(m_Config.GetNested("Auth.Username", "admin").c_str(),
+                                        m_Config.GetNested("Auth.Password", "admin").c_str());
+        }
     }
 }
 
-void HTTPServer::AddEndpoint(std::string_view endpointPath, http_method method, const Handler_t &handlerFunction) {
+void HTTPServer::AddEndpointText(std::string_view endpointPath, http_method method, const HandlerText_t &handlerFunction) {
     spdlog::debug("{} Adding endpoint: {} {}", LOG_TAG, http_method_str(method), endpointPath);
-    auto handler = new PsychicWebHandler();
-    handler->onRequest(handlerFunction);
-    m_MainServer->on(endpointPath.data(), method, handler);
+    PsychicEndpoint* endpoint = m_MainServer->on(endpointPath.data(), method, handlerFunction);
+    if (m_Config.GetNested("Auth.Enabled", false)) {
+        endpoint->setAuthentication(m_Config.GetNested("Auth.Username", "admin").c_str(),
+                                    m_Config.GetNested("Auth.Password", "admin").c_str());
+    }
+}
+
+void HTTPServer::AddEndpointJson(std::string_view endpointPath, http_method method, const HandlerJson_t &handlerFunction) {
+    spdlog::debug("{} Adding endpoint: {} {}", LOG_TAG, http_method_str(method), endpointPath);
+    PsychicEndpoint* endpoint = m_MainServer->on(endpointPath.data(), method, handlerFunction);
+    if (m_Config.GetNested("Auth.Enabled", false)) {
+        endpoint->setAuthentication(m_Config.GetNested("Auth.Username", "admin").c_str(),
+                                    m_Config.GetNested("Auth.Password", "admin").c_str());
+    }
 }
 
 void HTTPServer::CreateVariable(
@@ -137,15 +152,15 @@ void HTTPServer::CreateVariable(
 }
 
 void HTTPServer::AddSetVarEndpoint(std::string_view endpointPath, const std::shared_ptr<ServerVariable> &variable) {
-    AddEndpoint(endpointPath,
-                HTTP_POST,
-                [variable](PsychicRequest* request) {
+    AddEndpointText(endpointPath,
+                    HTTP_POST,
+                    [variable](PsychicRequest* request) {
                     spdlog::info("{} Received {} request from client {}", LOG_TAG, request->uri().c_str(),
                                  request->client()->remoteIP().toString().c_str());
                     spdlog::trace("{} Body: {}", LOG_TAG, request->body().c_str());
                     esp_err_t ret;
                     if (!request->hasParam(variable->GetName().data())) {
-                        ret = request->reply(404, "text/plain", "NOT_FOUND");
+                        ret = request->reply(404);
                         if (ret != ESP_OK) {
                             spdlog::error("{} Set failed: could not reply: {}",
                                           LOG_TAG,
@@ -157,7 +172,7 @@ void HTTPServer::AddSetVarEndpoint(std::string_view endpointPath, const std::sha
 
                     PsychicWebParameter* param = request->getParam(variable->GetName().data());
                     if (param && !variable->Set(param->value().c_str())) {
-                        ret = request->reply(400, "text/plain", "BAD_REQUEST");
+                        ret = request->reply(400);
                         if (ret != ESP_OK) {
                             spdlog::error("Set failed: could not reply: {}",
                                           LOG_TAG,
@@ -166,7 +181,7 @@ void HTTPServer::AddSetVarEndpoint(std::string_view endpointPath, const std::sha
                         else { spdlog::debug("{} Set failed: invalid value", LOG_TAG); }
                         return ret;
                     }
-                    ret = request->reply(200, "text/plain", "OK");
+                    ret = request->reply(200);
                     if (ret != ESP_OK) {
                         spdlog::error("{} Set failed: could not reply: {}",
                                       LOG_TAG,
@@ -178,16 +193,16 @@ void HTTPServer::AddSetVarEndpoint(std::string_view endpointPath, const std::sha
 }
 
 void HTTPServer::AddGetVarEndpoint(std::string_view endpointPath, const std::shared_ptr<ServerVariable> &variable) {
-    AddEndpoint(endpointPath,
-                HTTP_GET,
-                [variable](PsychicRequest* request) {
+    AddEndpointText(endpointPath,
+                    HTTP_GET,
+                    [variable](PsychicRequest* request) {
                     spdlog::info("{} Received {} request from client {}", LOG_TAG, request->uri().c_str(),
                                  request->client()->remoteIP().toString().c_str());
                     std::string varName = variable->GetName().data();
                     std::string value = variable->Get();
                     esp_err_t ret = request->reply(200, "text/plain", value.c_str());
                     if (ret != ESP_OK) {
-                        spdlog::error("{} Set failed: could not reply: {}",
+                        spdlog::error("{} Get failed: could not reply: {}",
                                       LOG_TAG,
                                       esp_err_to_name(ret));
                     }
@@ -269,17 +284,21 @@ void HTTPServer::AddUploadEndpoint(
                           LOG_TAG,
                           request->client()->remoteIP().toString().c_str(),
                           request->uri().c_str());
-            return request->reply(500, "text/plain", "FAILED");
+            return request->reply(500);
         }
 
         spdlog::info("{} File upload from client {} to {} successful",
                      LOG_TAG,
                      request->client()->remoteIP().toString().c_str(),
                      request->uri().c_str());
-        return request->reply(200, "text/plain", "OK");
+        return request->reply(200);
     });
 
-    m_MainServer->on(endpoint.data(), HTTP_POST, UploadHandler);
+    PsychicEndpoint* endpointObj = m_MainServer->on(endpoint.data(), HTTP_POST, UploadHandler);
+    if (m_Config.GetNested("Auth.Enabled", false)) {
+        endpointObj->setAuthentication(m_Config.GetNested("Auth.Username", "admin").c_str(),
+                                      m_Config.GetNested("Auth.Password", "admin").c_str());
+    }
 }
 
 bool HTTPServer::InitHTTP() {
@@ -296,7 +315,7 @@ bool HTTPServer::InitHTTP() {
                      LOG_TAG,
                      request->uri().c_str(),
                      request->client()->remoteIP().toString().c_str());
-        return request->reply(404, "text/plain", "Not found");
+        return request->reply(404);
     });
 
     spdlog::info("{} HTTP server started on port {}", LOG_TAG, port);
@@ -321,16 +340,14 @@ static bool ReadFile(const std::string &path, std::string &content) {
 
 bool HTTPServer::InitHTTPS() {
     spdlog::info("{} Initializing HTTPS server", LOG_TAG);
-    std::string key;
-    std::string cert;
-    if (!ReadFile("/https.key", key) || !ReadFile("/https.crt", cert)) {
+    if (!ReadFile("/https.key", m_Key) || !ReadFile("/https.crt", m_Cert)) {
         spdlog::error("{} Failed to read key or cert file", LOG_TAG);
-        m_Config.Set("HTTPS", false);
+        m_Config.SetNested("SSL.Enabled", false);
         return false;
     }
 
     int port = m_Config.GetNested("SSL.Port", 443);
-    esp_err_t status = m_HTTPSServer.listen(port, key.c_str(), cert.c_str());
+    esp_err_t status = m_HTTPSServer.listen(port, m_Cert.c_str(), m_Key.c_str());
 
     if (status != ESP_OK) {
         spdlog::error("{} Failed to start HTTPS server on port {}", LOG_TAG, port);
@@ -341,8 +358,9 @@ bool HTTPServer::InitHTTPS() {
                      LOG_TAG,
                      request->uri().c_str(),
                      request->client()->remoteIP().toString().c_str());
-        return request->reply(404, "text/plain", "Not found");
+        return request->reply(404);
     });
+    spdlog::info("{} HTTPS server started on port {}", LOG_TAG, port);
 
     port = m_Config.Get("Port", 80);
     m_HTTPServer.config.ctrl_port = 20420; // just a random port different from the default one
@@ -365,7 +383,6 @@ bool HTTPServer::InitHTTPS() {
         });
     }
 
-    spdlog::info("{} HTTPS server started on port {}", LOG_TAG, port);
     m_HTTPS = true;
     return true;
 }

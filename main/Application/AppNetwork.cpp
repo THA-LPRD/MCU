@@ -10,8 +10,8 @@ bool AppNetwork::InitImpl() {
     spdlog::info("{} Initializing network application", LOG_TAG);
     m_WiFi.ConfigureSNTP();
     if (!m_WiFi.Connect(WiFi::Mode::Station,
-                        m_ConfigApplication.GetNested("AppNetwork.WiFi.SSID"),
-                        m_ConfigApplication.GetNested("AppNetwork.WiFi.Password"))) {
+                        m_ConfigApplication.GetNested<std::string_view>("AppNetwork.WiFi.SSID"),
+                        m_ConfigApplication.GetNested<std::string_view>("AppNetwork.WiFi.Password"))) {
         return false;
     }
     m_IP = m_WiFi.GetIP(WiFi::Mode::Station);

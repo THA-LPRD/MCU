@@ -23,13 +23,15 @@
 
 class HTTPServer {
 public:
-    using Handler_t = std::function<esp_err_t(PsychicRequest*)>;
+    using HandlerText_t = std::function<esp_err_t(PsychicRequest*)>;
+    using HandlerJson_t = std::function<esp_err_t(PsychicRequest*, JsonVariant&)>;
 
     explicit HTTPServer(std::string_view apiEndpoint = "/api");
     ~HTTPServer();
     bool Init();
     void SetFilesToServe(const std::map<std::string, std::string> &files);
-    void AddEndpoint(std::string_view endpointPath, http_method method, const Handler_t &handlerFunction);
+    void AddEndpointText(std::string_view endpointPath, http_method method, const HandlerText_t &handlerFunction);
+    void AddEndpointJson(std::string_view endpointPath, http_method method, const HandlerJson_t &handlerFunction);
     void CreateVariable(const std::shared_ptr<std::string> &storage,
                         const std::function<bool(std::string_view)> &validator,
                         std::string_view paramName,
@@ -43,7 +45,7 @@ public:
     void AddUploadEndpoint(std::string_view endpoint,
                            const std::function<std::string(std::string_view filename)> &getTargetPath,
                            const std::function<void(std::string_view)> &postUpload);
-    inline const ConfigManager* GetConfig() { return &m_Config; }
+    inline ConfigManager* GetConfig() { return &m_Config; }
 private:
     bool InitHTTPS();
     bool InitHTTP();
@@ -53,6 +55,8 @@ private:
     PsychicHttpsServer m_HTTPSServer;
     PsychicHttpServer* m_MainServer = nullptr;
     bool m_HTTPS = false;
+    std::string m_Cert;
+    std::string m_Key;
     std::string m_APIEndpoint;
     std::string m_APIEndpointSet;
     std::string m_APIEndpointGet;
