@@ -3,3 +3,6 @@ build/
 .vscode/settings.json
 .DS_store
 managed_components/
+./~
+data/www
+flash_data/*
