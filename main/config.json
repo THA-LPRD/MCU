@@ -40,14 +40,14 @@
     "Button2": -1,
     "Button3": -1,
     "Display": {
-      "Driver": "WS_7IN3G",
+      "Driver": "GD_7IN5",
       "Pins": {
-        "Busy": 1,
-        "Reset": 44,
-        "DC": 3,
-        "CS": 4,
-        "CLK": 7,
-        "MOSI": 9
+        "Busy": 8,
+        "Reset": 39,
+        "DC": 38,
+        "CS": 37,
+        "CLK": 36,
+        "MOSI": 35
       }
     },
     "SD": {
