@@ -34,11 +34,11 @@
     }
   },
   "peripherals": {
-    "PowerEnable": 26,
-    "Button0": 2,
-    "Button1": -1,
-    "Button2": -1,
-    "Button3": -1,
+    "PowerEnable": 18,
+    "Button0": 17,
+    "Button1": 16,
+    "Button2": 15,
+    "Button3": 14,
     "Display": {
       "Driver": "GD_7IN5",
       "Pins": {
@@ -53,13 +53,13 @@
     "SD": {
       "Mode": 1,
       "Pins": {
-        "D2": 44,
-        "D3": 9,
-        "CMD": 15,
-        "CLK": 7,
-        "D0": 2,
-        "D1": 8,
-        "CD": 4
+        "D2": 9,
+        "D3": 10,
+        "CMD": 11,
+        "CLK": 12,
+        "D0": 13,
+        "D1": 6,
+        "CD": 5
       }
     }
   }
