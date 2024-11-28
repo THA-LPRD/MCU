@@ -22,8 +22,9 @@ Application::Application() :
     );
     spdlog::info("{} Starting application", LOG_TAG);
 
-    GPIO::SetMode(43, GPIO::Mode::Output);
-    GPIO::Write(43, 1);
+    int PinPowerEnable = m_ConfigPeripherals.Get("PowerEnable", -1);
+    GPIO::SetMode(PinPowerEnable, GPIO::Mode::Output);
+    GPIO::Write(PinPowerEnable, 1);
 }
 
 Application::~Application() {
@@ -35,33 +36,50 @@ Application::~Application() {
     GPIO::SetMode(PinPowerEnable, GPIO::Mode::Output);
     GPIO::Write(PinPowerEnable, 0);
 
-    for (int i = 0; i < 4; i++) {
-        int pin = m_ConfigPeripherals.Get(("Button" + std::to_string(i)).c_str(), -1);
-        if (pin == -1) continue;
+    uint64_t wakeMask = 0;
 
-        if (pin >= 22) {
-            spdlog::error("{} Button {} is not a valid RTC GPIO and cannot be used as a wakeup source", LOG_TAG, i);
-            continue;
-        }
+for (int i = 0; i < 4; i++) {
+    int pin = m_ConfigPeripherals.Get(("Button" + std::to_string(i)).c_str(), -1);
+    if (pin == -1) continue;
 
-        spdlog::debug("{} Setting Button {} as wakeup source", LOG_TAG, i);
-
-        GPIO::SetMode(pin, GPIO::Mode::Input);
-
-        esp_err_t err = rtc_gpio_pulldown_dis(static_cast<gpio_num_t>(pin));
-        if (err == ESP_OK) {
-            err = rtc_gpio_pullup_en(static_cast<gpio_num_t>(pin));
-        }
-        if (err == ESP_OK) {
-            err = esp_sleep_enable_ext1_wakeup(1ULL << pin, ESP_EXT1_WAKEUP_ANY_HIGH);
-        }
-        if (err != ESP_OK) {
-            spdlog::error("{} Failed to configure Button {} for wakeup", LOG_TAG, i);
-        }
-        else {
-            spdlog::info("{} Button {} is now a wakeup source", LOG_TAG, i);
-        }
+    if (pin >= 22) {
+        spdlog::error("{} Button {} is not a valid RTC GPIO and cannot be used as a wakeup source", LOG_TAG, i);
+        continue;
     }
+
+    spdlog::debug("{} Setting Button {} as wakeup source", LOG_TAG, i);
+
+    GPIO::SetMode(pin, GPIO::Mode::Input);
+
+    esp_err_t err = rtc_gpio_pulldown_dis(static_cast<gpio_num_t>(pin));
+    if (err == ESP_OK) {
+        err = rtc_gpio_pullup_dis(static_cast<gpio_num_t>(pin));
+    }
+    
+    if (err != ESP_OK) {
+        spdlog::error("{} Failed to configure Button {} GPIO settings", LOG_TAG, i);
+        continue;
+    }
+
+    // Füge den Pin zur Wakeup-Maske hinzu
+    wakeMask |= (1ULL << pin);
+    spdlog::info("{} Button {} prepared for wakeup configuration", LOG_TAG, i);
+}
+
+// Konfiguriere alle gesammelten Pins als Wakeup-Quellen
+if (wakeMask != 0) {
+    // 14 = 16384
+    // 15 = 32768 
+    // 16 = 65536 
+    // 17 = 131072
+    esp_err_t err = esp_sleep_enable_ext1_wakeup(wakeMask, ESP_EXT1_WAKEUP_ANY_LOW);
+    if (err != ESP_OK) {
+        spdlog::error("{} Failed to configure wakeup sources", LOG_TAG);
+    } else {
+        spdlog::info("{} Successfully configured all wakeup sources", LOG_TAG);
+        spdlog::info("{} WakeupMask {}", LOG_TAG, wakeMask);
+    }
+}
     spdlog::info("{} Application destroyed", LOG_TAG);
 }
 
