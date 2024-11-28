@@ -1,6 +1,7 @@
 #include "EPDL.h"
 #include "Displays/WS_7IN3G.h"
 #include "Displays/WS_9IN7.h"
+#include "Displays/GD_7IN5.h"
 #include <spdlog/sinks/stdout_color_sinks.h>
 
 EPDL::EPDL(int busyPin, int resetPin, int dcPin, int csPin, int sckPin, int mosiPin) :
@@ -37,6 +38,14 @@ void EPDL::Start(Display display) {
             break;
         case Display::GD_7IN5:
             spdlog::info("Starting 7.5in display");
+            m_Driver = new GD_7IN5(
+                    BusyPin,
+                    ResetPin,
+                    DCPin,
+                    CSPin,
+                    SCKPin,
+                    MOSIPin
+            );
             break;
     }
 }
