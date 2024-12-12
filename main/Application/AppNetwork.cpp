@@ -22,9 +22,16 @@ bool AppNetwork::InitImpl() {
 }
 
 uint64_t AppNetwork::Run() {
-    spdlog::info("{} Running network application", LOG_TAG);
+    spdlog::info("{} Running Network application", LOG_TAG);
+    int wifi_timeout = 0;
     while (m_Running) {
         vTaskDelay(1000 / portTICK_PERIOD_MS);
+        wifi_timeout++;
+        if (wifi_timeout > 300) {
+            spdlog::info("{} Network Application running for more than 5 minutes. Shutting down to save battery. ", LOG_TAG);
+            m_SleepTime = UINT64_MAX;
+            m_Running = false;
+        }
     }
     vTaskDelay(3000 / portTICK_PERIOD_MS);
     return m_SleepTime;
