@@ -1,6 +1,6 @@
 #include "Drivers/WiFi.h"
-#include "WiFiSoftAp.h"
-#include "WiFiStation.h"
+#include "Drivers/WiFiSoftAp.h"
+#include "Drivers/WiFiStation.h"
 #include "esp_netif.h"
 #include "esp_wifi.h"
 #include "esp_netif_sntp.h"
@@ -52,6 +52,50 @@ bool WiFi::Connect(Mode mode, std::string_view ssid, std::string_view password, 
             }
             return m_SoftAP->Start(ssid, password);
     }
+
+    return false;
+}
+
+bool WiFi::Connect(Mode mode, std::string_view ssid, std::string_view password, std::string_view anonymous_identity, std::string_view username, std::string_view ca_cert_path, int retryMax = 5) {
+    if (!m_EventLoopInitialized && !InitEventLoop()) {
+        return false;
+    }
+
+    if (ssid.empty()) {
+        spdlog::error("{} SSID is empty", LOG_TAG);
+        return false;
+    }
+    if (mode == Mode::Station && password.empty()) {
+        spdlog::error("{} Password is empty", LOG_TAG);
+        return false;
+    }
+    if (anonymous_identity.empty()) {
+        spdlog::error("{} Anonymous Identity is empty", LOG_TAG);
+        return false;
+    }
+    if (username.empty()) {
+        spdlog::error("{} Username is empty", LOG_TAG);
+        return false;
+    }
+
+    if (ca_cert_path.empty()) {
+        spdlog::error("{} CA Cert Path is empty", LOG_TAG);
+        return false;
+    }
+
+    if (!m_EAP) {
+        m_EAP = std::make_unique<WiFiEAP>();
+    }
+    if (!m_EAP->Connect(ssid, password, anonymous_identity, username, ca_cert_path, retryMax)) {
+        return false;
+    }
+    if (m_SNTPInitialized && !m_SNTPStarted) {
+        spdlog::info("[WiFi] Starting SNTP");
+        esp_netif_sntp_start();
+        esp_sntp_setservername(1, m_SNTPServer.c_str());
+        m_SNTPStarted = true;
+    }
+    return true;
 
     return false;
 }

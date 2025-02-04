@@ -13,16 +13,23 @@ class WiFiStation;
 
 class WiFiSoftAP;
 
+class WiFiEAP;
+
 class WiFi {
 public:
     enum class Mode {
         Station,
-        SoftAP
+        SoftAP,
+        EAP
     };
 
     WiFi();
     ~WiFi();
     bool Connect(Mode mode, std::string_view ssid, std::string_view password, int retryMax = 5);
+    bool Connect(Mode mode, std::string_view ssid, std::string_view password, std::string_view anonymous_identity, 
+                std::string_view username,
+                std::string_view ca_cert_path,
+                int retryMax = 5);
     bool Disconnect(Mode mode);
     static std::string GetMAC() {
         uint8_t mac[6];
@@ -42,6 +49,7 @@ private:
     static constexpr const char* LOG_TAG = "[WiFi] -";
     std::unique_ptr<WiFiStation> m_Station;
     std::unique_ptr<WiFiSoftAP> m_SoftAP;
+    std::unique_ptr<WiFiEAP> m_EAP;
     bool m_EventLoopInitialized = false;
     bool m_SNTPInitialized = false;
     bool m_SNTPStarted = false;

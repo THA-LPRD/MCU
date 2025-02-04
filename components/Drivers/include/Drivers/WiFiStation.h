@@ -22,12 +22,13 @@ public:
     bool Connect(std::string_view ssid, std::string_view password, int retryMax = 5);
     bool Disconnect();
     ip4_addr_t GetIP();
+
 private:
     bool InitializeNetIf();
     bool InitializeWiFi();
     bool RegisterEventHandlers(StationContext* context);
     bool ConfigureSettings(std::string_view ssid, std::string_view password);
-private:
+
     static constexpr const char* LOG_TAG = "[WiFi Station] -";
     bool m_Active = false;
     esp_event_handler_instance_t m_InstanceAnyId = nullptr;
