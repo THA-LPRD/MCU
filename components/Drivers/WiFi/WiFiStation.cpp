@@ -1,5 +1,5 @@
 #include "Drivers/WiFi.h"
-#include "WiFiStation.h"
+#include "Drivers/WiFiStation.h"
 
 #define WIFI_CONNECTED_BIT BIT0
 #define WIFI_FAIL_BIT      BIT1
@@ -19,6 +19,7 @@ static void StationEventHandler(void* ctx, esp_event_base_t event_base,
             case WIFI_EVENT_STA_DISCONNECTED:
                 if (context->RetryN < context->RetryMax) {
                     esp_wifi_connect();
+                    xEventGroupClearBits(context->EventGroup, WIFI_CONNECTED_BIT);
                     context->RetryN++;
                     spdlog::warn("{} Retrying connection ({}/{})",
                                  context->LOG_TAG,
@@ -145,7 +146,6 @@ bool WiFiStation::InitializeWiFi() {
     cfg.dynamic_tx_buf_num = 32; // 0 IDF, 32 Arduino
     cfg.cache_tx_buf_num = 4; // 32 IDF, 4 Arduino
 
-
     esp_err_t ret = esp_wifi_init(&cfg);
     if (ret != ESP_OK) {
         spdlog::error("{} Failed to init WiFi: {}", LOG_TAG, esp_err_to_name(ret));
@@ -177,6 +177,8 @@ bool WiFiStation::RegisterEventHandlers(StationContext* context) {
 }
 
 bool WiFiStation::ConfigureSettings(std::string_view ssid, std::string_view password) {
+    esp_wifi_set_storage(WIFI_STORAGE_RAM);
+
     wifi_config_t wifi_config = {};
 
     wifi_config.sta.listen_interval = 3;
