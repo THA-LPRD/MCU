@@ -198,7 +198,7 @@ extern "C" void app_main(void) {
     }
     else {
         if (UINT64_MAX != time) {
-            spdlog::info("Entering deep sleep for {} seconds", time);
+            spdlog::info("Entering deep sleep for {} seconds", time/1000/1000);
             esp_sleep_enable_timer_wakeup(time);
         }
         spdlog::info("Entering deep sleep");

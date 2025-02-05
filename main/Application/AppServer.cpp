@@ -20,23 +20,23 @@ bool AppServer::InitImpl() {
     spdlog::info("{} Initializing server application", LOG_TAG);
     m_WiFi.ConfigureSNTP();
 
-    std::string Auth_Mode(m_ConfigApplication.GetNested<std::string_view>("AppNetwork.WiFi.Auth_Mode", "PSK"));
+    std::string Auth_Mode(m_ConfigApplication.GetNested<std::string_view>("AppServer.WiFi.Auth_Mode", "PSK"));
 
     if (Auth_Mode == "PSK")
     {
         if (!m_WiFi.Connect(WiFi::Mode::Station,
-                                m_ConfigApplication.GetNested<std::string_view>("AppNetwork.WiFi.SSID", "your-SSID"),
-                                m_ConfigApplication.GetNested<std::string_view>("AppNetwork.WiFi.Password", "your-Password"))) {
+                                m_ConfigApplication.GetNested<std::string_view>("AppServer.WiFi.SSID", "your-SSID"),
+                                m_ConfigApplication.GetNested<std::string_view>("AppServer.WiFi.Password", "your-Password"))) {
                 return false;
             }
             m_IP = m_WiFi.GetIP(WiFi::Mode::Station);
     } else if (Auth_Mode == "EAP") {
         if (!m_WiFi.Connect(WiFi::Mode::EAP, 
-                                m_ConfigApplication.GetNested<std::string_view>("AppNetwork.WiFi.SSID", "your-ssid"), 
-                                m_ConfigApplication.GetNested<std::string_view>("AppNetwork.WiFi.Password", "your-Password"), 
-                                m_ConfigApplication.GetNested<std::string_view>("AppNetwork.WiFi.EAP_ID", "your-identity"),
-                                m_ConfigApplication.GetNested<std::string_view>("AppNetwork.WiFi.EAP_Username", "your-username"),
-                                m_ConfigApplication.GetNested<std::string_view>("AppNetwork.WiFi.EAP_Cert", "your-certificate"),
+                                m_ConfigApplication.GetNested<std::string_view>("AppServer.WiFi.SSID", "your-ssid"), 
+                                m_ConfigApplication.GetNested<std::string_view>("AppServer.WiFi.Password", "your-Password"), 
+                                m_ConfigApplication.GetNested<std::string_view>("AppServer.WiFi.EAP_ID", "your-identity"),
+                                m_ConfigApplication.GetNested<std::string_view>("AppServer.WiFi.EAP_Username", "your-username"),
+                                m_ConfigApplication.GetNested<std::string_view>("AppServer.WiFi.EAP_Cert", "your-certificate"),
                                 5)) {
                 return false;
             }
@@ -46,7 +46,7 @@ bool AppServer::InitImpl() {
             return false;
     }
     
-    spdlog::error("{} Server application initialized", LOG_TAG);
+    spdlog::info("{} Server application initialized", LOG_TAG);
     return true;
 }
 
@@ -54,7 +54,6 @@ bool AppServer::CheckIfRegistered(uint8_t* mac) {
     char checkRegisteredURL[100];
 
     sprintf(checkRegisteredURL, "%s/api/v1/displays/%02X%02X%02X%02X%02X%02X",
-    //lprd.informatik.tha.de
         m_ConfigApplication.GetNested<std::string_view>("AppServer.ServerURL", "http://lprd.informatik.tha.de:3000").data(),
         mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 
@@ -383,16 +382,23 @@ uint64_t AppServer::Run() {
         DeserializationError error = deserializeJson(configPayload, configPayloadString);
 
         if (error) {
-            m_SleepTime = UINT64_MAX; // Sleep endless to preserver battery
+            m_SleepTime = 86400000000; // 24 Stunden warten für den nächsten Sleep um ePaper zu schonen
+            DrawImg();
+            // UINT64_MAX; // Sleep endless to preserver battery
             spdlog::error("{} Failed to parse JSON config: {}", LOG_TAG, error.c_str());
         }
         else {
             // Konfigurationswerte setzen
-            m_SleepTime = configPayload["valid_for"].as<int>();
-            if (m_SleepTime < 1000 && m_SleepTime > 3153600000000000)
+            int configTime = configPayload["valid_for"].as<int>(); 
+            if (configTime < 0)
             {
-                // Mehr als 10 Jahre oder Weniger als 1 Sekunde -> Kein Timer Wakeup
-                m_SleepTime = UINT64_MAX;
+                // Keine absehbare Gültigkeitsdauer,  also schlafen wir 24 Stunden
+                m_SleepTime = 86400000000;
+                spdlog::info("{} No valid time received. Sleep for {} second", LOG_TAG, m_SleepTime/1000/1000);
+            } else {
+                // Gültige Dauer => in us umrechnen
+                m_SleepTime = configTime * 1000 * 1000;
+                spdlog::info("{} Valid time received. Sleep for {} second", LOG_TAG, configTime);
             }
             
             String imageURLPath = configPayload["file_path"].as<String>();
@@ -403,6 +409,7 @@ uint64_t AppServer::Run() {
             }
             else {
                 spdlog::error("{} Failed to get image data", LOG_TAG);
+                DrawImg();
             }
         }
     }
@@ -415,5 +422,6 @@ uint64_t AppServer::Run() {
     m_Running = false;
 
     vTaskDelay(3000 / portTICK_PERIOD_MS);
+    // In Mikrosekunden!
     return m_SleepTime;
 }

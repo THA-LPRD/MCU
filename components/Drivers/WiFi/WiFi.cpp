@@ -90,9 +90,9 @@ bool WiFi::Connect(Mode mode, std::string_view ssid, std::string_view password, 
         m_EAP = std::make_unique<WiFiEAP>();
     }
 
-    // if (!m_EAP->Connect(ssid, password, anonymous_identity, username, ca_cert_path, retryMax)) {
-    //     return false;
-    // }
+    if (!m_EAP->Connect(ssid, password, anonymous_identity, username, ca_cert_path, retryMax)) {
+        return false;
+    }
     if (m_SNTPInitialized && !m_SNTPStarted) {
         spdlog::info("[WiFi] Starting SNTP");
         esp_netif_sntp_start();
