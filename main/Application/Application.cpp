@@ -3,26 +3,27 @@
 #include "Application.h"
 #include "AppStandalone.h"
 #include "AppNetwork.h"
-//#include "AppServer.h"
+#include "AppServer.h"
 #include <magic_enum.hpp>
 #include "esp_log.h"
 #include "SD_MMC.h"
+#include "SD.h"
 #include <driver/rtc_io.h>
 
 Application::Application() :
         m_DeviceID("LPRD-" + WiFi::GetMAC())
 {
     m_Display = std::make_unique<EPDL>(
-            m_ConfigPeripherals.GetNested<int>("Display.Pins.Busy"),
-            m_ConfigPeripherals.GetNested<int>("Display.Pins.Reset"),
-            m_ConfigPeripherals.GetNested<int>("Display.Pins.DC"),
-            m_ConfigPeripherals.GetNested<int>("Display.Pins.CS"),
-            m_ConfigPeripherals.GetNested<int>("Display.Pins.CLK"),
-            m_ConfigPeripherals.GetNested<int>("Display.Pins.MOSI")
+            m_ConfigPeripherals.GetNested<int>("Display.Pins.Busy", 8),
+            m_ConfigPeripherals.GetNested<int>("Display.Pins.Reset", 39),
+            m_ConfigPeripherals.GetNested<int>("Display.Pins.DC", 38),
+            m_ConfigPeripherals.GetNested<int>("Display.Pins.CS", 37),
+            m_ConfigPeripherals.GetNested<int>("Display.Pins.CLK", 36),
+            m_ConfigPeripherals.GetNested<int>("Display.Pins.MOSI", 35)
     );
     spdlog::info("{} Starting application", LOG_TAG);
 
-    int PinPowerEnable = m_ConfigPeripherals.Get("PowerEnable", -1);
+    int PinPowerEnable = m_ConfigPeripherals.Get("PowerEnable", 18);
     GPIO::SetMode(PinPowerEnable, GPIO::Mode::Output);
     GPIO::Write(PinPowerEnable, 1);
 }
@@ -32,14 +33,16 @@ Application::~Application() {
 
     m_Display->Terminate();
 
-    int PinPowerEnable = m_ConfigPeripherals.Get("PowerEnable", -1);
+    int PinPowerEnable = m_ConfigPeripherals.Get("PowerEnable", 18);
     GPIO::SetMode(PinPowerEnable, GPIO::Mode::Output);
     GPIO::Write(PinPowerEnable, 0);
 
     uint64_t wakeMask = 0;
 
 for (int i = 0; i < 4; i++) {
-    int pin = m_ConfigPeripherals.Get(("Button" + std::to_string(i)).c_str(), -1);
+    // int pin = m_ConfigPeripherals.Get(("Button" + std::to_string(i)).c_str(), 17);
+    // HARDCODED!
+    int pin = 14 + i;
     if (pin == -1) continue;
 
     if (pin >= 22) {
@@ -92,7 +95,7 @@ Application* Application::Create(std::string_view mode) {
         app = new AppNetwork();
     }
     else if (mode == "Server") {
-//        app = new AppServer(std::move(configApplication));
+       app = new AppServer();
     }
     else {
         spdlog::error("Unknown application mode: {}", mode);
@@ -160,12 +163,41 @@ bool Application::MountSDMMC() {
     return true;
 }
 
+bool Application::MountSDSPI() {
+    int PinCD = m_ConfigPeripherals.GetNested("SD.Pins.CD", 5);
+    
+
+    GPIO::SetMode(PinCD, GPIO::Mode::Input);
+    if (GPIO::Read(PinCD) == 1) {
+        spdlog::error("{} SD Card not inserted", LOG_TAG);
+        return false;
+    }
+
+    auto spi = new SPIClass(HSPI);
+    spi->begin(
+            m_ConfigPeripherals.GetNested("SD.Pins.CLK", 12),
+            m_ConfigPeripherals.GetNested("SD.Pins.D0", 11),
+            m_ConfigPeripherals.GetNested("SD.Pins.CMD", 13),
+            m_ConfigPeripherals.GetNested("SD.Pins.D3", 10)
+    );
+
+    int status = SD.begin(m_ConfigPeripherals.GetNested("SD.Pins.D3", 10), *spi, 4000000, "/sd", 32, false);
+
+    if (!status) {
+        spdlog::error("{} Failed to mount SD Card, please make sure that the mode switch is set correctly", LOG_TAG);
+        return false;
+    }
+
+    return true;
+}
+
 bool Application::Init() {
     if (!MountLittleFS()) return false;
-//    if (!MountSDMMC()) return false;
+    // if (!MountSDMMC()) return false; // SD with SD Protocol
+    if (!MountSDSPI()) return false; // SD with SPI Protocol
 
     std::string displaystr = m_ConfigPeripherals.GetNested<std::string>("Display.Driver");
-    EPDL::Display display = magic_enum::enum_cast<EPDL::Display>(displaystr).value_or(EPDL::Display::WS_7IN3G);
+    EPDL::Display display = magic_enum::enum_cast<EPDL::Display>(displaystr).value_or(EPDL::Display::GD_7IN5);
     m_Display->Start(display);
 
     if (!InitImpl()) return false;
