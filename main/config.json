@@ -2,19 +2,32 @@
   "application": {
     "OperatingMode": "Standalone",
     "LogLevel": "info",
+    "CurrtenSlot": 0,
     "AppStandalone": {
       "WiFi": {}
     },
     "AppNetwork": {
       "WiFi": {
-        "SSID": "SSID",
-        "Password": "Password"
+        "Auth_Mode": "PSK",
+        "SSID": "your-ssid",
+        "Password": "your-password",
+        "EAP_ID": "id@example.com",
+        "EAP_Username": "user@example.com",
+        "EAP_Cert": "eap-cert.pem",
+        "EAP_Method": "TTLS",
+        "EAP_Phase2": "PAP"
       }
     },
     "AppServer": {
       "WiFi": {
-        "SSID": "SSID",
-        "Password": "Password"
+        "Auth_Mode": "PSK",
+        "SSID": "your-ssid",
+        "Password": "your-password",
+        "EAP_ID": "id@example.com",
+        "EAP_Username": "user@example.com",
+        "EAP_Cert": "eap-cert.pem",
+        "EAP_Method": "TTLS",
+        "EAP_Phase2": "PAP"
       },
       "ServerURL": "http://example.com"
     }
@@ -53,12 +66,12 @@
     "SD": {
       "Mode": 1,
       "Pins": {
-        "D2": 9,
+        "D2": -1,
         "D3": 10,
-        "CMD": 11,
+        "CMD": 13,
         "CLK": 12,
-        "D0": 13,
-        "D1": 6,
+        "D0": 11,
+        "D1": -1,
         "CD": 5
       }
     }
