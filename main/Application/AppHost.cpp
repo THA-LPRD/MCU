@@ -1,4 +1,5 @@
 #include "AppHost.h"
+#include "SD.h"
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include "esp_system.h"
 #include <map>
@@ -30,7 +31,8 @@ static std::map<std::string, std::string> MapFilesRecursively(std::string_view b
         std::string currentPath = dirQueue.front();
         dirQueue.pop();
 
-        File dir = LittleFS.open(currentPath.c_str());
+        // File dir = LittleFS.open(currentPath.c_str());
+        File dir = SD.open(currentPath.c_str());
         if (!dir || !dir.isDirectory()) {
             continue;
         }
@@ -113,6 +115,63 @@ bool AppHost::InitServer() {
                 this->m_Running = false;
             }
     );
+
+    // m_Server.AddUploadEndpoint(
+    //         "/api/v2/UploadSlot1Img",
+    //         [](std::string_view filename) {
+    //             spdlog::info("{} Uploaded Image on Slot 1", LOG_TAG);
+    //             return "/" + std::string("slot1.png");
+    //         }
+    // );
+
+    // m_Server.AddUploadEndpoint(
+    //         "/api/v2/UploadSlot2Img",
+    //         [](std::string_view filename) {
+    //             spdlog::info("{} Uploaded Image on Slot 2", LOG_TAG);
+    //             return "/" + std::string("slot2.png");
+    //         }
+    // );
+
+    // m_Server.AddUploadEndpoint(
+    //         "/api/v2/UploadSlot3Img",
+    //         [](std::string_view filename) {
+    //             spdlog::info("{} Uploaded Image on Slot 3", LOG_TAG);
+    //             return "/" + std::string("slot3.png");
+    //         }
+    // );
+
+    // m_Server.AddUploadEndpoint(
+    //         "/api/v2/UploadSlot4Img",
+    //         [](std::string_view filename) {
+    //             spdlog::info("{} Uploaded Image on Slot 4", LOG_TAG);
+    //             return "/" + std::string("slot4.png");
+    //         }
+    // );
+
+    // m_Server.CreateVariable(
+    //         [this]() { return m_ConfigApplication.Get("CurrtenSlot", 0);},
+    //         [this](std::string_view value) {
+    //             std::string str(value);
+    //             int slot = str.strtoi();
+    //             m_ConfigApplication.Set("CurrtenSlot", slot);
+    //             // TODO 
+    //             // Slot in str
+    //             spdlog::info("{} Processing image", LOG_TAG);
+    //             int handle = m_Display->CreateImage("/img.png");
+    //             spdlog::debug("{} Got handle: %d", LOG_TAG, handle);
+    //             this->m_Display->BeginFrame();
+    //             this->m_Display->DrawImage(handle, 0, 0);
+    //             this->m_Display->SwapBuffers();
+    //             this->m_Display->EndFrame();
+    //             this->m_Display->DeleteImage(handle);
+    //             spdlog::debug("{} Ready for next image", LOG_TAG);
+    //             this->m_SleepTime = UINT64_MAX;
+    //             this->m_Running = false;
+               
+    //             return true;
+    //         },
+    //         "CurrtenSlot"
+    // );
 
     m_Server.AddEndpointText(
             "/api/v2/Restart",
@@ -257,7 +316,7 @@ void AppHost::InitServerCore() {
                     }
                     m_ConfigApplication.SetNested("AppServer.WiFi.SSID", wifiSSIDstr);
                     m_ConfigApplication.SetNested("AppServer.WiFi.Password", wifiPassstr);
-                    m_ConfigApplication.SetNested("Appserver.ServerURL", serverURLstr);
+                    m_ConfigApplication.SetNested("AppServer.ServerURL", serverURLstr);
                 }
                 if (modestr == "Standalone") {
                     m_ConfigApplication.SetNested("AppStandalone.WiFi.SSID", wifiSSIDstr);
@@ -321,8 +380,10 @@ void AppHost::InitServerHTTP() {
 
                 json["Enabled"] = this->m_Server.GetConfig()->GetNested<bool>("SSL.Enabled", false);
                 json["Port"] = this->m_Server.GetConfig()->GetNested<int>("SSL.Port", 443);
-                json["HasCert"] = LittleFS.exists("/https.crt");
-                json["HasKey"] = LittleFS.exists("/https.key");
+                json["HasCert"] = SD.exists("/https.crt");
+                json["HasKey"] = SD.exists("/https.key");
+                // json["HasCert"] = LittleFS.exists("/https.crt");
+                // json["HasKey"] = LittleFS.exists("/https.key");
 
                 serializeJson(json, response);
 
@@ -341,13 +402,16 @@ void AppHost::InitServerHTTP() {
 
                 if (!json["Enabled"].as<bool>()) {
                     this->m_Server.GetConfig()->SetNested("SSL.Enabled", false);
-                    LittleFS.remove("/https.crt");
-                    LittleFS.remove("/https.key");
+                    SD.remove("/https.crt");
+                    SD.remove("/https.key");
+                    // LittleFS.remove("/https.crt");
+                    // LittleFS.remove("/https.key");
                     return request->reply(200);
                 }
 
                 auto writeFile = [](std::string_view filename, const uint8_t* data, size_t len) -> bool {
-                    File file = LittleFS.open(filename.data(), "w");
+                    File file = SD.open(filename.data(), "w");
+                    // File file = LittleFS.open(filename.data(), "w");
                     if (!file) {
                         spdlog::error("{} Failed to open file for writing: {}", LOG_TAG, filename);
                         return false;
