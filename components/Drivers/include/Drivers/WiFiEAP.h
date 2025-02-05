@@ -22,16 +22,16 @@ struct EAPContext {
 class WiFiEAP {
 public:
     WiFiEAP();
-    virtual ~WiFiEAP();
+    ~WiFiEAP();
     bool Connect(std::string_view ssid, std::string_view password, std::string_view anonymous_identity, 
                 std::string_view username,
                 std::string_view ca_cert_path,
                 int retryMax = 5);
 
     // Hide WiFiStation::Connect
-    // bool Connect(std::string_view ssid, std::string_view password, int retryMax = 5) {
-    //     return false; // Nicht erlaubt für Eduroam
-    // }
+    bool Connect(std::string_view ssid, std::string_view password, int retryMax = 5) {
+         return false; // Nicht erlaubt für Eduroam
+    }
     bool Disconnect();
     ip4_addr_t GetIP();
 

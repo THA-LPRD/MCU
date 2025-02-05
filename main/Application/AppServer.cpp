@@ -7,7 +7,6 @@
 #include "esp_http_client.h"
 #include "esp_log.h"
 #include "SD.h"
-#include "WiFiEAP.h"
 #include "esp_wifi.h"
 #include "esp_eap_client.h"
 #include "esp_netif.h"
@@ -21,34 +20,30 @@ bool AppServer::InitImpl() {
     spdlog::info("{} Initializing server application", LOG_TAG);
     m_WiFi.ConfigureSNTP();
 
-    switch (m_ConfigApplication.GetNested<std::string_view>("AppServer.WiFi.Auth_Mode", "PSK"))
+    std::string Auth_Mode(m_ConfigApplication.GetNested<std::string_view>("AppNetwork.WiFi.Auth_Mode", "PSK"));
+
+    if (Auth_Mode == "PSK")
     {
-        case "PSK":
-            if (!m_WiFi.Connect(WiFi::Mode::Station,
-                                m_ConfigApplication.GetNested<std::string_view>("AppServer.WiFi.SSID", "your-SSID"),
-                                m_ConfigApplication.GetNested<std::string_view>("AppServer.WiFi.Password", "your-Password"))) {
+        if (!m_WiFi.Connect(WiFi::Mode::Station,
+                                m_ConfigApplication.GetNested<std::string_view>("AppNetwork.WiFi.SSID", "your-SSID"),
+                                m_ConfigApplication.GetNested<std::string_view>("AppNetwork.WiFi.Password", "your-Password"))) {
                 return false;
             }
             m_IP = m_WiFi.GetIP(WiFi::Mode::Station);
-            break;
-
-        case "EAP":
-            if (!m_WiFi.Connect(WiFi::Mode::EAP, 
-                                m_ConfigApplication.GetNested<std::string_view>("AppServer.WiFi.SSID", "your-ssid"), 
-                                m_ConfigApplication.GetNested<std::string_view>("AppServer.WiFi.Password", "your-Password"), 
-                                m_ConfigApplication.GetNested<std::string_view>("AppServer.WiFi.EAP_ID", "your-identity"),
-                                m_ConfigApplication.GetNested<std::string_view>("AppServer.WiFi.EAP_Username", "your-username"),
-                                m_ConfigApplication.GetNested<std::string_view>("AppServer.WiFi.EAP_Cert", "your-certificate"),
+    } else if (Auth_Mode == "EAP") {
+        if (!m_WiFi.Connect(WiFi::Mode::EAP, 
+                                m_ConfigApplication.GetNested<std::string_view>("AppNetwork.WiFi.SSID", "your-ssid"), 
+                                m_ConfigApplication.GetNested<std::string_view>("AppNetwork.WiFi.Password", "your-Password"), 
+                                m_ConfigApplication.GetNested<std::string_view>("AppNetwork.WiFi.EAP_ID", "your-identity"),
+                                m_ConfigApplication.GetNested<std::string_view>("AppNetwork.WiFi.EAP_Username", "your-username"),
+                                m_ConfigApplication.GetNested<std::string_view>("AppNetwork.WiFi.EAP_Cert", "your-certificate"),
                                 5)) {
                 return false;
             }
             m_IP = m_WiFi.GetIP(WiFi::Mode::EAP);
-            break;
-
-        default:
-            spdlog::info("{} Unkown WiFi Auth Mode: {}", LOG_TAG, m_ConfigApplication.GetNested<std::string_view>("AppServer.WiFi.Auth_Mode"));
+    } else {
+        spdlog::info("{} Unkown WiFi Auth Mode: {}", LOG_TAG, m_ConfigApplication.GetNested<std::string_view>("AppServer.WiFi.Auth_Mode"));
             return false;
-            break;
     }
     
     spdlog::error("{} Server application initialized", LOG_TAG);

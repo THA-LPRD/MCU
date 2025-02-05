@@ -1,6 +1,7 @@
 #include "Drivers/WiFi.h"
 #include "Drivers/WiFiSoftAp.h"
 #include "Drivers/WiFiStation.h"
+#include "Drivers/WiFiEAP.h"
 #include "esp_netif.h"
 #include "esp_wifi.h"
 #include "esp_netif_sntp.h"
@@ -51,12 +52,14 @@ bool WiFi::Connect(Mode mode, std::string_view ssid, std::string_view password, 
                 m_SoftAP = std::make_unique<WiFiSoftAP>();
             }
             return m_SoftAP->Start(ssid, password);
+        case Mode::EAP:
+            return false;
     }
 
     return false;
 }
 
-bool WiFi::Connect(Mode mode, std::string_view ssid, std::string_view password, std::string_view anonymous_identity, std::string_view username, std::string_view ca_cert_path, int retryMax = 5) {
+bool WiFi::Connect(Mode mode, std::string_view ssid, std::string_view password, std::string_view anonymous_identity, std::string_view username, std::string_view ca_cert_path, int retryMax) {
     if (!m_EventLoopInitialized && !InitEventLoop()) {
         return false;
     }
@@ -86,9 +89,10 @@ bool WiFi::Connect(Mode mode, std::string_view ssid, std::string_view password, 
     if (!m_EAP) {
         m_EAP = std::make_unique<WiFiEAP>();
     }
-    if (!m_EAP->Connect(ssid, password, anonymous_identity, username, ca_cert_path, retryMax)) {
-        return false;
-    }
+
+    // if (!m_EAP->Connect(ssid, password, anonymous_identity, username, ca_cert_path, retryMax)) {
+    //     return false;
+    // }
     if (m_SNTPInitialized && !m_SNTPStarted) {
         spdlog::info("[WiFi] Starting SNTP");
         esp_netif_sntp_start();
@@ -113,9 +117,14 @@ bool WiFi::Disconnect(Mode mode) {
                 m_SoftAP.reset();
             }
             break;
+        case Mode::EAP:
+            if (m_EAP) {
+                m_EAP.reset();
+            }
+            break;
     }
 
-    if (!m_Station && !m_SoftAP) {
+    if (!m_Station && !m_SoftAP && !m_EAP) {
         DeinitEventLoop();
     }
 
@@ -135,6 +144,12 @@ ip4_addr_t WiFi::GetIP(Mode mode) {
                 return m_SoftAP->GetIP();
             }
             break;
+
+        case Mode::EAP:
+            if (m_EAP) {
+                return m_EAP->GetIP();
+            }
+            break; 
     }
 
     return {};

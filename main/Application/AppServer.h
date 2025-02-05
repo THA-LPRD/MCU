@@ -3,9 +3,6 @@
 /* */
 #include "Application.h"
 
-// Eduroam Fix
-#include "Drivers/Eduroam.h"
-
 
 class AppServer : public Application {
 public:
@@ -23,8 +20,6 @@ private:
     bool DrawImg();
 private:
     HTTPServer m_Server = HTTPServer("/api/v2");
-    // Eduroam Fix
-    Eduroam m_Eduroam;
 };
 /**/
 #endif //LPRD_MCU_APPSERVER_H
