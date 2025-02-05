@@ -1,4 +1,5 @@
 #include "HTTPServer.h"
+#include "SD.h"
 
 HTTPServer::HTTPServer(std::string_view apiEndpoint) :
         m_APIEndpoint(apiEndpoint) {
@@ -62,7 +63,8 @@ static std::string CreateLastModifiedHeader(time_t timestamp) {
 }
 
 static std::string GetFileLastModified(const char* path) {
-    File file = LittleFS.open(path, "r");
+    // File file = LittleFS.open(path, "r");
+    File file = SD.open(path, "r");
     if(!file) {
         return "";
     }
@@ -81,7 +83,8 @@ void HTTPServer::SetFilesToServe(const std::map<std::string, std::string> &files
     for (const auto &[uri, file]: files) {
         spdlog::debug("{} Adding file to serve: {} -> {}", LOG_TAG, file, uri);
         std::string lastModified = GetFileLastModified(file.c_str());
-        auto handler = new PsychicStaticFileHandler(uri.c_str(), LittleFS, file.c_str(), lastModified.c_str());
+        // auto handler = new PsychicStaticFileHandler(uri.c_str(), LittleFS, file.c_str(), lastModified.c_str());
+        auto handler = new PsychicStaticFileHandler(uri.c_str(), SD, file.c_str(), lastModified.c_str());
         if (uri == "/404") {
             spdlog::debug("{} Adding /404 page as default", LOG_TAG);
             m_MainServer->onNotFound([](PsychicRequest* request) {
@@ -237,14 +240,16 @@ void HTTPServer::AddUploadEndpoint(
                          LOG_TAG,
                          request->client()->remoteIP().toString().c_str(),
                          path.c_str());
-            file = LittleFS.open(path.c_str(), "w");
+            // file = LittleFS.open(path.c_str(), "w");
+            file = SD.open(path.c_str(), "w");
             status = new bool(true);
             request->_tempObject = status;
         }
         else {
             status = static_cast<bool*>(request->_tempObject);
             if (!*status) return ESP_FAIL;
-            file = LittleFS.open(path.c_str(), "a");
+            // FS.open(path.c_str(), "a");
+            file = SD.open(path.c_str(), "a");
         }
 
         if (!file) {
@@ -324,7 +329,8 @@ bool HTTPServer::InitHTTP() {
 }
 
 static bool ReadFile(const std::string &path, std::string &content) {
-    File file = LittleFS.open(path.c_str(), "r");
+    // File file = LittleFS.open(path.c_str(), "r");
+    File file = SD.open(path.c_str(), "r");
     if (!file) {
         spdlog::error("Failed to open file: {}", path);
         return false;
