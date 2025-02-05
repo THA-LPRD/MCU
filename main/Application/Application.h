@@ -9,6 +9,7 @@
 #include "EPDL.h"
 #include <Drivers/WiFi.h>
 
+
 class Application {
 public:
     Application();
@@ -21,6 +22,7 @@ protected:
 private:
     bool MountLittleFS();
     bool MountSDMMC();
+    bool MountSDSPI();
 protected:
     static constexpr const char* LOG_TAG = "[Application] -";
     std::string m_DeviceID;
