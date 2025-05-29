@@ -38,7 +38,6 @@ bool AppServer::InitImpl() {
 
 // Eduroam Fix
 
-
 bool AppServer::InitImpl() {
     spdlog::info("{} Initializing server application", LOG_TAG);
     m_WiFi.ConfigureSNTP();

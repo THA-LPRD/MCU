@@ -20,7 +20,6 @@ bool AppNetwork::InitImpl() {
             }
             m_IP = m_WiFi.GetIP(WiFi::Mode::Station);
             break;
-
         case "EAP":
             if (!m_WiFi.Connect(WiFi::Mode::EAP, 
                                 m_ConfigApplication.GetNested<std::string_view>("AppNetwork.WiFi.SSID", "your-ssid"), 

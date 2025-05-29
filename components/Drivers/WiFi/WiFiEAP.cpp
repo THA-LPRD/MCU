@@ -8,8 +8,6 @@
 /* The event group allows multiple bits for each event,
    but we only care about one event - are we connected
    to the AP with an IP? */
-const int CONNECTED_BIT = BIT0;
-const int WIFI_FAIL_BIT = BIT1;
 
 /* CA cert, taken from ca.pem
    Client cert, taken from client.crt
@@ -81,7 +79,7 @@ WiFiEAP::~WiFiEAP() {
     Disconnect();
 }
 
-bool WiFiEAP::Connect(std::string_view ssid, std::string_view password, std::string_view anonymous_identity, std::string_view username, std::string_view ca_cert_path, int retryMax = 5) {
+bool WiFiEAP::Connect(std::string_view ssid, std::string_view password, std::string_view anonymous_identity, std::string_view username, std::string_view ca_cert_path, int retryMax) {
     if (m_Active) {
         spdlog::warn("{} Already connected", LOG_TAG);
         return false;

@@ -6,7 +6,6 @@
 // Eduroam Fix
 #include "Drivers/Eduroam.h"
 
-
 class AppServer : public Application {
 public:
     AppServer() = default;

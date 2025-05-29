@@ -276,7 +276,11 @@ void AppHost::InitServerCore() {
 
                 auto modestr = json["Mode"].as<std::string>();
                 auto wifiSSIDstr = json["WiFiSSID"].as<std::string>();
+                auto wifiAuthModestr = json["WiFiAuth_Mode"].as<std::string>();
                 auto wifiPassstr = json["WiFiPassword"].as<std::string>();
+                auto wifiEAPIDstr = json["WiFiEAPID"].as<std::string>();
+                auto wifiEAPUserstr = json["WiFiEAPUsername"].as<std::string>();
+                auto wifiEAPCertstr = json["WiFiEAPCert"].as<std::string>();
                 auto serverURLstr = json["ServerURL"].as<std::string>();
 
                 if (modestr.empty()) {
@@ -314,6 +318,24 @@ void AppHost::InitServerCore() {
                         spdlog::error("{} Set failed: ServerURL parameter too long", LOG_TAG);
                         return request->reply(400, "text/plain", "Server URL parameter too long");
                     }
+                    if (wifiAuthModestr != "PSK" && wifiAuthModestr != "EAP") {
+                        spdlog::error("{} Set failed: Invalid WiFiAuth_Mode parameter", LOG_TAG);
+                        return request->reply(400, "text/plain", "Invalid WiFiAuth_Mode parameter");
+                    }
+                    if (wifiAuthModestr == "EAP") {
+                        if (wifiEAPIDstr.empty()) {
+                            spdlog::error("{} Set failed: Missing WiFiEAPID parameter", LOG_TAG);
+                            return request->reply(400, "text/plain", "Missing WiFiEAPID parameter");
+                        }
+                        if (wifiEAPUserstr.empty()) {
+                            spdlog::error("{} Set failed: Missing WiFiEAPUsername parameter", LOG_TAG);
+                            return request->reply(400, "text/plain", "Missing WiFiEAPUsername parameter");
+                        }
+                        if (wifiEAPCertstr.empty()) {
+                            spdlog::error("{} Set failed: Missing WiFiEAPCert parameter", LOG_TAG);
+                            return request->reply(400, "text/plain", "Missing WiFiEAPCert parameter");
+                        }
+                    }
                     m_ConfigApplication.SetNested("AppServer.WiFi.SSID", wifiSSIDstr);
                     m_ConfigApplication.SetNested("AppServer.WiFi.Password", wifiPassstr);
                     m_ConfigApplication.SetNested("AppServer.ServerURL", serverURLstr);
@@ -323,8 +345,33 @@ void AppHost::InitServerCore() {
                     m_ConfigApplication.SetNested("AppStandalone.WiFi.Password", wifiPassstr);
                 }
                 else if (modestr == "Network") {
+                    if (wifiAuthModestr != "PSK" && wifiAuthModestr != "EAP") {
+                        spdlog::error("{} Set failed: Invalid WiFiAuth_Mode parameter", LOG_TAG);
+                        return request->reply(400, "text/plain", "Invalid WiFiAuth_Mode parameter");
+                    }
+                    if (wifiAuthModestr == "EAP") {
+                        if (wifiEAPIDstr.empty()) {
+                            spdlog::error("{} Set failed: Missing WiFiEAPID parameter", LOG_TAG);
+                            return request->reply(400, "text/plain", "Missing WiFiEAPID parameter");
+                        }
+                        if (wifiEAPUserstr.empty()) {
+                            spdlog::error("{} Set failed: Missing WiFiEAPUsername parameter", LOG_TAG);
+                            return request->reply(400, "text/plain", "Missing WiFiEAPUsername parameter");
+                        }
+                        if (wifiEAPCertstr.empty()) {
+                            spdlog::error("{} Set failed: Missing WiFiEAPCert parameter", LOG_TAG);
+                            return request->reply(400, "text/plain", "Missing WiFiEAPCert parameter");
+                        }
+                    }
                     m_ConfigApplication.SetNested("AppNetwork.WiFi.SSID", wifiSSIDstr);
                     m_ConfigApplication.SetNested("AppNetwork.WiFi.Password", wifiPassstr);
+                    m_ConfigApplication.SetNested("AppNetwork.WiFi.Auth_Mode", wifiAuthModestr);
+                    if (wifiAuthModestr == "EAP")
+                    {
+                        m_ConfigApplication.SetNested("AppNetwork.WiFi.EAP_ID", wifiEAPIDstr);
+                        m_ConfigApplication.SetNested("AppNetwork.WiFi.EAP_Username", wifiEAPUserstr);
+                        m_ConfigApplication.SetNested("AppNetwork.WiFi.EAP_Cert", wifiEAPCertstr);
+                    }
                 }
                 m_ConfigApplication.Set("OperatingMode", modestr);
 
