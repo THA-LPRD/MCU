@@ -47,7 +47,7 @@ public:
         JsonDocument tempDoc;
         DeserializationError error = deserializeJson(tempDoc, jsonStr);
         if (error) {
-            spdlog::error("{} Failed to parse configuration: {}", LOG_TAG, error.c_str());
+            spdlog::error("{} Failed to parse configuration: Error: {} String: {}", LOG_TAG, error.c_str(), jsonStr.c_str());
             return false;
         }
 
@@ -104,7 +104,7 @@ public:
             m_Document[kvp.key()] = kvp.value();
         }
 
-        spdlog::debug("{} Configuration loaded from NVS", LOG_TAG);
+        spdlog::debug("{} Configuration loaded from NVS: {}", LOG_TAG, jsonStr.c_str());
         return true;
     }
 
@@ -135,7 +135,7 @@ public:
         }
 
         nvs_close(handle);
-        spdlog::debug("{} Configuration saved to NVS", LOG_TAG);
+        spdlog::debug("{} Configuration saved to NVS: {}", LOG_TAG, jsonStr.c_str());
         return true;
     }
 

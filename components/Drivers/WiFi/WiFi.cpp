@@ -46,17 +46,25 @@ bool WiFi::Connect(Mode mode, std::string_view ssid, std::string_view password, 
                 m_SNTPStarted = true;
             }
             return true;
+            break;
         case Mode::SoftAP:
             if (!m_SoftAP) {
                 m_SoftAP = std::make_unique<WiFiSoftAP>();
             }
             return m_SoftAP->Start(ssid, password);
+            break;
+        case Mode::EAP:
+            return false;
+            break;
+        case default:
+            return false;
+            break;
     }
 
     return false;
 }
 
-bool WiFi::Connect(Mode mode, std::string_view ssid, std::string_view password, std::string_view anonymous_identity, std::string_view username, std::string_view ca_cert_path, int retryMax = 5) {
+bool WiFi::Connect(Mode mode, std::string_view ssid, std::string_view password, std::string_view anonymous_identity, std::string_view username, std::string_view ca_cert_path, int retryMax) {
     if (!m_EventLoopInitialized && !InitEventLoop()) {
         return false;
     }

@@ -86,7 +86,7 @@ bool CheckConfigReset() {
 
     // Get Button0 pin from config
     ConfigManager configPeripherals("peripherals");
-    int buttonPin = configPeripherals.Get("Button0", 2);
+    int buttonPin = configPeripherals.Get("Button0", 17);
 
     if (buttonPin == -1) {
         spdlog::error("{} Button0 pin not configured", LOG_TAG);
@@ -163,14 +163,15 @@ extern "C" void app_main(void) {
     CheckConfigReset();
 
     ConfigManager configApplication("application");
-    std::string loglevel = configApplication.Get("LogLevel", "info");
+    configApplication.Set("LogLevel", "trace");
+    std::string loglevel = configApplication.Get("LogLevel", "trace");
     spdlog::set_level(spdlog::level::from_str(loglevel.data()));
-    std::string mode = configApplication.Get("OperatingMode", "Standalone");
+    std::string mode = configApplication.Get("OperatingMode", "Server");
 
     // Application creation and init
     app = Application::Create(mode);
     if (!app || !app->Init()) {
-        spdlog::critical("Failed to start application");
+        spdlog::critical("Failed to start application"); 
         spdlog::critical("Rebooting in 5 seconds");
 
         // Increment boot count for initialization failure
@@ -186,21 +187,29 @@ extern "C" void app_main(void) {
         vTaskDelay(5000 / portTICK_PERIOD_MS);
     }
     else {
+        //time = UINT64_MAX; // WebApp überspringen und direkt in den DeepSleep
         time = app->Run();
+        spdlog::debug("This Asset is valid for {} seconds", time/1000000);
         ResetBootCount();
     }
 
     delete app;
+
+    // time = UINT64_MAX;
 
     if (time == 0) {
         spdlog::info("Rebooting");
         esp_restart();
     }
     else {
-        if (UINT64_MAX != time) {
-            spdlog::info("Entering deep sleep for {} seconds", time);
-            esp_sleep_enable_timer_wakeup(time);
-        }
+        if (time == UINT64_MAX) {
+            // Refresh every 48 hours for preventing damage of epaper display
+          time = 48*60*60;
+          time = time * 1000000; 
+        } 
+        spdlog::info("Entering deep sleep for {} seconds", time/1000000);
+        esp_sleep_enable_timer_wakeup(time);
+
         spdlog::info("Entering deep sleep");
         vTaskDelay(1000 / portTICK_PERIOD_MS);
         esp_deep_sleep_start();
