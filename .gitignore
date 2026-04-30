@@ -1,5 +1,7 @@
 sdkconfig
 build/
+components/arduino-esp32/
+components/PsychicHttp/
 .vscode/settings.json
 .DS_store
 managed_components/
@@ -7,3 +9,4 @@ managed_components/
 ~/*
 data/www
 flash_data/*
+.idea/*

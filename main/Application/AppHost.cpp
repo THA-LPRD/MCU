@@ -339,6 +339,13 @@ void AppHost::InitServerCore() {
                     m_ConfigApplication.SetNested("AppServer.WiFi.SSID", wifiSSIDstr);
                     m_ConfigApplication.SetNested("AppServer.WiFi.Password", wifiPassstr);
                     m_ConfigApplication.SetNested("AppServer.ServerURL", serverURLstr);
+                    m_ConfigApplication.SetNested("AppServer.WiFi.Auth_Mode", wifiAuthModestr);
+                    if (wifiAuthModestr == "EAP")
+                    {
+                        m_ConfigApplication.SetNested("AppServer.WiFi.EAP_ID", wifiEAPIDstr);
+                        m_ConfigApplication.SetNested("AppServer.WiFi.EAP_Username", wifiEAPUserstr);
+                        m_ConfigApplication.SetNested("AppServer.WiFi.EAP_Cert", wifiEAPCertstr);
+                    }
                 }
                 if (modestr == "Standalone") {
                     m_ConfigApplication.SetNested("AppStandalone.WiFi.SSID", wifiSSIDstr);
@@ -395,7 +402,7 @@ void AppHost::InitServerCore() {
             [this]() { return m_ConfigApplication.Get<std::string>("LogLevel"); },
             [this](std::string_view value) {
                 m_ConfigApplication.Set("LogLevel", value);
-                spdlog::set_level(spdlog::level::from_str(value.data()));
+                spdlog::default_logger()->sinks()[0]->set_level(spdlog::level::from_str(value.data()));
                 return true;
             },
             "LogLevel"

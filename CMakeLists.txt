@@ -3,7 +3,7 @@
 cmake_minimum_required(VERSION 3.16)
 
 set(SDKCONFIG "${CMAKE_BINARY_DIR}/sdkconfig")
-set(CONFIG_APP_PROJECT_VER "2.0.0-aplha")
+set(CONFIG_APP_PROJECT_VER "2.0.0-beta")
 set(IDF_TARGET "esp32s3")
 set(CMAKE_CXX_STANDARD 23)
 
@@ -16,6 +16,12 @@ elseif(LPRD_DEBUG)
 else()
     message(FATAL_ERROR "Unknown configuration: either LPRD_RELEASE or LPRD_DEBUG must be true.")
 endif()
+
+include(FetchContent)
+
+include(cmake/arduino-esp32.cmake)
+include(cmake/psychichttp.cmake)
+
 
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 project(LPRD-MCU)

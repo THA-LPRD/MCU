@@ -60,7 +60,7 @@ void CheckBootCount() {
 
 void InitLogging() {
     spdlog::set_pattern("%^[%C-%m-%d %H:%M:%S.%e] %=8l: [%=11n] - %v%$");
-    std::shared_ptr<spdlog::logger> globalLogger = spdlog::stdout_color_mt("Gloabal", spdlog::color_mode::always);
+    std::shared_ptr<spdlog::logger> globalLogger = spdlog::stdout_color_mt("Global", spdlog::color_mode::always);
     globalLogger->set_pattern("%^[%C-%m-%d %H:%M:%S.%e] %=8l: %v%$");
     spdlog::set_default_logger(globalLogger);
     spdlog::set_level(spdlog::level::trace);
@@ -163,15 +163,14 @@ extern "C" void app_main(void) {
     CheckConfigReset();
 
     ConfigManager configApplication("application");
-    configApplication.Set("LogLevel", "trace");
-    std::string loglevel = configApplication.Get("LogLevel", "trace");
-    spdlog::set_level(spdlog::level::from_str(loglevel.data()));
-    std::string mode = configApplication.Get("OperatingMode", "Server");
+    std::string loglevel = configApplication.Get("LogLevel", "info");
+    spdlog::default_logger()->sinks()[0]->set_level(spdlog::level::from_str(loglevel.data()));
+    std::string mode = configApplication.Get("OperatingMode", "Standalone");
 
     // Application creation and init
     app = Application::Create(mode);
     if (!app || !app->Init()) {
-        spdlog::critical("Failed to start application"); 
+        spdlog::critical("Failed to start application");
         spdlog::critical("Rebooting in 5 seconds");
 
         // Increment boot count for initialization failure
@@ -187,29 +186,20 @@ extern "C" void app_main(void) {
         vTaskDelay(5000 / portTICK_PERIOD_MS);
     }
     else {
-        //time = UINT64_MAX; // WebApp überspringen und direkt in den DeepSleep
         time = app->Run();
-        spdlog::debug("This Asset is valid for {} seconds", time/1000000);
+        spdlog::debug("This Asset is valid for {} seconds", time / 1000 / 1000);
         ResetBootCount();
     }
 
     delete app;
-
-    // time = UINT64_MAX;
 
     if (time == 0) {
         spdlog::info("Rebooting");
         esp_restart();
     }
     else {
-        if (time == UINT64_MAX) {
-            // Refresh every 48 hours for preventing damage of epaper display
-          time = 48*60*60;
-          time = time * 1000000; 
-        } 
-        spdlog::info("Entering deep sleep for {} seconds", time/1000000);
+        spdlog::info("Entering deep sleep for {} seconds", time / 1000 / 1000);
         esp_sleep_enable_timer_wakeup(time);
-
         spdlog::info("Entering deep sleep");
         vTaskDelay(1000 / portTICK_PERIOD_MS);
         esp_deep_sleep_start();

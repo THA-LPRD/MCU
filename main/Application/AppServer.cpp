@@ -1,170 +1,78 @@
-//
-// Created by emirhan on 06/11/24.
-//
-/* */
 #include "AppServer.h"
-#include <fstream>
-#include "esp_http_client.h"
-#include "esp_log.h"
+#include "HttpClient.h"
 #include "SD.h"
-#include "WiFiEAP.h"
-#include "esp_wifi.h"
-#include "esp_eap_client.h"
-#include "esp_netif.h"
 
+static constexpr uint64_t kSleepFallback5Min = 5ULL * 60 * 1000 * 1000;
+static constexpr uint64_t kSleepFallback24h = 86400000000ULL;
 
 AppServer::~AppServer() {
     spdlog::info("{} Destroyed server application", LOG_TAG);
 }
 
-// Normaler Code
-
-/*
 bool AppServer::InitImpl() {
     spdlog::info("{} Initializing server application", LOG_TAG);
     m_WiFi.ConfigureSNTP();
-    if (!m_WiFi.Connect(WiFi::Mode::Station,
-        m_ConfigApplication.GetNested<std::string_view>("AppServer.WiFi.SSID", "your-SSID"),
-        m_ConfigApplication.GetNested<std::string_view>("AppServer.WiFi.Password", "your-Password"))) {
+
+    std::string authMode(m_ConfigApplication.GetNested<std::string_view>("AppServer.WiFi.Auth_Mode", "PSK"));
+
+    if (authMode == "PSK") {
+        if (!m_WiFi.Connect(WiFi::Mode::Station,
+                            m_ConfigApplication.GetNested<std::string_view>("AppServer.WiFi.SSID", "your-SSID"),
+                            m_ConfigApplication.GetNested<std::string_view>(
+                                "AppServer.WiFi.Password", "your-Password"))) { return false; }
+        m_IP = m_WiFi.GetIP(WiFi::Mode::Station);
+    }
+    else if (authMode == "EAP") {
+        if (!m_WiFi.Connect(WiFi::Mode::EAP,
+                            m_ConfigApplication.GetNested<std::string_view>("AppServer.WiFi.SSID", "your-ssid"),
+                            m_ConfigApplication.GetNested<std::string_view>("AppServer.WiFi.Password", "your-Password"),
+                            m_ConfigApplication.GetNested<std::string_view>("AppServer.WiFi.EAP_ID", "your-identity"),
+                            m_ConfigApplication.GetNested<std::string_view>(
+                                "AppServer.WiFi.EAP_Username", "your-username"),
+                            m_ConfigApplication.GetNested<std::string_view>(
+                                "AppServer.WiFi.EAP_Cert", "your-certificate"),
+                            5)) { return false; }
+        m_IP = m_WiFi.GetIP(WiFi::Mode::EAP);
+    }
+    else {
+        spdlog::error("{} Unknown WiFi Auth Mode: {}", LOG_TAG, authMode);
         return false;
     }
-    m_IP = m_WiFi.GetIP(WiFi::Mode::Station);
-    // if (!InitServer()) return false;
 
     spdlog::info("{} Server application initialized", LOG_TAG);
     return true;
 }
-*/
 
-// Eduroam Fix
-
-bool AppServer::InitImpl() {
-    spdlog::info("{} Initializing server application", LOG_TAG);
-    m_WiFi.ConfigureSNTP();
-
-    switch (m_ConfigApplication.GetNested<std::string_view>("AppServer.WiFi.Auth_Mode", "PSK"))
-    {
-        case "PSK":
-            if (!m_WiFi.Connect(WiFi::Mode::Station,
-                                m_ConfigApplication.GetNested<std::string_view>("AppServer.WiFi.SSID", "your-SSID"),
-                                m_ConfigApplication.GetNested<std::string_view>("AppServer.WiFi.Password", "your-Password"))) {
-                return false;
-            }
-            m_IP = m_WiFi.GetIP(WiFi::Mode::Station);
-            break;
-
-        case "EAP":
-            if (!m_WiFi.Connect(WiFi::Mode::EAP, 
-                                m_ConfigApplication.GetNested<std::string_view>("AppServer.WiFi.SSID", "your-ssid"), 
-                                m_ConfigApplication.GetNested<std::string_view>("AppServer.WiFi.Password", "your-Password"), 
-                                m_ConfigApplication.GetNested<std::string_view>("AppServer.WiFi.EAP_ID", "your-identity"),
-                                m_ConfigApplication.GetNested<std::string_view>("AppServer.WiFi.EAP_Username", "your-username"),
-                                m_ConfigApplication.GetNested<std::string_view>("AppServer.WiFi.EAP_Cert", "your-certificate"),
-                                5)) {
-                return false;
-            }
-            m_IP = m_WiFi.GetIP(WiFi::Mode::EAP);
-            break;
-
-        default:
-            spdlog::info("{} Unkown WiFi Auth Mode: {}", LOG_TAG, m_ConfigApplication.GetNested<std::string_view>("AppServer.WiFi.Auth_Mode"));
-            return false;
-            break;
-    }
-    
-    spdlog::error("{} Server application initialized", LOG_TAG);
-    return true;
+std::string AppServer::MacToHex(uint8_t* mac) {
+    char buf[13];
+    sprintf(buf, "%02X%02X%02X%02X%02X%02X", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+    return buf;
 }
 
-
-static void initialise_wifi(void)
-{
-    // auto anonymous_identity = m_ConfigApplication.GetNested<std::string_view>("AppServer.Eduroam.AnonymousIdentity", "eduroam@hs-augsburg.de");
-    // auto username = m_ConfigApplication.GetNested<std::string_view>("AppServer.Eduroam.Username", "mwegmann@hs-augsburg.de");
-    // auto password = m_ConfigApplication.GetNested<std::string_view>("AppServer.Eduroam.Password", "Trim-Freeze404");
-    // auto eap_ssid = m_ConfigApplication.GetNested<std::string_view>("AppServer.Eduroam.SSID", "eduroam");
-
-    // esp_netif_init();
-    // wifi_event_group = xEventGroupCreate();
-    // esp_event_loop_create_default();
-    // sta_netif = esp_netif_create_default_wifi_sta();
-    assert(sta_netif);
-
-    // wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
-    // esp_wifi_init(&cfg);
-    // esp_event_handler_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &event_handler, NULL);
-    // esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &event_handler, NULL);
-    // esp_wifi_set_storage(WIFI_STORAGE_RAM);
-    // wifi_config_t wifi_config = {
-    //     .sta = {
-    //         .ssid = eap_ssid,
-    //     },
-    // };
-    // ESP_LOGI(TAG, "Setting WiFi configuration SSID %s...", wifi_config.sta.ssid);
-    // esp_wifi_set_mode(WIFI_MODE_STA);
-    // esp_wifi_set_config(WIFI_IF_STA, &wifi_config);
-    // esp_eap_client_set_identity((uint8_t *)anonymous_identity, strlen(anonymous_identity));
-
-
-    // ESP_ERROR_CHECK(esp_eap_client_set_username((uint8_t *)username, strlen(username)) );
-    // ESP_ERROR_CHECK(esp_eap_client_set_password((uint8_t *)password, strlen(password)) );
-    // CONFIG_EXAMPLE_EAP_METHOD_TTLS
-
-
-    // ESP_ERROR_CHECK(esp_eap_client_set_ttls_phase2_method(TTLS_PHASE2_METHOD) );
-    // CONFIG_EXAMPLE_EAP_METHOD_TTLS
-
-// #ifdef CONFIG_EXAMPLE_USE_DEFAULT_CERT_BUNDLE
-//     ESP_ERROR_CHECK(esp_eap_client_use_default_cert_bundle(true));
-// #endif
-    // esp_wifi_sta_enterprise_enable();
-    // esp_wifi_start();
+std::string AppServer::ServerURL() {
+    return std::string(m_ConfigApplication.GetNested<std::string_view>(
+        "AppServer.ServerURL", "http://lprd.informatik.tha.de:3000"));
 }
-
-// Eduroam Fix ENDE
-
-
 
 bool AppServer::CheckIfRegistered(uint8_t* mac) {
-    char checkRegisteredURL[100];
+    HttpClient http;
+    auto result = http.Get(ServerURL() + "/api/v1/displays/" + MacToHex(mac));
 
-    sprintf(checkRegisteredURL, "%s/api/v1/displays/%02X%02X%02X%02X%02X%02X",
-    //lprd.informatik.tha.de
-        m_ConfigApplication.GetNested<std::string_view>("AppServer.ServerURL", "http://lprd.informatik.tha.de:3000").data(),
-        mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
-
-    esp_http_client_config_t config = {
-        .url = checkRegisteredURL,
-        .method = HTTP_METHOD_GET,
-        .timeout_ms = 5000,
-    };
-
-    esp_http_client_handle_t client = esp_http_client_init(&config);
-    if (client == NULL) {
-        spdlog::error("{} Failed to initialize HTTP client", LOG_TAG);
+    if (!result) {
+        spdlog::error("{} CheckIfRegistered failed: {}", LOG_TAG, result.error().message);
         return false;
     }
 
-    esp_err_t err = esp_http_client_perform(client);
-    if (err != ESP_OK) {
-        spdlog::error("{} HTTP GET request failed: {}", LOG_TAG, esp_err_to_name(err));
-        esp_http_client_cleanup(client);
-        return false;
-    }
-
-    int status_code = esp_http_client_get_status_code(client);
-    esp_http_client_cleanup(client);
-
-    if (status_code == HttpStatus_Ok) {
+    if (result->status_code == HttpStatus_Ok) {
         spdlog::info("{} Display is already registered on server", LOG_TAG);
         return true;
     }
-    else if (status_code == HttpStatus_NotFound) {
+    else if (result->status_code == HttpStatus_NotFound) {
         spdlog::info("{} Display not registered on server", LOG_TAG);
         return false;
     }
     else {
-        spdlog::error("{} Failed to check if display is registered, HTTP code:  {}", LOG_TAG, status_code);
+        spdlog::error("{} Failed to check registration, HTTP code: {}", LOG_TAG, result->status_code);
         return false;
     }
 }
@@ -172,272 +80,87 @@ bool AppServer::CheckIfRegistered(uint8_t* mac) {
 bool AppServer::RegisterOnServer(uint8_t* mac) {
     spdlog::debug("{} Registering as new display on server", LOG_TAG);
 
-    // Prepare URL
-    char registerURL[255];
-    sprintf(registerURL, "%s/api/v1/displays/register/%02X%02X%02X%02X%02X%02X",
-        m_ConfigApplication.GetNested<std::string_view>("AppServer.ServerURL", "http://lprd.informatik.tha.de:3000").data(),
-        mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+    std::string macHex = MacToHex(mac);
 
-    // Prepare JSON payload
-    DynamicJsonDocument newDisplayPayload(1024);
-    char friendlyName[100];
-    sprintf(friendlyName, "Display %02X%02X%02X%02X%02X%02X",
-        mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+    JsonDocument payload;
+    payload["friendly_name"] = "Display " + macHex;
+    payload["width"] = 800; // EPDL::GetWidth();
+    payload["height"] = 480; // EPDL::GetHeight();
 
-    newDisplayPayload["friendly_name"] = friendlyName;
-    newDisplayPayload["width"] = 800;// EPDL::GetWidth();
-    newDisplayPayload["height"] = 480;// EPDL::GetHeight();
+    String payloadStr;
+    serializeJson(payload, payloadStr);
 
-    String newDisplayPayloadString;
-    serializeJson(newDisplayPayload, newDisplayPayloadString);
+    HttpClient http;
+    auto result = http.Put(
+        ServerURL() + "/api/v1/displays/register/" + macHex,
+        std::string_view(payloadStr.c_str(), payloadStr.length()));
 
-    // Configure HTTP client
-    esp_http_client_config_t config = {
-        .url = registerURL,
-        .method = HTTP_METHOD_PUT,
-        .timeout_ms = 5000,
-    };
-
-    esp_http_client_handle_t client = esp_http_client_init(&config);
-    if (client == NULL) {
-        spdlog::error("{} Failed to initialize HTTP client URL: {} JSON: {}", LOG_TAG, registerURL, newDisplayPayloadString.c_str());
+    if (!result) {
+        spdlog::error("{} RegisterOnServer failed: {}", LOG_TAG, result.error().message);
         return false;
     }
 
-    // Set headers
-    esp_http_client_set_header(client, "Content-Type", "application/json");
-    esp_http_client_set_header(client, "Content-Length", String(newDisplayPayloadString.length()).c_str());
-
-    // Set post data
-    esp_http_client_set_post_field(client, newDisplayPayloadString.c_str(), newDisplayPayloadString.length());
-
-    // Perform the request
-    esp_err_t err = esp_http_client_perform(client);
-    if (err != ESP_OK) {
-        spdlog::error("{} HTTP PUT request failed:  {}", LOG_TAG, esp_err_to_name(err));
-        esp_http_client_cleanup(client);
-        return false;
-    }
-
-    int status_code = esp_http_client_get_status_code(client);
-    esp_http_client_cleanup(client);
-
-    if (status_code == HttpStatus_Ok) {
+    if (result->status_code == HttpStatus_Ok) {
         spdlog::info("{} Registered as new display on server", LOG_TAG);
         return true;
     }
     else {
-        spdlog::error("{} Failed to register as new display, HTTP code: ", LOG_TAG, status_code);
+        spdlog::error("{} Failed to register, HTTP code: {}", LOG_TAG, result->status_code);
         return false;
     }
 }
 
-String AppServer::FetchConfig(uint8_t* mac) {
+std::string AppServer::FetchConfig(uint8_t* mac) {
     spdlog::debug("{} Fetching config from server", LOG_TAG);
-    String configPayloadString = "";
 
-    // Prepare URL
-    char configURL[255];
-    sprintf(configURL, "%s/api/v1/displays/config/%02X%02X%02X%02X%02X%02X", 
-            m_ConfigApplication.GetNested<std::string_view>("AppServer.ServerURL", "http://lprd.informatik.tha.de:3000").data(), 
-            mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
-    
-    spdlog::debug("{} Using URL: {}", LOG_TAG, configURL);
+    HttpClient http;
+    auto result = http.Get(ServerURL() + "/api/v1/displays/config/" + MacToHex(mac));
 
-    esp_http_client_config_t config = {
-        .url = configURL,
-        .method = HTTP_METHOD_GET,
-        .timeout_ms = 5000,
-        .buffer_size = 2048,
-    };
-    
-    esp_http_client_handle_t client = esp_http_client_init(&config);
-    if (client == NULL) {
-        spdlog::error("{} Failed to initialize HTTP client", LOG_TAG);
-        return configPayloadString;
+    if (!result) {
+        spdlog::error("{} FetchConfig failed: {}", LOG_TAG, result.error().message);
+        return "";
     }
 
-    // Setze Header
-    esp_http_client_set_header(client, "Accept", "application/json");
-
-    // Öffne die Verbindung
-    esp_err_t err = esp_http_client_open(client, 0);
-    if (err != ESP_OK) {
-        spdlog::error("{} Failed to open HTTP connection: {}", LOG_TAG, esp_err_to_name(err));
-        esp_http_client_cleanup(client);
-        return configPayloadString;
+    if (result->status_code != HttpStatus_Ok) {
+        spdlog::error("{} FetchConfig failed, HTTP code: {}", LOG_TAG, result->status_code);
+        return "";
     }
 
-    // Sende den Request
-    esp_http_client_fetch_headers(client);
-    
-    // Hole den HTTP Status
-    int status_code = esp_http_client_get_status_code(client);
-    int content_length = esp_http_client_get_content_length(client);
-    
-    spdlog::debug("{} Status Code: {}, Content Length: {}", LOG_TAG, status_code, content_length);
-
-    if (status_code == HttpStatus_Ok) {
-        // Lese die Daten
-        std::string response;
-        char buffer[512];
-        int total_read = 0;
-        
-        while (true) {
-            int read_len = esp_http_client_read(client, buffer, sizeof(buffer) - 1);
-            spdlog::debug("{} Read chunk of {} bytes", LOG_TAG, read_len);
-            
-            if (read_len <= 0) {
-                break;
-            }
-            
-            buffer[read_len] = 0; // Null-terminieren
-            response += buffer;
-            total_read += read_len;
-        }
-        
-        spdlog::debug("{} Total bytes read: {}", LOG_TAG, total_read);
-        
-        if (total_read > 0) {
-            configPayloadString = String(response.c_str());
-            spdlog::info("{} Config fetched successfully");
-            spdlog::debug("{} Config content: {}", LOG_TAG, configPayloadString.c_str());
-        } else {
-            spdlog::error("{} No data received in response", LOG_TAG);
-        }
-    } else {
-        spdlog::error("{} HTTP request failed with status: {}", LOG_TAG, status_code);
-    }
-
-    esp_http_client_close(client);
-    esp_http_client_cleanup(client);
-    return configPayloadString;
+    spdlog::info("{} Config fetched successfully", LOG_TAG);
+    spdlog::debug("{} Config content: {}", LOG_TAG, result->body);
+    return result->body;
 }
 
-bool AppServer::FetchImg(const std::string& imageURLPath) {
+bool AppServer::FetchImg(std::string_view imageURLPath) {
     spdlog::debug("{} Fetching image from server", LOG_TAG);
 
-    // Prepare URL
-    char imageURL[255];
-    sprintf(imageURL, "%s%s",
-        m_ConfigApplication.GetNested<std::string_view>("AppServer.ServerURL", "http://lprd.informatik.tha.de:3000").data(),
-        imageURLPath.c_str());
-    
+    std::string imageURL;
+    if (imageURLPath.starts_with("http://") || imageURLPath.starts_with("https://")) { imageURL = imageURLPath; }
+    else { imageURL = ServerURL() + std::string(imageURLPath); }
+
     spdlog::debug("{} Using URL: {}", LOG_TAG, imageURL);
 
-    esp_http_client_config_t config = {
-        .url = imageURL,
-        .method = HTTP_METHOD_GET,
-        .timeout_ms = 10000,
-        .buffer_size = 2048  // Größerer Buffer für Bilder
-    };
+    HttpClient http;
+    auto result = http.GetToFile(imageURL, "/img.png");
 
-    std::string path = "/img.png";
-    
-    esp_http_client_handle_t client = esp_http_client_init(&config);
-    if (client == NULL) {
-        spdlog::error("{} Failed to initialize HTTP client", LOG_TAG);
+    if (!result) {
+        spdlog::error("{} FetchImg failed: {}", LOG_TAG, result.error().message);
         return false;
     }
 
-    // Öffne die Verbindung
-    esp_err_t err = esp_http_client_open(client, 0);
-    if (err != ESP_OK) {
-        spdlog::error("{} Failed to open HTTP connection: {}", LOG_TAG, esp_err_to_name(err));
-        esp_http_client_cleanup(client);
-        return false;
-    }
-
-    // Sende den Request und hole Header
-    esp_http_client_fetch_headers(client);
-    
-    // Hole den HTTP Status
-    int status_code = esp_http_client_get_status_code(client);
-    int content_length = esp_http_client_get_content_length(client);
-    
-    spdlog::debug("{} Status Code: {}, Content Length: {}", LOG_TAG, status_code, content_length);
-
-    if (status_code == HttpStatus_Ok) {
-        // Open file on SD card
-        File file = SD.open(path.c_str(), "w");
-        if (!file) {
-            spdlog::error("{} Failed to open file for writing on SD card", LOG_TAG);
-            esp_http_client_close(client);
-            esp_http_client_cleanup(client);
-            return false;
-        }
-
-        // Lese und schreibe die Daten
-        char buffer[2048];
-        int total_read = 0;
-        bool success = true;
-
-        while (true) {
-            int read_len = esp_http_client_read(client, buffer, sizeof(buffer));
-            spdlog::debug("{} Read chunk of {} bytes", LOG_TAG, read_len);
-
-            if (read_len < 0) {
-                spdlog::error("{} Error reading data: {}", LOG_TAG, esp_err_to_name(read_len));
-                success = false;
-                break;
-            }
-
-            if (read_len == 0) {
-                // Übertragung abgeschlossen
-                break;
-            }
-
-            if (file.write((const uint8_t*)buffer, read_len) != read_len) {
-                spdlog::error("{} Failed to write chunk to SD card", LOG_TAG);
-                success = false;
-                break;
-            }
-
-            total_read += read_len;
-            if (content_length > 0) {
-                spdlog::info("{} Download progress: {}%", LOG_TAG, (total_read * 100) / content_length);
-            }
-        }
-
-        file.close();
-
-        if (success && total_read > 0) {
-            spdlog::info("{} Image downloaded successfully, total bytes: {}", LOG_TAG, total_read);
-            // Validiere die Datei
-            File check = SD.open(path.c_str(), "r");
-            if (check) {
-                size_t fileSize = check.size();
-                check.close();
-                spdlog::debug("{} Saved file size: {} bytes", LOG_TAG, fileSize);
-            }
-        } else {
-            spdlog::error("{} Failed to download image", LOG_TAG);
-            esp_http_client_close(client);
-            esp_http_client_cleanup(client);
-            return false;
-        }
-    } else {
-        spdlog::error("{} HTTP request failed with status: {}", LOG_TAG, status_code);
-        esp_http_client_close(client);
-        esp_http_client_cleanup(client);
-        return false;
-    }
-
-    esp_http_client_close(client);
-    esp_http_client_cleanup(client);
+    spdlog::info("{} Image downloaded successfully", LOG_TAG);
     return true;
 }
 
 bool AppServer::DrawImg() {
     spdlog::info("{} Processing image", LOG_TAG);
     int handle = m_Display->CreateImage("/img.png");
-    spdlog::debug("{} Got handle: %d", LOG_TAG, handle);
-    this->m_Display->BeginFrame();
-    this->m_Display->DrawImage(handle, 0, 0);
-    this->m_Display->SwapBuffers();
-    this->m_Display->EndFrame();
-    this->m_Display->DeleteImage(handle);
-
+    spdlog::debug("{} Got handle: {}", LOG_TAG, handle);
+    m_Display->BeginFrame();
+    m_Display->DrawImage(handle, 0, 0);
+    m_Display->SwapBuffers();
+    m_Display->EndFrame();
+    m_Display->DeleteImage(handle);
     return true;
 }
 
@@ -447,48 +170,55 @@ uint64_t AppServer::Run() {
     uint8_t mac[6];
     esp_read_mac(mac, ESP_MAC_WIFI_SOFTAP);
 
-    if (CheckIfRegistered(mac)) {
-        spdlog::info("{} Display is already registered on server", LOG_TAG);
+    if (!CheckIfRegistered(mac)) {
+        spdlog::info("{} Display is not yet registered, registering now", LOG_TAG);
+        RegisterOnServer(mac);
+        m_Running = false;
+        m_SleepTime = kSleepFallback24h;
+        return m_SleepTime;
+    }
 
-        String configPayloadString = FetchConfig(mac);
+    // --- Fetch config ---
+    std::string configStr = FetchConfig(mac);
+    if (configStr.empty()) {
+        spdlog::error("{} Config fetch failed – sleeping 5 minutes", LOG_TAG);
+        m_Running = false;
+        m_SleepTime = kSleepFallback5Min;
+        return m_SleepTime;
+    }
 
-        spdlog::debug("{} Got following Config {}", LOG_TAG, configPayloadString.c_str());
+    JsonDocument configPayload;
+    DeserializationError error = deserializeJson(configPayload, configStr);
+    if (error) {
+        spdlog::error("{} Failed to parse config JSON: {} – sleeping 5 minutes", LOG_TAG, error.c_str());
+        m_Running = false;
+        m_SleepTime = kSleepFallback5Min;
+        return m_SleepTime;
+    }
 
-        DynamicJsonDocument configPayload(1024);
-        DeserializationError error = deserializeJson(configPayload, configPayloadString);
-
-        if (error) {
-            m_SleepTime = UINT64_MAX; // Sleep endless to preserver battery
-            spdlog::error("{} Failed to parse JSON config: {}", LOG_TAG, error.c_str());
-        }
-        else {
-            // Konfigurationswerte setzen
-            m_SleepTime = configPayload["valid_for"].as<int>();
-            if (m_SleepTime < 1000 && m_SleepTime > 3153600000000000)
-            {
-                // Mehr als 10 Jahre oder Weniger als 1 Sekunde -> Kein Timer Wakeup
-                m_SleepTime = UINT64_MAX;
-            }
-            
-            String imageURLPath = configPayload["file_path"].as<String>();
-
-            // Bild herunterladen und anzeigen
-            if (FetchImg(std::string(imageURLPath.c_str()))) {
-                DrawImg();
-            }
-            else {
-                spdlog::error("{} Failed to get image data", LOG_TAG);
-            }
-        }
+    int configTime = configPayload["valid_for"].as<int>();
+    if (configTime < 0) {
+        m_SleepTime = kSleepFallback24h;
+        spdlog::info("{} No valid time in config – sleeping 24 h", LOG_TAG);
     }
     else {
-        spdlog::info("{} Display is not yet registered on server", LOG_TAG);
-        RegisterOnServer(mac);
-        m_SleepTime = UINT64_MAX;
+        m_SleepTime = std::min(static_cast<uint64_t>(configTime) * 1000ULL * 1000ULL, kSleepFallback24h);
+        spdlog::info("{} Sleeping for {} s ({} µs)", LOG_TAG, configTime, m_SleepTime);
     }
 
-    m_Running = false;
+    // --- Fetch image ---
+    std::string imageURLPath = configPayload["file_path"].as<std::string>();
+    if (!FetchImg(imageURLPath)) {
+        spdlog::error("{} Image fetch failed – sleeping 5 minutes", LOG_TAG);
+        m_Running = false;
+        m_SleepTime = kSleepFallback5Min;
+        return m_SleepTime;
+    }
 
-    vTaskDelay(3000 / portTICK_PERIOD_MS);
+    DrawImg();
+
+    m_Running = false;
+    vTaskDelay(pdMS_TO_TICKS(3000));
+    spdlog::info("{} Return sleep value: {} µs", LOG_TAG, m_SleepTime);
     return m_SleepTime;
 }

@@ -3,6 +3,7 @@
 
 #include <string_view>
 #include <spdlog/spdlog.h>
+#include <spdlog/sinks/rotating_file_sink.h>
 #include <memory>
 #include "../ConfigManager.h"
 #include "../HTTPServer/HTTPServer.h"
@@ -32,6 +33,7 @@ protected:
     WiFi m_WiFi;
     bool m_Running = true;
     ip4_addr_t m_IP = {};
+    std::shared_ptr<spdlog::sinks::rotating_file_sink_mt> m_SDLogSink;
 };
 
 #endif //LPRD_MCU_APPLICATION_H

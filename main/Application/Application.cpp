@@ -9,6 +9,8 @@
 #include "SD_MMC.h"
 #include "SD.h"
 #include <driver/rtc_io.h>
+#include "spdlog/sinks/rotating_file_sink.h"
+#include <filesystem>
 
 Application::Application() :
         m_DeviceID("LPRD-" + WiFi::GetMAC())
@@ -31,58 +33,63 @@ Application::Application() :
 Application::~Application() {
     spdlog::debug("{} Destroying application", LOG_TAG);
 
+    // Remove and close the SD log sink before touching the SD card or SPI bus.
+    // The sink destructor closes the file, which flushes the FatFS sector cache.
+    if (m_SDLogSink) {
+        auto& sinks = spdlog::get("Global")->sinks();
+        sinks.erase(std::remove(sinks.begin(), sinks.end(), m_SDLogSink), sinks.end());
+        m_SDLogSink.reset();
+    }
+
     m_Display->Terminate();
 
+    SD.end();
     int PinPowerEnable = m_ConfigPeripherals.Get("PowerEnable", 18);
     GPIO::SetMode(PinPowerEnable, GPIO::Mode::Output);
     GPIO::Write(PinPowerEnable, 0);
 
     uint64_t wakeMask = 0;
 
-for (int i = 0; i < 4; i++) {
-    // int pin = m_ConfigPeripherals.Get(("Button" + std::to_string(i)).c_str(), 17);
-    // HARDCODED!
-    int pin = 14 + i;
-    if (pin == -1) continue;
+    for (int i = 0; i < 4; i++) {
+        // int pin = m_ConfigPeripherals.Get(("Button" + std::to_string(i)).c_str(), 17);
+        // HARDCODED!
+        int pin = 14 + i;
+        if (pin == -1) continue;
 
-    if (pin >= 22) {
-        spdlog::error("{} Button {} is not a valid RTC GPIO and cannot be used as a wakeup source", LOG_TAG, i);
-        continue;
+        if (pin >= 22) {
+            spdlog::error("{} Button {} is not a valid RTC GPIO and cannot be used as a wakeup source", LOG_TAG, i);
+            continue;
+        }
+
+        spdlog::debug("{} Setting Button {} as wakeup source", LOG_TAG, i);
+
+        GPIO::SetMode(pin, GPIO::Mode::Input);
+
+        esp_err_t err = rtc_gpio_pulldown_dis(static_cast<gpio_num_t>(pin));
+        if (err == ESP_OK) { err = rtc_gpio_pullup_dis(static_cast<gpio_num_t>(pin)); }
+        if (err != ESP_OK) {
+            spdlog::error("{} Failed to configure Button {} GPIO settings", LOG_TAG, i);
+            continue;
+        }
+
+        // Füge den Pin zur Wakeup-Maske hinzu
+        wakeMask |= (1ULL << pin);
+        spdlog::info("{} Button {} prepared for wakeup configuration", LOG_TAG, i);
     }
 
-    spdlog::debug("{} Setting Button {} as wakeup source", LOG_TAG, i);
-
-    GPIO::SetMode(pin, GPIO::Mode::Input);
-
-    esp_err_t err = rtc_gpio_pulldown_dis(static_cast<gpio_num_t>(pin));
-    if (err == ESP_OK) {
-        err = rtc_gpio_pullup_dis(static_cast<gpio_num_t>(pin));
+    // Konfiguriere alle gesammelten Pins als Wakeup-Quellen
+    if (wakeMask != 0) {
+        // 14 = 16384
+        // 15 = 32768
+        // 16 = 65536
+        // 17 = 131072
+        esp_err_t err = esp_sleep_enable_ext1_wakeup(wakeMask, ESP_EXT1_WAKEUP_ANY_LOW);
+        if (err != ESP_OK) { spdlog::error("{} Failed to configure wakeup sources", LOG_TAG); }
+        else {
+            spdlog::info("{} Successfully configured all wakeup sources", LOG_TAG);
+            spdlog::info("{} WakeupMask {}", LOG_TAG, wakeMask);
+        }
     }
-    
-    if (err != ESP_OK) {
-        spdlog::error("{} Failed to configure Button {} GPIO settings", LOG_TAG, i);
-        continue;
-    }
-
-    // Füge den Pin zur Wakeup-Maske hinzu
-    wakeMask |= (1ULL << pin);
-    spdlog::info("{} Button {} prepared for wakeup configuration", LOG_TAG, i);
-}
-
-// Konfiguriere alle gesammelten Pins als Wakeup-Quellen
-if (wakeMask != 0) {
-    // 14 = 16384
-    // 15 = 32768 
-    // 16 = 65536 
-    // 17 = 131072
-    esp_err_t err = esp_sleep_enable_ext1_wakeup(wakeMask, ESP_EXT1_WAKEUP_ANY_LOW);
-    if (err != ESP_OK) {
-        spdlog::error("{} Failed to configure wakeup sources", LOG_TAG);
-    } else {
-        spdlog::info("{} Successfully configured all wakeup sources", LOG_TAG);
-        spdlog::info("{} WakeupMask {}", LOG_TAG, wakeMask);
-    }
-}
     spdlog::info("{} Application destroyed", LOG_TAG);
 }
 
@@ -195,6 +202,13 @@ bool Application::Init() {
     if (!MountLittleFS()) return false;
     // if (!MountSDMMC()) return false; // SD with SD Protocol
     if (!MountSDSPI()) return false; // SD with SPI Protocol
+    // std::filesystem::create_directory("/sd/logs");
+    mkdir("/sd/logs", 0777);
+    m_SDLogSink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(
+        "/sd/logs/logs", 1024 * 1024 * 1, 5, false);
+    m_SDLogSink->set_level(spdlog::level::debug);
+    spdlog::get("Global")->sinks().push_back(m_SDLogSink);
+    spdlog::info("{} Storage initialized", LOG_TAG);
 
     std::string displaystr = m_ConfigPeripherals.GetNested<std::string>("Display.Driver");
     EPDL::Display display = magic_enum::enum_cast<EPDL::Display>(displaystr).value_or(EPDL::Display::GD_7IN5);

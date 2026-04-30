@@ -104,7 +104,7 @@ public:
             m_Document[kvp.key()] = kvp.value();
         }
 
-        spdlog::debug("{} Configuration loaded from NVS: {}", LOG_TAG, jsonStr.c_str());
+        spdlog::debug("{} Configuration loaded from NVS", LOG_TAG);
         return true;
     }
 
@@ -135,7 +135,7 @@ public:
         }
 
         nvs_close(handle);
-        spdlog::debug("{} Configuration saved to NVS: {}", LOG_TAG, jsonStr.c_str());
+        spdlog::debug("{} Configuration saved to NVS", LOG_TAG);
         return true;
     }
 
