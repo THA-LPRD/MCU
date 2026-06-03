@@ -6,6 +6,7 @@ set(COMPONENT_REQUIRES
         "magic_enum"
         "ConfigManager"
         "Drivers"
+        "MAX17048"
 )
 
 FILE(GLOB_RECURSE SOURCES "*.cpp")
