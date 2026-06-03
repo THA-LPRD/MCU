@@ -11,6 +11,7 @@
 #include <driver/rtc_io.h>
 #include "spdlog/sinks/rotating_file_sink.h"
 #include <filesystem>
+#include "Drivers/GPIO.h"
 
 Application::Application() :
         m_DeviceID("LPRD-" + WiFi::GetMAC())
@@ -198,6 +199,54 @@ bool Application::MountSDSPI() {
     return true;
 }
 
+bool Application::InitFuelGauge() {
+    bool enabled = m_ConfigPeripherals.GetNested("peripherals.FuelGauge.Enabled", true);
+    if (!enabled) {
+        spdlog::info("{} Fuel gauge disabled by config", LOG_TAG);
+        return true;
+    }
+
+    int powerEnablePin = m_ConfigPeripherals.GetNested("peripherals.FuelGauge.Pins.PowerEnable", 7);
+    if (powerEnablePin != -1) {
+        GPIO::SetMode(powerEnablePin, GPIO::Mode::Output);
+        GPIO::Write(powerEnablePin, 1);
+        spdlog::info("{} Fuel gauge power enable GPIO{} set high", LOG_TAG, powerEnablePin);
+        vTaskDelay(pdMS_TO_TICKS(100));
+    }
+
+    I2C::Bus::Config config = {
+            .port = I2C_NUM_0,
+            .sda = static_cast<gpio_num_t>(m_ConfigPeripherals.GetNested("peripherals.FuelGauge.Pins.SDA", 3)),
+            .scl = static_cast<gpio_num_t>(m_ConfigPeripherals.GetNested("peripherals.FuelGauge.Pins.SCL", 4)),
+            .frequency = static_cast<uint32_t>(m_ConfigPeripherals.GetNested("peripherals.FuelGauge.I2C.Frequency", 100000)),
+            .enablePullups = m_ConfigPeripherals.GetNested("peripherals.FuelGauge.I2C.EnablePullups", true),
+            .timeout = pdMS_TO_TICKS(m_ConfigPeripherals.GetNested("peripherals.FuelGauge.I2C.TimeoutMs", 1000)),
+    };
+
+    auto init = m_I2CBus.Init(config);
+    if (!init) {
+        spdlog::error("{} Failed to initialize fuel gauge I2C: {}", LOG_TAG, I2C::ToString(init.error()));
+        return false;
+    }
+
+    m_FuelGauge = std::make_unique<MAX17048>(I2C::Device(m_I2CBus, MAX17048::DefaultAddress));
+
+    auto snapshot = m_FuelGauge->ReadSnapshot();
+    if (!snapshot) {
+        spdlog::error("{} Failed to read MAX17048: {}", LOG_TAG, I2C::ToString(snapshot.error()));
+        return false;
+    }
+
+    spdlog::info("{} MAX17048 initialized: {:.3f} V, {:.1f} %, {:+.2f} %/hr, ready={}",
+                 LOG_TAG,
+                 snapshot->cellVoltage,
+                 snapshot->cellPercent,
+                 snapshot->chargeRate,
+                 snapshot->ready ? "yes" : "no");
+
+    return true;
+}
+
 bool Application::Init() {
     if (!MountLittleFS()) return false;
     // if (!MountSDMMC()) return false; // SD with SD Protocol
@@ -206,9 +255,10 @@ bool Application::Init() {
     mkdir("/sd/logs", 0777);
     m_SDLogSink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(
         "/sd/logs/logs", 1024 * 1024 * 1, 5, false);
-    m_SDLogSink->set_level(spdlog::level::debug);
-    spdlog::get("Global")->sinks().push_back(m_SDLogSink);
-    spdlog::info("{} Storage initialized", LOG_TAG);
+        m_SDLogSink->set_level(spdlog::level::debug);
+        spdlog::get("Global")->sinks().push_back(m_SDLogSink);
+        spdlog::info("{} Storage initialized", LOG_TAG);
+    if (!InitFuelGauge()) return false;
 
     std::string displaystr = m_ConfigPeripherals.GetNested<std::string>("Display.Driver");
     EPDL::Display display = magic_enum::enum_cast<EPDL::Display>(displaystr).value_or(EPDL::Display::GD_7IN5);

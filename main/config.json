@@ -74,6 +74,20 @@
         "D1": -1,
         "CD": 5
       }
+    },
+    "FuelGauge": {
+      "Enabled": true,
+      "Driver": "MAX17048",
+      "Pins": {
+        "PowerEnable": 7,
+        "SDA": 3,
+        "SCL": 4
+      },
+      "I2C": {
+        "Frequency": 100000,
+        "EnablePullups": true,
+        "TimeoutMs": 1000
+      }
     }
   }
 }

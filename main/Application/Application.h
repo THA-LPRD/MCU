@@ -9,6 +9,8 @@
 #include "../HTTPServer/HTTPServer.h"
 #include "EPDL.h"
 #include <Drivers/WiFi.h>
+#include <Drivers/I2C.h>
+#include "MAX17048.h"
 
 
 class Application {
@@ -24,12 +26,15 @@ private:
     bool MountLittleFS();
     bool MountSDMMC();
     bool MountSDSPI();
+    bool InitFuelGauge();
 protected:
     static constexpr const char* LOG_TAG = "[Application] -";
     std::string m_DeviceID;
     ConfigManager m_ConfigApplication = ConfigManager("application");
     ConfigManager m_ConfigPeripherals = ConfigManager("peripherals");
     std::unique_ptr<EPDL> m_Display;
+    I2C::Bus m_I2CBus;
+    std::unique_ptr<MAX17048> m_FuelGauge;
     WiFi m_WiFi;
     bool m_Running = true;
     ip4_addr_t m_IP = {};

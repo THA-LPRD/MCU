@@ -121,6 +121,10 @@ std::expected<HttpResponse, HttpError> HttpClient::Put(std::string_view path, st
     return PerformWithRetry(path, HTTP_METHOD_PUT, body);
 }
 
+std::expected<HttpResponse, HttpError> HttpClient::Post(std::string_view path, std::string_view body) {
+    return PerformWithRetry(path, HTTP_METHOD_POST, body);
+}
+
 std::expected<HttpResponse, HttpError> HttpClient::PerformWithRetry(
         std::string_view path,
         esp_http_client_method_t method,
@@ -172,12 +176,21 @@ std::expected<HttpResponse, HttpError> HttpClient::Perform(
     }
 
     if (!body.empty()) {
-        esp_http_client_set_post_field(m_Client, body.data(), body.size());
+        esp_http_client_set_header(m_Client, "Content-Type", "application/json");
     }
 
-    esp_err_t err = esp_http_client_open(m_Client, 0);
+    int write_len = body.empty() ? 0 : static_cast<int>(body.size());
+    esp_err_t err = esp_http_client_open(m_Client, write_len);
     if (err != ESP_OK) {
         return std::unexpected(HttpError{-1, std::string("Failed to open connection: ") + esp_err_to_name(err)});
+    }
+
+    if (!body.empty()) {
+        int written = esp_http_client_write(m_Client, body.data(), write_len);
+        if (written < 0) {
+            esp_http_client_close(m_Client);
+            return std::unexpected(HttpError{-1, "Failed to write request body"});
+        }
     }
 
     esp_http_client_fetch_headers(m_Client);

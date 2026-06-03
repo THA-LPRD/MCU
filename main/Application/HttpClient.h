@@ -30,6 +30,7 @@ public:
     std::expected<HttpResponse, HttpError> Get(std::string_view url);
     std::expected<HttpResponse, HttpError> GetToFile(std::string_view url, std::string_view filepath);
     std::expected<HttpResponse, HttpError> Put(std::string_view url, std::string_view body = {});
+    std::expected<HttpResponse, HttpError> Post(std::string_view url, std::string_view body = {});
 
 private:
     std::expected<HttpResponse, HttpError> Perform(std::string_view url,

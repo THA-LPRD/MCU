@@ -4,6 +4,8 @@
 
 static constexpr uint64_t kSleepFallback5Min = 5ULL * 60 * 1000 * 1000;
 static constexpr uint64_t kSleepFallback24h = 86400000000ULL;
+static constexpr int kHttpCreated = 201;
+static constexpr int kHttpNoContent = 204;
 
 AppServer::~AppServer() {
     spdlog::info("{} Destroyed server application", LOG_TAG);
@@ -110,6 +112,49 @@ bool AppServer::RegisterOnServer(uint8_t* mac) {
     }
 }
 
+bool AppServer::PostStatus(uint8_t* mac) {
+    spdlog::debug("{} Posting display status to server", LOG_TAG);
+
+    JsonDocument payload;
+    JsonObject battery = payload["battery"].to<JsonObject>();
+    battery["present"] = m_FuelGauge != nullptr;
+
+    if (m_FuelGauge) {
+        auto snapshot = m_FuelGauge->ReadSnapshot();
+        if (snapshot) {
+            battery["voltage_v"] = snapshot->cellVoltage;
+            battery["state_of_charge_percent"] = snapshot->cellPercent;
+        }
+        else {
+            battery["error"] = I2C::ToString(snapshot.error());
+        }
+    }
+
+    String payloadStr;
+    serializeJson(payload, payloadStr);
+
+    std::string macHex = MacToHex(mac);
+    HttpClient http;
+    auto result = http.Post(
+        ServerURL() + "/api/v1/displays/" + macHex + "/status",
+        std::string_view(payloadStr.c_str(), payloadStr.length()));
+
+    if (!result) {
+        spdlog::error("{} PostStatus failed: {}", LOG_TAG, result.error().message);
+        return false;
+    }
+
+    if (result->status_code == HttpStatus_Ok ||
+        result->status_code == kHttpCreated ||
+        result->status_code == kHttpNoContent) {
+        spdlog::info("{} Display status posted successfully", LOG_TAG);
+        return true;
+    }
+
+    spdlog::error("{} Failed to post status, HTTP code: {}", LOG_TAG, result->status_code);
+    return false;
+}
+
 std::string AppServer::FetchConfig(uint8_t* mac) {
     spdlog::debug("{} Fetching config from server", LOG_TAG);
 
@@ -176,6 +221,10 @@ uint64_t AppServer::Run() {
         m_Running = false;
         m_SleepTime = kSleepFallback24h;
         return m_SleepTime;
+    }
+
+    if (!PostStatus(mac)) {
+        spdlog::warn("{} Status post failed, continuing with config fetch", LOG_TAG);
     }
 
     // --- Fetch config ---

@@ -17,6 +17,7 @@ private:
     std::string ServerURL();
     bool CheckIfRegistered(uint8_t* mac);
     bool RegisterOnServer(uint8_t* mac);
+    bool PostStatus(uint8_t* mac);
     std::string FetchConfig(uint8_t* mac);
     bool FetchImg(std::string_view imageURLPath);
     bool DrawImg();
